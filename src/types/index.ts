@@ -79,7 +79,7 @@ export interface NewsItem {
   link: string;
   description: string;
   pubDate: string;
-  source: "ProPublica" | "PBS NewsHour";
+  source: "ProPublica" | "PBS NewsHour" | "The Guardian";
   categories?: string[];
   author?: string;
 }

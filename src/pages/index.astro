@@ -11,6 +11,7 @@ const parser = new Parser();
 const FEEDS = [
   { url: "https://www.propublica.org/feeds/propublica/main", source: "ProPublica" as const },
   { url: "https://www.pbs.org/newshour/feeds/rss/politics", source: "PBS NewsHour" as const },
+  { url: "https://www.theguardian.com/us-news/us-politics/rss", source: "The Guardian" as const },
 ];
 const allHeadlines: NewsItem[] = [];
 for (const feed of FEEDS) {
