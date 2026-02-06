@@ -1,0 +1,78 @@
+---
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/learn/how-congress-works", label: "Learn" },
+  { href: "/senate", label: "Senate" },
+  { href: "/house", label: "House" },
+  { href: "/explore", label: "Explore" },
+  { href: "/glossary", label: "Glossary" },
+  { href: "/resources", label: "Resources" },
+];
+---
+
+<header class="bg-navy text-white sticky top-0 z-50">
+  <nav class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold tracking-tight">
+      The Midterm Project
+    </a>
+
+    <!-- Desktop nav -->
+    <ul class="hidden md:flex gap-6 text-sm font-medium">
+      {navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class:list={[
+              "hover:text-tossup transition-colors",
+              currentPath === link.href || currentPath.startsWith(link.href + "/")
+                ? "text-tossup"
+                : "text-white/80",
+            ]}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Mobile menu button -->
+    <button
+      id="mobile-menu-btn"
+      class="md:hidden text-white/80 hover:text-white"
+      aria-label="Toggle menu"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile nav -->
+  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2 text-sm font-medium">
+    {navLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={[
+            "block py-2 hover:text-tossup transition-colors",
+            currentPath === link.href || currentPath.startsWith(link.href + "/")
+              ? "text-tossup"
+              : "text-white/80",
+          ]}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</header>
+
+<script>
+  const btn = document.getElementById("mobile-menu-btn");
+  const menu = document.getElementById("mobile-menu");
+  btn?.addEventListener("click", () => {
+    menu?.classList.toggle("hidden");
+  });
+</script>

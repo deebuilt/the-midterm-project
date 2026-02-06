@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-dem: #3B82F6;
+  --color-dem-light: #DBEAFE;
+  --color-dem-dark: #1E40AF;
+  --color-gop: #EF4444;
+  --color-gop-light: #FEE2E2;
+  --color-gop-dark: #991B1B;
+  --color-ind: #A855F7;
+  --color-ind-light: #F3E8FF;
+  --color-ind-dark: #6B21A8;
+  --color-tossup: #F59E0B;
+  --color-navy: #1E293B;
+}

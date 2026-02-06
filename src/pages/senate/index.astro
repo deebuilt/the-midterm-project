@@ -1,0 +1,179 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Tooltip from "../../components/ui/Tooltip.astro";
+import { senateRaces, senateOverview } from "../../data/senate-races";
+
+const tossups = senateRaces.filter((r) => r.rating === "Toss-up");
+const leanR = senateRaces.filter((r) => r.rating === "Lean R");
+const leanD = senateRaces.filter((r) => r.rating === "Lean D");
+const specials = senateRaces.filter((r) => r.isSpecialElection);
+
+function ratingColor(rating: string) {
+  switch (rating) {
+    case "Safe R":
+    case "Likely R":
+      return "text-gop bg-gop-light";
+    case "Lean R":
+      return "text-gop bg-gop-light/50";
+    case "Toss-up":
+      return "text-tossup bg-amber-50";
+    case "Lean D":
+      return "text-dem bg-dem-light/50";
+    case "Safe D":
+    case "Likely D":
+      return "text-dem bg-dem-light";
+    default:
+      return "text-slate-500 bg-slate-100";
+  }
+}
+---
+
+<Layout title="2026 Senate Races" description="All 33 Senate seats up for election in 2026, plus 2 special elections.">
+  <section class="max-w-5xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">2026 Senate Races</h1>
+    <p class="text-lg text-slate-500 mb-6">
+      {senateOverview.seatsUpForElection} <Tooltip term="Class II" definition="The Senate is split into 3 classes. Each class comes up for election every 6 years. Class II is up in 2026." /> seats + {senateOverview.specialElections} <Tooltip term="special elections" definition="Elections held to fill seats that were vacated early, like when a senator resigns to take another job." />.
+      Currently {senateOverview.currentSplit.republican}R - {senateOverview.currentSplit.democrat}D.
+    </p>
+
+    <!-- Rating Legend -->
+    <div class="flex flex-wrap gap-3 mb-10 text-xs">
+      <span class="text-slate-400 font-medium self-center">Ratings:</span>
+      <span class="px-2 py-1 rounded-full bg-gop-light text-gop font-medium">Safe R</span>
+      <span class="px-2 py-1 rounded-full bg-gop-light/50 text-gop font-medium">Lean R</span>
+      <span class="px-2 py-1 rounded-full bg-amber-50 text-tossup font-medium">Toss-up</span>
+      <span class="px-2 py-1 rounded-full bg-dem-light/50 text-dem font-medium">Lean D</span>
+      <span class="px-2 py-1 rounded-full bg-dem-light text-dem font-medium">Safe D</span>
+      <a href="/glossary#lean" class="text-slate-400 underline self-center">What do these mean?</a>
+    </div>
+
+    <!-- Path to Majority -->
+    <div class="bg-slate-50 rounded-xl p-6 mb-10">
+      <h2 class="text-xl font-bold mb-4">Path to Majority</h2>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="flex-1 bg-gop rounded-l-full h-8 flex items-center justify-center text-white text-sm font-bold" style={`width: ${senateOverview.currentSplit.republican}%`}>
+          {senateOverview.currentSplit.republican} R
+        </div>
+        <div class="flex-1 bg-dem rounded-r-full h-8 flex items-center justify-center text-white text-sm font-bold" style={`width: ${senateOverview.currentSplit.democrat}%`}>
+          {senateOverview.currentSplit.democrat} D
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-center text-sm">
+        <div>
+          <span class="font-bold text-dem text-lg">{senateOverview.demsNeedToFlip}</span>
+          <p class="text-slate-500">seats Dems need to flip</p>
+        </div>
+        <div>
+          <span class="font-bold text-gop text-lg">{senateOverview.gopsCanLose}</span>
+          <p class="text-slate-500">max seats GOP can lose</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toss-up Races -->
+    {tossups.length > 0 && (
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-tossup"></span>
+          Toss-up Races
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {tossups.map((race) => (
+            <div class="border border-tossup/30 rounded-xl p-5 bg-amber-50/30">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h3 class="text-lg font-bold">{race.state}</h3>
+                  <p class="text-sm text-slate-500">
+                    {race.isOpenSeat ? "Open seat" : `Incumbent: ${race.incumbent?.name} (${race.incumbent?.party.charAt(0)})`}
+                  </p>
+                </div>
+                <span class={`text-xs font-bold px-2 py-1 rounded-full ${ratingColor(race.rating)}`}>
+                  {race.rating}
+                </span>
+              </div>
+              {race.whyCompetitive && (
+                <p class="text-sm text-slate-600 mb-3">{race.whyCompetitive}</p>
+              )}
+              <div class="flex gap-4 text-sm">
+                <div>
+                  <span class="font-medium text-dem">D:</span>
+                  {race.candidates.democrat.map((c) => c.name).join(", ") || "TBD"}
+                </div>
+                <div>
+                  <span class="font-medium text-gop">R:</span>
+                  {race.candidates.republican.map((c) => c.name).join(", ") || "TBD"}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Lean Races -->
+    {(leanR.length > 0 || leanD.length > 0) && (
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold mb-4">Competitive Races</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...leanD, ...leanR].map((race) => (
+            <div class="border border-slate-200 rounded-xl p-5">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h3 class="text-lg font-bold">{race.state}</h3>
+                  <p class="text-sm text-slate-500">
+                    {race.isOpenSeat ? "Open seat" : `Incumbent: ${race.incumbent?.name}`}
+                    {race.isSpecialElection ? " (Special)" : ""}
+                  </p>
+                </div>
+                <span class={`text-xs font-bold px-2 py-1 rounded-full ${ratingColor(race.rating)}`}>
+                  {race.rating}
+                </span>
+              </div>
+              {race.whyCompetitive && (
+                <p class="text-sm text-slate-600">{race.whyCompetitive}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Special Elections -->
+    <div class="mb-10">
+      <h2 class="text-2xl font-bold mb-4">Special Elections</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {specials.map((race) => (
+          <div class="border border-ind/30 rounded-xl p-5 bg-ind-light/20">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="text-lg font-bold">{race.state}</h3>
+                <p class="text-sm text-slate-500">
+                  Vacated by {race.incumbent?.name} ({race.incumbent?.currentRole})
+                </p>
+              </div>
+              <span class={`text-xs font-bold px-2 py-1 rounded-full ${ratingColor(race.rating)}`}>
+                {race.rating}
+              </span>
+            </div>
+            {race.whyCompetitive && (
+              <p class="text-sm text-slate-600">{race.whyCompetitive}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Retirements -->
+    <div id="retirements" class="mb-10">
+      <h2 class="text-2xl font-bold mb-4">Senate Retirements</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        {senateOverview.retirements.map((r) => (
+          <div class={`rounded-lg p-4 text-sm ${r.party === "Republican" ? "bg-gop-light/50" : "bg-dem-light/50"}`}>
+            <div class="font-semibold">{r.name}</div>
+            <div class="text-slate-500">{r.state} ({r.party.charAt(0)})</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

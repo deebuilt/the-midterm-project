@@ -1,0 +1,87 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Senate 101" description="Everything you need to know about the U.S. Senate: terms, classes, and how elections work.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn/how-congress-works" class="text-dem hover:underline">Learn</a> / Senate 101
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-6">Senate 101</h1>
+
+    <div class="space-y-8">
+      <p class="text-lg text-slate-600">
+        The U.S. Senate is often called "the world's greatest deliberative body." Every state gets exactly two senators, regardless of population. That means Wyoming (population ~580,000) has the same Senate representation as California (population ~39 million).
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-6">
+        <h2 class="text-xl font-bold mb-4">Key Facts</h2>
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <div class="text-3xl font-bold text-dem">100</div>
+            <div class="text-sm text-slate-500">Total Senators</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-dem">6 years</div>
+            <div class="text-sm text-slate-500">Term Length</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-dem">3</div>
+            <div class="text-sm text-slate-500">Classes</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-dem">51</div>
+            <div class="text-sm text-slate-500">Seats for Majority</div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-bold">The 3-Class System</h2>
+      <p class="text-slate-600">
+        To avoid replacing the entire Senate at once, senators are divided into three groups called "classes":
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-sm text-slate-400">Class I</h3>
+          <p class="text-lg font-semibold">33 senators</p>
+          <p class="text-sm text-slate-500">Last elected in 2024. Next election: 2030</p>
+        </div>
+        <div class="border-2 border-tossup rounded-lg p-4 bg-tossup/5">
+          <h3 class="font-bold text-sm text-tossup">Class II</h3>
+          <p class="text-lg font-semibold">33 senators</p>
+          <p class="text-sm text-slate-700 font-medium">Up for election in 2026!</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <h3 class="font-bold text-sm text-slate-400">Class III</h3>
+          <p class="text-lg font-semibold">34 senators</p>
+          <p class="text-sm text-slate-500">Last elected in 2022. Next election: 2028</p>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-bold">Special Elections</h2>
+      <p class="text-slate-600">
+        When a senator leaves office before their term is up (resignation, death, or appointment to another role), their state may hold a <strong>special election</strong> to fill the seat. In 2026, there are two special elections:
+      </p>
+      <ul class="list-disc list-inside text-slate-600 space-y-1">
+        <li><strong>Ohio</strong> &mdash; JD Vance resigned to become Vice President</li>
+        <li><strong>Florida</strong> &mdash; Marco Rubio resigned to become Secretary of State</li>
+      </ul>
+
+      <h2 class="text-2xl font-bold">What Does a Senator Do?</h2>
+      <ul class="list-disc list-inside text-slate-600 space-y-2">
+        <li>Writes and votes on legislation</li>
+        <li>Confirms (or rejects) the president's nominees for judges, cabinet members, and ambassadors</li>
+        <li>Ratifies treaties with foreign nations</li>
+        <li>Conducts impeachment trials</li>
+        <li>Represents their entire state's interests</li>
+      </ul>
+
+      <div class="bg-dem-light border border-dem/20 rounded-lg p-6">
+        <p class="text-sm font-medium text-dem-dark">
+          Ready to see who's on the ballot? Check out the
+          <a href="/senate" class="underline">2026 Senate races</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

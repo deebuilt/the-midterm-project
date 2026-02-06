@@ -1,0 +1,80 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="House 101" description="Everything you need to know about the U.S. House of Representatives.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn/how-congress-works" class="text-dem hover:underline">Learn</a> / House 101
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-6">House 101</h1>
+
+    <div class="space-y-8">
+      <p class="text-lg text-slate-600">
+        The House of Representatives is the "people's chamber." Unlike the Senate, where every state gets two seats, House seats are distributed based on population. More people = more representatives.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-6">
+        <h2 class="text-xl font-bold mb-4">Key Facts</h2>
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <div class="text-3xl font-bold text-gop">435</div>
+            <div class="text-sm text-slate-500">Total Representatives</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-gop">2 years</div>
+            <div class="text-sm text-slate-500">Term Length</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-gop">ALL</div>
+            <div class="text-sm text-slate-500">Seats Up Every Election</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-gop">218</div>
+            <div class="text-sm text-slate-500">Seats for Majority</div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-bold">Why Every Seat, Every Time?</h2>
+      <p class="text-slate-600">
+        With only 2-year terms, House members are <strong>always</strong> up for re-election. This is by design &mdash; the founders wanted the House to be the most responsive to the will of the people. If voters are unhappy, they can replace their representative every two years.
+      </p>
+
+      <h2 class="text-2xl font-bold">How Are Seats Distributed?</h2>
+      <p class="text-slate-600">
+        Every 10 years, after the census, seats are <strong>reapportioned</strong> based on population changes. States that grew may gain seats, while states that shrank may lose them.
+      </p>
+      <div class="bg-slate-50 rounded-lg p-4">
+        <h3 class="font-semibold mb-2">Largest Delegations (2026)</h3>
+        <ul class="text-sm text-slate-600 space-y-1">
+          <li>California &mdash; 52 seats</li>
+          <li>Texas &mdash; 38 seats</li>
+          <li>Florida &mdash; 28 seats</li>
+          <li>New York &mdash; 26 seats</li>
+        </ul>
+        <p class="text-xs text-slate-400 mt-2">7 states have only 1 representative: Alaska, Delaware, North Dakota, South Dakota, Vermont, Wyoming, and Montana (gained a 2nd in 2022).</p>
+      </div>
+
+      <h2 class="text-2xl font-bold">Districts & Gerrymandering</h2>
+      <p class="text-slate-600">
+        Each representative serves a specific <strong>district</strong> within their state. State legislatures draw district lines, which can be controversial. <strong>Gerrymandering</strong> is when districts are drawn to favor one party &mdash; it's one of the most debated issues in American politics.
+      </p>
+
+      <h2 class="text-2xl font-bold">What Does a Representative Do?</h2>
+      <ul class="list-disc list-inside text-slate-600 space-y-2">
+        <li>Writes and votes on legislation</li>
+        <li>Initiates all revenue (tax) bills &mdash; only the House can do this</li>
+        <li>Brings impeachment charges against federal officials</li>
+        <li>Represents their district's specific needs and interests</li>
+      </ul>
+
+      <div class="bg-gop-light border border-gop/20 rounded-lg p-6">
+        <p class="text-sm font-medium text-gop-dark">
+          See which House seats are up for grabs in
+          <a href="/house" class="underline">2026 House races</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,135 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Countdown from "../components/ui/Countdown";
+import { senateOverview } from "../data/senate-races";
+import { houseOverview } from "../data/house-overview";
+---
+
+<Layout title="Home" description="Learn about the 2026 U.S. midterm elections. Who's on the ballot, what's at stake, and why your vote matters.">
+  <!-- Hero -->
+  <section class="bg-navy text-white">
+    <div class="max-w-5xl mx-auto px-4 py-24 md:py-32">
+      <p class="text-sm font-mono tracking-widest text-white/40 uppercase mb-4">November 3, 2026</p>
+      <h1 class="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6 max-w-3xl">
+        Know your ballot.<br />
+        <span class="text-tossup">Own your vote.</span>
+      </h1>
+      <div class="mb-8">
+        <Countdown client:load />
+      </div>
+      <p class="text-lg text-white/60 mb-10 max-w-xl leading-relaxed">
+        35 Senate seats. 435 House seats. Thousands of decisions that shape
+        your daily life. This is your guide to the 2026 midterms.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="/learn/how-congress-works"
+          class="bg-white text-navy px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-white/90 transition-colors"
+        >
+          Start learning
+        </a>
+        <a
+          href="/explore"
+          class="border border-white/20 text-white/80 px-5 py-2.5 rounded-md text-sm font-semibold hover:bg-white/5 transition-colors"
+        >
+          Explore candidates
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Numbers -->
+  <section class="border-b border-slate-100">
+    <div class="max-w-5xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div>
+        <div class="text-3xl font-black text-navy">{senateOverview.seatsUpForElection + senateOverview.specialElections}</div>
+        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Senate seats</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-navy">{houseOverview.totalSeats}</div>
+        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">House seats</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-tossup">{houseOverview.retirements.total + senateOverview.retirements.length}</div>
+        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Retiring</div>
+      </div>
+      <div>
+        <div class="text-3xl font-black text-navy">{houseOverview.battlegroundDistricts}</div>
+        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Battlegrounds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What's at Stake -->
+  <section class="py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-6">What's at stake</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Senate -->
+        <a href="/senate" class="group block">
+          <div class="border border-slate-200 rounded-lg p-6 hover:border-dem transition-colors">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xl font-bold">The Senate</h3>
+              <span class="text-sm text-slate-400 group-hover:text-dem transition-colors">&rarr;</span>
+            </div>
+            <div class="flex items-center gap-0.5 mb-4 rounded-full overflow-hidden h-3">
+              <div class="bg-gop h-full rounded-l-full" style={`width: ${senateOverview.currentSplit.republican}%`}></div>
+              <div class="bg-dem h-full rounded-r-full" style={`width: ${senateOverview.currentSplit.democrat}%`}></div>
+            </div>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Republicans hold {senateOverview.currentSplit.republican}&ndash;{senateOverview.currentSplit.democrat}.
+              Democrats need to flip <strong class="text-dem">{senateOverview.demsNeedToFlip} seats</strong> for a majority.
+              {senateOverview.retirements.length} senators are retiring, creating open races.
+            </p>
+          </div>
+        </a>
+
+        <!-- House -->
+        <a href="/house" class="group block">
+          <div class="border border-slate-200 rounded-lg p-6 hover:border-gop transition-colors">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-xl font-bold">The House</h3>
+              <span class="text-sm text-slate-400 group-hover:text-gop transition-colors">&rarr;</span>
+            </div>
+            <div class="flex items-center gap-0.5 mb-4 rounded-full overflow-hidden h-3">
+              <div class="bg-gop h-full rounded-l-full" style={`width: ${(houseOverview.currentSplit.republican / houseOverview.totalSeats) * 100}%`}></div>
+              <div class="bg-dem h-full rounded-r-full" style={`width: ${(houseOverview.currentSplit.democrat / houseOverview.totalSeats) * 100}%`}></div>
+            </div>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              All {houseOverview.totalSeats} seats contested.
+              Democrats need <strong class="text-dem">{houseOverview.demsNeedToFlip} more seats</strong>.
+              {houseOverview.retirements.total} incumbents retiring.
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Learn -->
+  <section class="bg-slate-50 py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">The basics</h2>
+      <p class="text-2xl font-bold mb-8">New to this? Start here.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {[
+          { href: "/learn/how-congress-works", title: "How Congress Works", desc: "The two chambers, what they do, and how a bill becomes law." },
+          { href: "/learn/senate-101", title: "Senate 101", desc: "100 senators, 6-year terms, and the 3-class rotation system." },
+          { href: "/learn/house-101", title: "House 101", desc: "435 representatives, 2-year terms, districts, and gerrymandering." },
+          { href: "/learn/what-are-midterms", title: "What Are Midterms?", desc: "Why the elections between presidential years matter just as much." },
+        ].map((item) => (
+          <a
+            href={item.href}
+            class="group flex items-start gap-4 bg-white rounded-lg p-5 border border-slate-200 hover:border-slate-400 transition-colors"
+          >
+            <div class="flex-1">
+              <h3 class="font-semibold mb-1 group-hover:text-dem transition-colors">{item.title}</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+            </div>
+            <span class="text-slate-300 group-hover:text-dem transition-colors mt-1">&rarr;</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

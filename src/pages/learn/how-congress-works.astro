@@ -1,0 +1,70 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="How Congress Works" description="A beginner's guide to the U.S. Congress: the Senate and the House of Representatives.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn/how-congress-works" class="text-dem hover:underline">Learn</a>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-6">How Congress Works</h1>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        The United States Congress is the legislative branch of the federal government. It makes the laws, controls the budget, and provides a check on the president's power. Congress is made up of two chambers.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+        <div class="bg-dem-light rounded-xl p-6 border border-dem/20">
+          <h2 class="text-xl font-bold text-dem-dark mb-3">The Senate</h2>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li><strong>100 members</strong> &mdash; 2 per state</li>
+            <li><strong>6-year terms</strong></li>
+            <li>Confirms presidential appointments</li>
+            <li>Ratifies treaties</li>
+            <li>Conducts impeachment trials</li>
+          </ul>
+          <a href="/learn/senate-101" class="text-dem text-sm font-medium mt-4 inline-block hover:underline">
+            Senate 101 &rarr;
+          </a>
+        </div>
+
+        <div class="bg-gop-light rounded-xl p-6 border border-gop/20">
+          <h2 class="text-xl font-bold text-gop-dark mb-3">The House</h2>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li><strong>435 members</strong> &mdash; based on state population</li>
+            <li><strong>2-year terms</strong></li>
+            <li>Initiates revenue bills</li>
+            <li>Brings impeachment charges</li>
+            <li>Elects the president if no Electoral College majority</li>
+          </ul>
+          <a href="/learn/house-101" class="text-gop text-sm font-medium mt-4 inline-block hover:underline">
+            House 101 &rarr;
+          </a>
+        </div>
+      </div>
+
+      <h2 class="text-2xl font-bold">How a Bill Becomes a Law</h2>
+      <ol class="list-decimal list-inside space-y-2 text-slate-600">
+        <li>A member of Congress introduces a bill</li>
+        <li>It goes to a committee for review and debate</li>
+        <li>If the committee approves, the full chamber votes</li>
+        <li>If one chamber passes it, it goes to the other chamber</li>
+        <li>Both chambers must pass the same version</li>
+        <li>The president signs it into law (or vetoes it)</li>
+      </ol>
+
+      <h2 class="text-2xl font-bold">Why Does This Matter for Midterms?</h2>
+      <p class="text-slate-600">
+        In midterm elections, voters choose who fills these seats. The party that controls Congress controls what bills get voted on, which judges get confirmed, and how the federal budget is spent. A single seat can shift the balance of power.
+      </p>
+
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Next up: Learn specifically about the Senate and House, or jump straight to
+          <a href="/learn/what-are-midterms" class="underline">what midterm elections are</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

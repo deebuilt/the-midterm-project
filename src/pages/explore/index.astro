@@ -1,0 +1,18 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SwipeCards from "../../components/ui/SwipeCards";
+import { swipeCards } from "../../data/swipe-cards";
+---
+
+<Layout title="Explore Candidates" description="Swipe through 2026 candidates and learn key facts about the midterm elections.">
+  <section class="max-w-lg mx-auto py-12 px-4">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold mb-2">Explore</h1>
+      <p class="text-slate-500">
+        Swipe through candidates and key facts about the 2026 midterms.
+      </p>
+    </div>
+
+    <SwipeCards client:load cards={swipeCards} />
+  </section>
+</Layout>
