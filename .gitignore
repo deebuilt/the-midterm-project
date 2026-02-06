@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # claude code working files
 .claude/
+CLAUDE.md
