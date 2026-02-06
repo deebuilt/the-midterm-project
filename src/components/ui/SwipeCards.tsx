@@ -197,14 +197,37 @@ function CandidateCard({ card }: { card: SwipeCard }) {
             </span>
           )}
         </div>
-        <h3 className="text-lg font-bold mb-0.5">{candidate.name}</h3>
+        {candidate.website ? (
+          <a
+            href={candidate.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg font-bold mb-0.5 underline decoration-1 underline-offset-2 hover:decoration-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {candidate.name} &#8599;
+          </a>
+        ) : (
+          <h3 className="text-lg font-bold mb-0.5">{candidate.name}</h3>
+        )}
         {race && (
           <p className="text-xs text-slate-500 mb-1">
             {race.state} Senate {race.isSpecialElection ? "(Special)" : "2026"}
           </p>
         )}
         {candidate.currentRole && (
-          <p className="text-xs text-slate-600 mb-2">{candidate.currentRole}</p>
+          <p className="text-xs text-slate-600 mb-1">{candidate.currentRole}</p>
+        )}
+        {candidate.twitter && (
+          <a
+            href={`https://x.com/${candidate.twitter}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-slate-400 hover:text-slate-600 mb-2 inline-block"
+            onClick={(e) => e.stopPropagation()}
+          >
+            @{candidate.twitter}
+          </a>
         )}
 
         {/* Show positions if available, otherwise show key issues */}

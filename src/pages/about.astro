@@ -1,0 +1,117 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About" description="Why The Midterm Project exists, what we believe, and how we approach the 2026 midterms.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">About The Midterm Project</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      What this is, why it exists, and where we stand.
+    </p>
+
+    <div class="space-y-10">
+      <!-- What This Is -->
+      <div>
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">What this is</h2>
+        <div class="prose prose-slate max-w-none">
+          <p class="text-slate-700 leading-relaxed">
+            The Midterm Project is a free, open voter education site built for the 2026 U.S. midterm elections.
+            We present candidates, their voting records, their positions, and their own words &mdash; so you can
+            make informed decisions without having to wade through cable news spin or social media noise.
+          </p>
+          <p class="text-slate-700 leading-relaxed mt-4">
+            Every candidate page links directly to their official website and social media. Every voting record
+            is sourced from public congressional data. We want you to go beyond this site &mdash; look things up,
+            verify what we've written, and form your own conclusions.
+          </p>
+        </div>
+      </div>
+
+      <!-- How We Approach It -->
+      <div>
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">How we approach it</h2>
+        <div class="prose prose-slate max-w-none">
+          <p class="text-slate-700 leading-relaxed">
+            Our content aims to be factual and nonpartisan. We cover every candidate &mdash; Democrat, Republican,
+            and Independent &mdash; with the same format: their record, their positions, and links to learn more.
+            We don't tell you who to vote for. We show you what they've done and let you decide.
+          </p>
+          <p class="text-slate-700 leading-relaxed mt-4">
+            We believe that when people have real information, they make good choices. The problem isn't that
+            voters are uninformed &mdash; it's that accurate, accessible information is getting harder to find.
+            That's the gap we're trying to fill.
+          </p>
+        </div>
+      </div>
+
+      <!-- Where We Stand -->
+      <div>
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Where we stand</h2>
+        <div class="bg-slate-900 text-white rounded-xl p-8">
+          <p class="text-lg leading-relaxed mb-4">
+            We present all candidates fairly. But we are not neutral about democracy itself.
+          </p>
+          <p class="text-slate-300 leading-relaxed mb-4">
+            The Midterm Project exists because we believe President Trump poses an unquestionable threat to
+            American democracy. The erosion of democratic norms, the attacks on the free press, the attempts
+            to undermine election integrity, the concentration of executive power &mdash; these are not partisan
+            concerns. They are threats to the system that makes self-governance possible.
+          </p>
+          <p class="text-slate-300 leading-relaxed mb-4">
+            We built this site because the 2026 midterms are one of the most important elections in modern
+            American history. Congress has the power to check executive overreach, protect voting rights,
+            and hold power accountable. But only if we show up and vote.
+          </p>
+          <p class="text-slate-300 leading-relaxed mb-4">
+            Our position is simple: your right to vote freely and fairly must not be taken from you.
+            Your vote must be counted. The institutions that protect your voice must be defended.
+          </p>
+          <p class="text-white font-semibold text-lg">
+            That's why this project exists. Not to tell you what to think &mdash; but to make sure
+            you have everything you need to make your voice heard while you still can.
+          </p>
+        </div>
+      </div>
+
+      <!-- Built With -->
+      <div>
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Built by</h2>
+        <div class="prose prose-slate max-w-none">
+          <p class="text-slate-700 leading-relaxed">
+            The Midterm Project was created on February 5, 2026, by a concerned citizen who believes
+            that access to clear, factual political information shouldn't require a political science degree
+            or a cable news subscription.
+          </p>
+          <p class="text-slate-700 leading-relaxed mt-4">
+            This is a volunteer effort. It's not funded by any campaign, PAC, or political organization.
+            If you find it useful, share it with someone who needs it.
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="bg-dem/5 border border-dem/20 rounded-xl p-8 text-center">
+        <h3 class="text-xl font-bold mb-3">The most important thing you can do</h3>
+        <p class="text-slate-600 mb-6">
+          Check your voter registration. Know your district. Know your candidates. And vote.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a
+            href="https://www.vote.org/am-i-registered-to-vote/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block bg-navy text-white font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
+          >
+            Check your registration
+          </a>
+          <a
+            href="/explore"
+            class="inline-block border-2 border-navy text-navy font-semibold px-6 py-3 rounded-lg hover:bg-navy hover:text-white transition-colors"
+          >
+            Explore candidates
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
