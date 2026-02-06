@@ -663,6 +663,58 @@ export const senateRaces: SenateRace[] = [
   },
 ];
 
+/**
+ * All 33 Class II Senate seats up in 2026.
+ * This includes competitive + non-competitive races.
+ * Non-competitive seats are derived from the states data.
+ */
+export interface Class2Seat {
+  state: string;
+  stateAbbr: string;
+  senator: string;
+  party: "Democrat" | "Republican" | "Independent";
+  rating: string;
+  isCompetitive: boolean;
+}
+
+export const allClass2Seats: Class2Seat[] = [
+  // -- Republican-held seats (20) --
+  { state: "Alabama", stateAbbr: "AL", senator: "Tommy Tuberville", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Alaska", stateAbbr: "AK", senator: "Dan Sullivan", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Arkansas", stateAbbr: "AR", senator: "Tom Cotton", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Idaho", stateAbbr: "ID", senator: "Jim Risch", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Iowa", stateAbbr: "IA", senator: "Joni Ernst", party: "Republican", rating: "Lean R", isCompetitive: true },
+  { state: "Kansas", stateAbbr: "KS", senator: "Roger Marshall", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Kentucky", stateAbbr: "KY", senator: "Mitch McConnell", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Louisiana", stateAbbr: "LA", senator: "Bill Cassidy", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Maine", stateAbbr: "ME", senator: "Susan Collins", party: "Republican", rating: "Toss-up", isCompetitive: true },
+  { state: "Mississippi", stateAbbr: "MS", senator: "Roger Wicker", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Montana", stateAbbr: "MT", senator: "Steve Daines", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Nebraska", stateAbbr: "NE", senator: "Pete Ricketts", party: "Republican", rating: "Lean R", isCompetitive: true },
+  { state: "North Carolina", stateAbbr: "NC", senator: "Thom Tillis", party: "Republican", rating: "Toss-up", isCompetitive: true },
+  { state: "Oklahoma", stateAbbr: "OK", senator: "Markwayne Mullin", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "South Carolina", stateAbbr: "SC", senator: "Lindsey Graham", party: "Republican", rating: "Safe R", isCompetitive: true },
+  { state: "South Dakota", stateAbbr: "SD", senator: "Mike Rounds", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Tennessee", stateAbbr: "TN", senator: "Marsha Blackburn", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Texas", stateAbbr: "TX", senator: "John Cornyn", party: "Republican", rating: "Safe R", isCompetitive: true },
+  { state: "West Virginia", stateAbbr: "WV", senator: "Shelley Moore Capito", party: "Republican", rating: "Safe R", isCompetitive: false },
+  { state: "Wyoming", stateAbbr: "WY", senator: "Cynthia Lummis", party: "Republican", rating: "Safe R", isCompetitive: false },
+  // -- Democrat-held seats (13) --
+  { state: "Colorado", stateAbbr: "CO", senator: "John Hickenlooper", party: "Democrat", rating: "Safe D", isCompetitive: true },
+  { state: "Delaware", stateAbbr: "DE", senator: "Chris Coons", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Georgia", stateAbbr: "GA", senator: "Jon Ossoff", party: "Democrat", rating: "Toss-up", isCompetitive: true },
+  { state: "Illinois", stateAbbr: "IL", senator: "Dick Durbin", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Massachusetts", stateAbbr: "MA", senator: "Ed Markey", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Michigan", stateAbbr: "MI", senator: "Gary Peters", party: "Democrat", rating: "Toss-up", isCompetitive: true },
+  { state: "Minnesota", stateAbbr: "MN", senator: "Tina Smith", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "New Hampshire", stateAbbr: "NH", senator: "Jeanne Shaheen", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "New Jersey", stateAbbr: "NJ", senator: "Cory Booker", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "New Mexico", stateAbbr: "NM", senator: "Martin Heinrich", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Oregon", stateAbbr: "OR", senator: "Jeff Merkley", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Rhode Island", stateAbbr: "RI", senator: "Jack Reed", party: "Democrat", rating: "Safe D", isCompetitive: false },
+  { state: "Virginia", stateAbbr: "VA", senator: "Mark Warner", party: "Democrat", rating: "Likely D", isCompetitive: true },
+];
+
 export const senateOverview = {
   totalSeats: 100,
   seatsUpForElection: 33,

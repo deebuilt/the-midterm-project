@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Tooltip from "../../components/ui/Tooltip.astro";
 import SenateGuide from "../../components/ui/SenateGuide";
-import { senateRaces, senateOverview } from "../../data/senate-races";
+import { senateRaces, senateOverview, allClass2Seats } from "../../data/senate-races";
 
 const tossups = senateRaces.filter((r) => r.rating === "Toss-up");
 const leanR = senateRaces.filter((r) => r.rating === "Lean R");
@@ -184,7 +184,7 @@ function ratingColor(rating: string) {
     )}
 
     <!-- Special Elections -->
-    <div class="mb-10">
+    <div id="special-elections" class="mb-10">
       <h2 class="text-2xl font-bold mb-4">Special Elections</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {specials.map((race) => (
@@ -219,6 +219,67 @@ function ratingColor(rating: string) {
           </div>
         ))}
       </div>
+    </div>
+
+    <!-- All 33 Class II Seats -->
+    <div id="all-seats" class="mb-10">
+      <h2 class="text-2xl font-bold mb-2">All 33 Senate Seats Up in 2026</h2>
+      <p class="text-sm text-slate-500 mb-6">
+        Every state below has a senator whose 6-year term ends in January 2027.
+        Most of these races aren't expected to be close, but they'll still appear on your ballot if you live there.
+      </p>
+
+      <!-- Republican-held seats -->
+      <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-gop"></span>
+        Republican-held seats ({allClass2Seats.filter(s => s.party === "Republican").length})
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-8">
+        {allClass2Seats.filter(s => s.party === "Republican").map((seat) => (
+          <div class={`rounded-lg border p-3 text-sm ${seat.isCompetitive ? "border-tossup/50 bg-amber-50/30" : "border-slate-200"}`}>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-slate-800">{seat.state}</div>
+                <div class="text-xs text-slate-500">{seat.senator}</div>
+              </div>
+              <span class={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ratingColor(seat.rating)}`}>
+                {seat.rating}
+              </span>
+            </div>
+            {seat.isCompetitive && (
+              <a href="#toss-ups" class="text-[10px] text-tossup font-medium mt-1 inline-block hover:underline">See race details above</a>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <!-- Democrat-held seats -->
+      <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-dem"></span>
+        Democrat-held seats ({allClass2Seats.filter(s => s.party === "Democrat").length})
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+        {allClass2Seats.filter(s => s.party === "Democrat").map((seat) => (
+          <div class={`rounded-lg border p-3 text-sm ${seat.isCompetitive ? "border-tossup/50 bg-amber-50/30" : "border-slate-200"}`}>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-slate-800">{seat.state}</div>
+                <div class="text-xs text-slate-500">{seat.senator}</div>
+              </div>
+              <span class={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ratingColor(seat.rating)}`}>
+                {seat.rating}
+              </span>
+            </div>
+            {seat.isCompetitive && (
+              <a href="#toss-ups" class="text-[10px] text-tossup font-medium mt-1 inline-block hover:underline">See race details above</a>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p class="text-xs text-slate-400 mt-4">
+        Plus 2 <a href="#special-elections" class="underline">special elections</a> in Ohio and Florida (Class III seats vacated early).
+      </p>
     </div>
   </section>
 </Layout>

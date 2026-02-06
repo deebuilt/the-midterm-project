@@ -139,6 +139,10 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
                     stroke="#FFFFFF"
                     strokeWidth={isSelected ? 1.5 : 0.5}
                     onClick={() => handleStateClick(fips)}
+                    onTouchEnd={(e: any) => {
+                      e.preventDefault();
+                      handleStateClick(fips);
+                    }}
                     onMouseEnter={(e: any) => {
                       if (!selectedAbbr) {
                         setHoveredAbbr(abbr);
@@ -154,6 +158,7 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
                         outline: "none",
                         cursor: "pointer",
                         transition: "fill 0.15s",
+                        WebkitTapHighlightColor: "transparent",
                       },
                       hover: {
                         outline: "none",
@@ -264,17 +269,15 @@ function BallotPanel({
     );
   }
 
-  const accentColor = senateRace
-    ? RATING_COLORS[senateRace.rating] ?? NEUTRAL_COLOR
-    : NEUTRAL_COLOR;
+  const hasSenateRace = !!senateRace || !!stateInfo.senateClass2Senator;
 
   return (
     <div
       className={`
-        fixed z-[55] bg-white shadow-2xl transition-transform duration-300 ease-in-out overflow-y-auto
+        fixed z-[55] bg-[#FFFEF8] shadow-2xl transition-transform duration-300 ease-in-out overflow-y-auto
         ${isMobile
-          ? "inset-x-0 bottom-0 rounded-t-2xl max-h-[70vh]"
-          : "top-0 right-0 bottom-0 w-[400px] border-l border-slate-200"
+          ? "inset-x-0 bottom-0 rounded-t-2xl max-h-[75vh]"
+          : "top-0 right-0 bottom-0 w-[420px] border-l border-slate-300"
         }
         ${isOpen
           ? "translate-x-0 translate-y-0"
@@ -284,12 +287,6 @@ function BallotPanel({
         }
       `}
     >
-      {/* Accent bar */}
-      <div
-        className="absolute top-0 left-0 bottom-0 w-1"
-        style={{ backgroundColor: accentColor }}
-      />
-
       {/* Mobile drag handle */}
       {isMobile && (
         <div className="flex justify-center pt-3 pb-1">
@@ -297,157 +294,289 @@ function BallotPanel({
         </div>
       )}
 
-      <div className="p-5 pl-6">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-navy">
-              {stateInfo.name}
-            </h2>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Here's what you'll vote on in November 2026
+      {/* Ballot header — black bar like a real ballot */}
+      <div className="bg-black text-white px-4 py-3 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-wide">
+            {stateInfo.name}
+          </h2>
+          <p className="text-[11px] text-white/70 tracking-wide">
+            Ballot Preview — General Election, November 2026
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-white/60 hover:text-white transition-colors p-1 -mr-1"
+          aria-label="Close panel"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div className="px-4 py-3">
+        <p className="text-xs text-slate-500 mb-3 italic">
+          This is a preview of what you might see on your ballot. Actual candidates may vary.
+        </p>
+
+        {/* ── FEDERAL OFFICES ── */}
+        <BallotSectionHeader title="Federal Offices" />
+
+        {/* Senate */}
+        <BallotRow
+          office="United States Senator"
+          status={hasSenateRace ? "on-ballot" : "not-this-year"}
+        >
+          {senateRace ? (
+            <CompetitiveRaceCard race={senateRace} />
+          ) : stateInfo.senateClass2Senator ? (
+            <div className="px-3 py-2">
+              <BallotBubble
+                name={stateInfo.senateClass2Senator}
+                party={stateInfo.senateClass2Party ?? "Republican"}
+                detail="Incumbent — running for re-election"
+              />
+              <EmptyBallotBubble
+                party={stateInfo.senateClass2Party === "Democrat" ? "Republican" : "Democrat"}
+              />
+              <p className="text-[11px] text-slate-400 mt-2 pl-7">
+                This race isn't expected to be close, but you'll still see it on your ballot.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 px-3 py-2">
+              No Senate seat up in your state this year.
+            </p>
+          )}
+        </BallotRow>
+
+        {/* House */}
+        <BallotRow office="United States Representative" status="on-ballot">
+          <div className="px-3 py-2 text-xs text-slate-600">
+            {stateInfo.houseDistricts === 1 ? (
+              <p>
+                {stateInfo.name} has <span className="font-semibold">1 at-large seat</span> —
+                {" "}one representative for the whole state. You'll vote for this seat.
+              </p>
+            ) : (
+              <p>
+                {stateInfo.name} has <span className="font-semibold">{stateInfo.houseDistricts} congressional districts</span>.
+                {" "}You vote only in your district — find yours at{" "}
+                <a
+                  href="https://www.house.gov/representatives/find-your-representative"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-dem"
+                >
+                  house.gov
+                </a>.
+              </p>
+            )}
+          </div>
+        </BallotRow>
+
+        {/* ── STATE OFFICES ── */}
+        <BallotSectionHeader title="State Offices" />
+
+        {/* Governor */}
+        <BallotRow
+          office="Governor"
+          status={stateInfo.governorUpIn2026 ? "on-ballot" : "not-this-year"}
+        >
+          {stateInfo.governorUpIn2026 ? (
+            <div className="px-3 py-2">
+              {stateInfo.currentGovernor && (() => {
+                // Check if current governor is running for Senate instead
+                const govRunningForSenate = senateRace?.candidates.democrat.some(
+                  c => c.name === stateInfo.currentGovernor
+                ) || senateRace?.candidates.republican.some(
+                  c => c.name === stateInfo.currentGovernor
+                );
+                return govRunningForSenate ? (
+                  <p className="text-[11px] text-slate-500 mb-1">
+                    Gov. {stateInfo.currentGovernor} is running for U.S. Senate, so this seat will be open.
+                  </p>
+                ) : (
+                  <BallotBubble
+                    name={`Gov. ${stateInfo.currentGovernor}`}
+                    party={stateInfo.currentGovernorParty ?? "Republican"}
+                    detail="Current governor"
+                  />
+                );
+              })()}
+              <EmptyBallotBubble party="Democrat" />
+              <EmptyBallotBubble party="Republican" />
+              <p className="text-[11px] text-tossup mt-2 pl-7">
+                Candidate details coming soon
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400 px-3 py-2">
+              Not up for election in 2026.
+            </p>
+          )}
+        </BallotRow>
+
+        {/* ── BALLOT MEASURES ── */}
+        <BallotSectionHeader title="Ballot Measures" />
+
+        <BallotRow office="Statewide Ballot Measures" status="unknown">
+          <div className="px-3 py-2">
+            <p className="text-xs text-slate-500">
+              Ballot measures are yes-or-no votes on new laws, constitutional amendments,
+              or policy changes. They go directly to voters instead of through the legislature.
+            </p>
+            <p className="text-[11px] text-tossup mt-1.5">
+              Details for {stateInfo.name} coming soon
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors p-1 -mt-1"
-            aria-label="Close panel"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+        </BallotRow>
+
+        {/* Footer */}
+        <div className="border-t-2 border-black mt-4 pt-3">
+          <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+            For educational purposes only. Not an official ballot.
+            Race ratings from nonpartisan analysts (Cook Political Report, Sabato's Crystal Ball).
+          </p>
         </div>
-
-        {/* Ballot items — visual ballot style */}
-        <div className="space-y-3">
-          {/* Senate */}
-          <BallotItem
-            icon="🏛"
-            title="U.S. Senate"
-            hasElection={!!senateRace || !!stateInfo.senateClass2Senator}
-          >
-            {senateRace ? (
-              <CompetitiveRaceCard race={senateRace} />
-            ) : stateInfo.senateClass2Senator ? (
-              <div className="text-sm text-slate-600 mt-2">
-                <p>
-                  Sen. <span className="font-semibold">{stateInfo.senateClass2Senator}</span>{" "}
-                  ({stateInfo.senateClass2Party}) is up for re-election.
-                  This race is not expected to be close.
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 mt-2">
-                Your state doesn't have a Senate seat up for election in 2026.
-              </p>
-            )}
-          </BallotItem>
-
-          {/* House */}
-          <BallotItem icon="🏠" title="U.S. House" hasElection={true}>
-            <div className="text-sm text-slate-600 mt-2">
-              {stateInfo.houseDistricts === 1 ? (
-                <p>
-                  You'll pick <span className="font-semibold">1 representative</span> who
-                  serves your entire state.
-                </p>
-              ) : (
-                <p>
-                  Your state has <span className="font-semibold">{stateInfo.houseDistricts} districts</span>.
-                  You'll pick the representative for your district.
-                </p>
-              )}
-            </div>
-          </BallotItem>
-
-          {/* Governor */}
-          <BallotItem
-            icon="⭐"
-            title="Governor"
-            hasElection={!!stateInfo.governorUpIn2026}
-          >
-            {stateInfo.governorUpIn2026 ? (
-              <div className="text-sm mt-2">
-                {stateInfo.currentGovernor && (
-                  <p className="text-slate-500">
-                    Current: Gov. {stateInfo.currentGovernor} ({stateInfo.currentGovernorParty})
-                  </p>
-                )}
-                <p className="mt-1 text-tossup font-medium text-xs">
-                  Candidate details coming soon
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 mt-2">
-                Your state isn't electing a governor in 2026.
-              </p>
-            )}
-          </BallotItem>
-
-          {/* Ballot Measures */}
-          <BallotItem icon="📋" title="Statewide Questions" hasElection={null}>
-            <p className="text-sm text-slate-400 mt-2">
-              These are yes-or-no votes on new laws or policy changes.
-              Details for your state are coming soon.
-            </p>
-          </BallotItem>
-        </div>
-
-        {/* Disclaimer */}
-        <p className="text-[10px] text-slate-300 mt-5 text-center">
-          For educational purposes only. Senate race ratings from nonpartisan analysts.
-        </p>
       </div>
     </div>
   );
 }
 
-// --- Ballot Item — visual ballot-style row ---
+// --- Ballot section header — black bar ---
 
-function BallotItem({
-  icon,
-  title,
-  hasElection,
+function BallotSectionHeader({ title }: { title: string }) {
+  return (
+    <div className="bg-black text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 mt-3 first:mt-0">
+      {title}
+    </div>
+  );
+}
+
+// --- Ballot row — one office ---
+
+function BallotRow({
+  office,
+  status,
   children,
 }: {
-  icon: string;
-  title: string;
-  hasElection: boolean | null; // null = unknown/coming soon
+  office: string;
+  status: "on-ballot" | "not-this-year" | "unknown";
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-slate-200 rounded-lg p-4">
-      <div className="flex items-center gap-3">
-        <span className="text-lg">{icon}</span>
-        <h3 className="font-bold text-navy text-sm flex-1">{title}</h3>
-        {hasElection === true && (
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-navy text-white px-2 py-0.5 rounded">
-            On your ballot
+    <div className="border-x border-b border-slate-300">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+        <span className="text-xs font-bold text-slate-700">{office}</span>
+        {status === "on-ballot" && (
+          <span className="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5">
+            Vote for one
           </span>
         )}
-        {hasElection === false && (
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-400 px-2 py-0.5 rounded">
+        {status === "not-this-year" && (
+          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
             Not this year
-          </span>
-        )}
-        {hasElection === null && (
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-tossup/10 text-tossup px-2 py-0.5 rounded">
-            Researching
           </span>
         )}
       </div>
       {children}
+    </div>
+  );
+}
+
+// --- Ballot bubble — candidate row with oval marker ---
+
+function BallotBubble({
+  name,
+  party,
+  detail,
+  isIncumbent,
+  website,
+}: {
+  name: string;
+  party: string;
+  detail?: string;
+  isIncumbent?: boolean;
+  website?: string;
+}) {
+  const partyAbbr =
+    party === "Democrat" ? "DEM" : party === "Republican" ? "REP" : "IND";
+  const partyDot =
+    party === "Democrat"
+      ? "border-dem"
+      : party === "Republican"
+        ? "border-gop"
+        : "border-ind";
+
+  return (
+    <div className="flex items-start gap-2 py-1">
+      <span
+        className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 ${partyDot} flex-shrink-0`}
+      />
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {website ? (
+            <a
+              href={website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-slate-800 underline decoration-1 underline-offset-2 hover:decoration-2"
+            >
+              {name}
+            </a>
+          ) : (
+            <span className="text-sm font-semibold text-slate-800">{name}</span>
+          )}
+          <span className="text-[10px] text-slate-400 font-medium">{partyAbbr}</span>
+          {isIncumbent && (
+            <span className="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-medium">
+              Incumbent
+            </span>
+          )}
+        </div>
+        {detail && (
+          <p className="text-[11px] text-slate-400 leading-snug">{detail}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// --- Empty ballot bubble — placeholder for unannounced candidates ---
+
+function EmptyBallotBubble({ party }: { party: string }) {
+  const partyAbbr =
+    party === "Democrat" ? "DEM" : party === "Republican" ? "REP" : "IND";
+  const partyDot =
+    party === "Democrat"
+      ? "border-dem"
+      : party === "Republican"
+        ? "border-gop"
+        : "border-ind";
+
+  return (
+    <div className="flex items-start gap-2 py-1 opacity-40">
+      <span
+        className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dashed ${partyDot} flex-shrink-0`}
+      />
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm text-slate-400 italic">No announced candidate</span>
+          <span className="text-[10px] text-slate-300 font-medium">{partyAbbr}</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -457,72 +586,57 @@ function BallotItem({
 function CompetitiveRaceCard({ race }: { race: SenateRace }) {
   const ratingColor = RATING_COLORS[race.rating] ?? NEUTRAL_COLOR;
 
+  const allCandidates = [
+    ...race.candidates.democrat.map((c) => ({ ...c, party: "Democrat" as const })),
+    ...race.candidates.republican.map((c) => ({ ...c, party: "Republican" as const })),
+    ...(race.candidates.independent ?? []).map((c) => ({ ...c, party: "Independent" as const })),
+  ];
+
   return (
-    <div className="mt-2">
-      {/* Rating + badges */}
-      <div className="flex items-center gap-2 mb-3">
+    <div className="px-3 py-2">
+      {/* Rating badges */}
+      <div className="flex items-center gap-1.5 mb-2">
         <span
-          className="inline-block text-white text-xs font-bold px-2.5 py-0.5 rounded-full"
+          className="text-white text-[10px] font-bold px-2 py-0.5 rounded"
           style={{ backgroundColor: ratingColor }}
         >
           {race.rating}
         </span>
         {race.isSpecialElection && (
-          <span className="inline-block bg-ind-light text-ind-dark text-xs font-bold px-2.5 py-0.5 rounded-full">
+          <span className="bg-ind-light text-ind-dark text-[10px] font-bold px-2 py-0.5 rounded">
             Special Election
           </span>
         )}
         {race.isOpenSeat && (
-          <span className="inline-block bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+          <span className="bg-slate-200 text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded">
             Open Seat
           </span>
         )}
       </div>
 
-      {/* Candidates */}
-      <div className="space-y-2">
-        {[
-          ...race.candidates.democrat.map((c) => ({ ...c, party: "Democrat" as const })),
-          ...race.candidates.republican.map((c) => ({ ...c, party: "Republican" as const })),
-          ...(race.candidates.independent ?? []).map((c) => ({ ...c, party: "Independent" as const })),
-        ].map((candidate) => {
-          const colors = PARTY_COLORS[candidate.party]!;
-          return (
-            <div
-              key={candidate.id}
-              className={`${colors.bg} rounded-lg p-3`}
-            >
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-                <span className={`font-semibold text-sm ${colors.text}`}>
-                  {candidate.name}
-                </span>
-                {candidate.isIncumbent && (
-                  <span className="text-[10px] bg-white/60 text-slate-500 px-1.5 py-0.5 rounded font-medium">
-                    Incumbent
-                  </span>
-                )}
-              </div>
-              {candidate.keyIssues.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1.5 ml-4">
-                  {candidate.keyIssues.slice(0, 3).map((issue) => (
-                    <span
-                      key={issue}
-                      className="text-[10px] bg-white/50 text-slate-500 px-1.5 py-0.5 rounded"
-                    >
-                      {issue}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      {/* Candidate bubbles */}
+      <div className="space-y-0.5">
+        {allCandidates.map((candidate) => (
+          <BallotBubble
+            key={candidate.id}
+            name={candidate.name}
+            party={candidate.party}
+            detail={candidate.currentRole}
+            isIncumbent={candidate.isIncumbent}
+            website={candidate.website}
+          />
+        ))}
+        {race.candidates.democrat.length === 0 && (
+          <EmptyBallotBubble party="Democrat" />
+        )}
+        {race.candidates.republican.length === 0 && (
+          <EmptyBallotBubble party="Republican" />
+        )}
       </div>
 
       {/* Why this race matters */}
       {race.whyCompetitive && (
-        <p className="text-xs text-slate-500 mt-3 italic leading-relaxed">
+        <p className="text-[11px] text-slate-500 mt-2 leading-relaxed border-t border-dashed border-slate-200 pt-2">
           {race.whyCompetitive}
         </p>
       )}
