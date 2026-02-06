@@ -1,0 +1,25 @@
+---
+import Layout from "../layouts/Layout.astro";
+import USMap from "../components/ui/USMap";
+import { states, statesByFips } from "../data/states";
+import { senateRaces } from "../data/senate-races";
+---
+
+<Layout
+  title="What's On Your Ballot — 2026 Midterms | The Midterm Project"
+  description="Interactive map of the 2026 U.S. midterm elections. Click any state to see Senate races, House seats, and more."
+>
+  <section class="max-w-6xl mx-auto py-8 md:py-12 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">What's On Your Ballot</h1>
+    <p class="text-lg text-slate-500 mb-8">
+      Click any state to preview what you'll see on your 2026 midterm ballot.
+    </p>
+
+    <USMap
+      client:only="react"
+      states={states}
+      senateRaces={senateRaces}
+      statesByFips={statesByFips}
+    />
+  </section>
+</Layout>

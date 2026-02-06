@@ -3,11 +3,15 @@ const currentPath = Astro.url.pathname;
 
 const primaryLinks = [
   { href: "/", label: "Home" },
-  { href: "/learn/how-congress-works", label: "Learn" },
-  { href: "/senate", label: "Senate" },
-  { href: "/house", label: "House" },
+  { href: "/map", label: "Map" },
   { href: "/explore", label: "Explore" },
   { href: "/news", label: "News" },
+];
+
+const learnLinks = [
+  { href: "/learn/how-congress-works", label: "How Congress Works" },
+  { href: "/senate", label: "2026 Senate Races" },
+  { href: "/house", label: "2026 House Races" },
 ];
 
 const moreLinks = [
@@ -16,7 +20,10 @@ const moreLinks = [
   { href: "/about", label: "About" },
 ];
 
-const allLinks = [...primaryLinks, ...moreLinks];
+const isLearnActive =
+  learnLinks.some(
+    (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
+  ) || currentPath.startsWith("/learn/");
 
 const isMoreActive = moreLinks.some(
   (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
@@ -31,7 +38,57 @@ const isMoreActive = moreLinks.some(
 
     <!-- Desktop nav -->
     <ul class="hidden md:flex gap-6 text-sm font-medium items-center">
-      {primaryLinks.map((link) => (
+      <!-- Home -->
+      <li>
+        <a
+          href="/"
+          class:list={[
+            "hover:text-tossup transition-colors",
+            currentPath === "/" ? "text-tossup" : "text-white/80",
+          ]}
+        >
+          Home
+        </a>
+      </li>
+
+      <!-- Learn dropdown -->
+      <li class="relative">
+        <button
+          id="learn-btn"
+          class:list={[
+            "hover:text-tossup transition-colors flex items-center gap-1",
+            isLearnActive ? "text-tossup" : "text-white/80",
+          ]}
+        >
+          Learn
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <ul
+          id="learn-menu"
+          class="hidden absolute left-0 top-full mt-2 bg-navy border border-white/10 rounded-lg py-2 min-w-[200px] shadow-lg"
+        >
+          {learnLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  "block px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors",
+                  currentPath === link.href || currentPath.startsWith(link.href + "/")
+                    ? "text-tossup"
+                    : "text-white/80",
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
+
+      <!-- Map, Explore, News -->
+      {primaryLinks.filter((l) => l.href !== "/").map((link) => (
         <li>
           <a
             href={link.href}
@@ -46,6 +103,7 @@ const isMoreActive = moreLinks.some(
           </a>
         </li>
       ))}
+
       <!-- More dropdown -->
       <li class="relative">
         <button
@@ -95,14 +153,51 @@ const isMoreActive = moreLinks.some(
     </button>
   </nav>
 
-  <!-- Mobile nav (flat list of all links) -->
-  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2 text-sm font-medium">
-    {allLinks.map((link) => (
+  <!-- Mobile nav -->
+  <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-1 text-sm font-medium">
+    {/* Primary links */}
+    {primaryLinks.map((link) => (
       <li>
         <a
           href={link.href}
           class:list={[
             "block py-2 hover:text-tossup transition-colors",
+            currentPath === link.href || currentPath.startsWith(link.href + "/")
+              ? "text-tossup"
+              : "text-white/80",
+          ]}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+
+    {/* Learn section */}
+    <li class="pt-3 pb-1 text-xs text-white/30 uppercase tracking-wider">Learn</li>
+    {learnLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={[
+            "block py-2 hover:text-tossup transition-colors pl-2",
+            currentPath === link.href || currentPath.startsWith(link.href + "/")
+              ? "text-tossup"
+              : "text-white/80",
+          ]}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+
+    {/* More section */}
+    <li class="pt-3 pb-1 text-xs text-white/30 uppercase tracking-wider">More</li>
+    {moreLinks.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          class:list={[
+            "block py-2 hover:text-tossup transition-colors pl-2",
             currentPath === link.href || currentPath.startsWith(link.href + "/")
               ? "text-tossup"
               : "text-white/80",
@@ -123,6 +218,20 @@ const isMoreActive = moreLinks.some(
     mobileMenu?.classList.toggle("hidden");
   });
 
+  // Desktop "Learn" dropdown
+  const learnBtn = document.getElementById("learn-btn");
+  const learnMenu = document.getElementById("learn-menu");
+
+  learnBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    learnMenu?.classList.toggle("hidden");
+    moreMenu?.classList.add("hidden");
+  });
+
+  learnMenu?.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
   // Desktop "More" dropdown
   const moreBtn = document.getElementById("more-btn");
   const moreMenu = document.getElementById("more-menu");
@@ -130,15 +239,16 @@ const isMoreActive = moreLinks.some(
   moreBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     moreMenu?.classList.toggle("hidden");
+    learnMenu?.classList.add("hidden");
   });
 
-  // Close dropdown when clicking outside
-  document.addEventListener("click", () => {
-    moreMenu?.classList.add("hidden");
-  });
-
-  // Prevent closing when clicking inside the dropdown
   moreMenu?.addEventListener("click", (e) => {
     e.stopPropagation();
+  });
+
+  // Close all dropdowns when clicking outside
+  document.addEventListener("click", () => {
+    learnMenu?.classList.add("hidden");
+    moreMenu?.classList.add("hidden");
   });
 </script>

@@ -83,3 +83,18 @@ export interface NewsItem {
   categories?: string[];
   author?: string;
 }
+
+export interface StateInfo {
+  name: string;
+  abbr: string;
+  fips: string;
+  houseDistricts: number;
+  senateClass2Senator?: string;
+  senateClass2Party?: "Democrat" | "Republican" | "Independent";
+  otherSenator?: string;
+  otherSenatorParty?: "Democrat" | "Republican" | "Independent";
+  hasCompetitiveRace: boolean;
+  governorUpIn2026?: boolean;
+  currentGovernor?: string;
+  currentGovernorParty?: "Democrat" | "Republican" | "Independent";
+}
