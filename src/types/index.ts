@@ -73,3 +73,13 @@ export type PartyColor = {
   Republican: string;
   Independent: string;
 };
+
+export interface NewsItem {
+  title: string;
+  link: string;
+  description: string;
+  pubDate: string;
+  source: "ProPublica" | "PBS NewsHour";
+  categories?: string[];
+  author?: string;
+}

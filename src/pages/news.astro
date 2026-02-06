@@ -1,0 +1,186 @@
+---
+import Layout from "../layouts/Layout.astro";
+import type { NewsItem } from "../types";
+import Parser from "rss-parser";
+
+const parser = new Parser();
+
+const FEEDS = [
+  { url: "https://www.propublica.org/feeds/propublica/main", source: "ProPublica" as const },
+  { url: "https://www.pbs.org/newshour/feeds/rss/politics", source: "PBS NewsHour" as const },
+];
+
+const allItems: NewsItem[] = [];
+
+for (const feed of FEEDS) {
+  try {
+    const parsed = await parser.parseURL(feed.url);
+    for (const item of parsed.items ?? []) {
+      allItems.push({
+        title: item.title ?? "Untitled",
+        link: item.link ?? "#",
+        description: item.contentSnippet ?? item.content ?? "",
+        pubDate: item.pubDate ?? "",
+        source: feed.source,
+        categories: (item.categories ?? []).map((cat: unknown) =>
+          typeof cat === "string" ? cat : (cat as { _: string })._ ?? String(cat)
+        ),
+        author: item.creator ?? item["dc:creator"] ?? undefined,
+      });
+    }
+  } catch (e) {
+    console.error(`Failed to fetch ${feed.source} feed:`, e);
+  }
+}
+
+// Sort newest first
+allItems.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+// Limit to 30 items
+const items = allItems.slice(0, 30);
+
+// All items are rendered; filtering happens client-side via JS
+const filtered = items;
+
+function formatDate(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+function truncate(str: string, max: number): string {
+  if (str.length <= max) return str;
+  return str.slice(0, max).trimEnd() + "...";
+}
+---
+
+<Layout title="News" description="Latest political news from ProPublica and PBS NewsHour.">
+  <section class="py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <h1 class="text-4xl font-black tracking-tight text-navy mb-2">News</h1>
+      <p class="text-slate-500 mb-8">
+        Latest political coverage from trusted sources, updated with each site build.
+      </p>
+
+      <!-- Source filter -->
+      <div class="flex gap-2 mb-10 text-sm font-medium" id="source-filters">
+        <button
+          data-filter="all"
+          class="filter-btn px-4 py-2 rounded-full border transition-colors bg-navy text-white border-navy"
+        >
+          All Sources
+        </button>
+        <button
+          data-filter="ProPublica"
+          class="filter-btn px-4 py-2 rounded-full border transition-colors text-slate-500 border-slate-200 hover:border-slate-400"
+        >
+          ProPublica
+        </button>
+        <button
+          data-filter="PBS NewsHour"
+          class="filter-btn px-4 py-2 rounded-full border transition-colors text-slate-500 border-slate-200 hover:border-slate-400"
+        >
+          PBS NewsHour
+        </button>
+      </div>
+
+      <!-- Articles -->
+      {filtered.length === 0 ? (
+        <p class="text-slate-400 text-center py-12">No articles found.</p>
+      ) : (
+        <div class="space-y-6">
+          {filtered.map((item) => (
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-source={item.source}
+              class="news-card group block border border-slate-200 rounded-lg p-6 hover:border-slate-400 transition-colors"
+            >
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3 mb-2">
+                    <span
+                      class:list={[
+                        "text-xs font-semibold px-2.5 py-0.5 rounded-full",
+                        item.source === "ProPublica"
+                          ? "bg-slate-800 text-white"
+                          : "bg-indigo-100 text-indigo-700",
+                      ]}
+                    >
+                      {item.source}
+                    </span>
+                    <span class="text-xs text-slate-400">{formatDate(item.pubDate)}</span>
+                    {item.author && (
+                      <span class="text-xs text-slate-400 hidden sm:inline">by {item.author}</span>
+                    )}
+                  </div>
+                  <h2 class="text-lg font-bold text-navy group-hover:text-dem transition-colors mb-2 leading-snug">
+                    {item.title}
+                  </h2>
+                  <p class="text-sm text-slate-500 leading-relaxed">
+                    {truncate(item.description, 200)}
+                  </p>
+                  {item.categories && item.categories.length > 0 && (
+                    <div class="flex flex-wrap gap-1.5 mt-3">
+                      {item.categories.slice(0, 4).map((cat) => (
+                        <span class="text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded">
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <span class="text-slate-300 group-hover:text-dem transition-colors mt-1 shrink-0">
+                  &rarr;
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+
+      <p class="text-xs text-slate-400 mt-12 text-center">
+        Articles sourced from <a href="https://www.propublica.org" class="underline hover:text-slate-600" target="_blank" rel="noopener noreferrer">ProPublica</a> and <a href="https://www.pbs.org/newshour" class="underline hover:text-slate-600" target="_blank" rel="noopener noreferrer">PBS NewsHour</a>.
+        This page links to original reporting &mdash; The Midterm Project does not host or modify this content.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+  const cards = document.querySelectorAll<HTMLAnchorElement>(".news-card");
+
+  const activeClasses = ["bg-navy", "text-white", "border-navy"];
+  const inactiveClasses = ["text-slate-500", "border-slate-200", "hover:border-slate-400"];
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter!;
+
+      // Update button styles
+      buttons.forEach((b) => {
+        b.classList.remove(...activeClasses);
+        b.classList.add(...inactiveClasses);
+      });
+      btn.classList.remove(...inactiveClasses);
+      btn.classList.add(...activeClasses);
+
+      // Filter cards
+      cards.forEach((card) => {
+        if (filter === "all" || card.dataset.source === filter) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  });
+</script>

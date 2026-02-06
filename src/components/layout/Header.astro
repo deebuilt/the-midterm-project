@@ -1,15 +1,25 @@
 ---
 const currentPath = Astro.url.pathname;
 
-const navLinks = [
+const primaryLinks = [
   { href: "/", label: "Home" },
   { href: "/learn/how-congress-works", label: "Learn" },
   { href: "/senate", label: "Senate" },
   { href: "/house", label: "House" },
   { href: "/explore", label: "Explore" },
+  { href: "/news", label: "News" },
+];
+
+const moreLinks = [
   { href: "/glossary", label: "Glossary" },
   { href: "/resources", label: "Resources" },
 ];
+
+const allLinks = [...primaryLinks, ...moreLinks];
+
+const isMoreActive = moreLinks.some(
+  (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
+);
 ---
 
 <header class="bg-navy text-white sticky top-0 z-50">
@@ -19,8 +29,8 @@ const navLinks = [
     </a>
 
     <!-- Desktop nav -->
-    <ul class="hidden md:flex gap-6 text-sm font-medium">
-      {navLinks.map((link) => (
+    <ul class="hidden md:flex gap-6 text-sm font-medium items-center">
+      {primaryLinks.map((link) => (
         <li>
           <a
             href={link.href}
@@ -35,6 +45,41 @@ const navLinks = [
           </a>
         </li>
       ))}
+      <!-- More dropdown -->
+      <li class="relative">
+        <button
+          id="more-btn"
+          class:list={[
+            "hover:text-tossup transition-colors flex items-center gap-1",
+            isMoreActive ? "text-tossup" : "text-white/80",
+          ]}
+        >
+          More
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <ul
+          id="more-menu"
+          class="hidden absolute right-0 top-full mt-2 bg-navy border border-white/10 rounded-lg py-2 min-w-[160px] shadow-lg"
+        >
+          {moreLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  "block px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors",
+                  currentPath === link.href || currentPath.startsWith(link.href + "/")
+                    ? "text-tossup"
+                    : "text-white/80",
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
     </ul>
 
     <!-- Mobile menu button -->
@@ -49,9 +94,9 @@ const navLinks = [
     </button>
   </nav>
 
-  <!-- Mobile nav -->
+  <!-- Mobile nav (flat list of all links) -->
   <ul id="mobile-menu" class="hidden md:hidden px-4 pb-4 space-y-2 text-sm font-medium">
-    {navLinks.map((link) => (
+    {allLinks.map((link) => (
       <li>
         <a
           href={link.href}
@@ -70,9 +115,29 @@ const navLinks = [
 </header>
 
 <script>
-  const btn = document.getElementById("mobile-menu-btn");
-  const menu = document.getElementById("mobile-menu");
-  btn?.addEventListener("click", () => {
-    menu?.classList.toggle("hidden");
+  // Mobile menu toggle
+  const mobileBtn = document.getElementById("mobile-menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+  mobileBtn?.addEventListener("click", () => {
+    mobileMenu?.classList.toggle("hidden");
+  });
+
+  // Desktop "More" dropdown
+  const moreBtn = document.getElementById("more-btn");
+  const moreMenu = document.getElementById("more-menu");
+
+  moreBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    moreMenu?.classList.toggle("hidden");
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", () => {
+    moreMenu?.classList.add("hidden");
+  });
+
+  // Prevent closing when clicking inside the dropdown
+  moreMenu?.addEventListener("click", (e) => {
+    e.stopPropagation();
   });
 </script>
