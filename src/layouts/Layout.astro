@@ -23,6 +23,11 @@ const { title, description = "Nonpartisan voter education for the 2026 U.S. midt
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#1E293B" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Midterms 2026" />
     <title>{title} | The Midterm Project</title>
   </head>
   <body class="bg-white text-slate-800 min-h-screen flex flex-col">
@@ -31,5 +36,10 @@ const { title, description = "Nonpartisan voter education for the 2026 U.S. midt
       <slot />
     </main>
     <Footer />
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js");
+      }
+    </script>
   </body>
 </html>

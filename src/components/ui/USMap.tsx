@@ -14,6 +14,30 @@ interface USMapProps {
   statesByFips: Record<string, StateInfo>;
 }
 
+// --- Ballot selections (localStorage) ---
+
+type BallotSelections = Record<string, Record<string, string>>;
+// shape: { "CA": { "senate": "candidate-id", "governor": "candidate-id" }, ... }
+
+const STORAGE_KEY = "tmp-ballot-selections";
+
+function loadSelections(): BallotSelections {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveSelections(selections: BallotSelections): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+  } catch {
+    // localStorage full or unavailable — silently fail
+  }
+}
+
 // --- Color mapping ---
 
 const RATING_COLORS: Record<string, string> = {
@@ -51,6 +75,39 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [topoData, setTopoData] = useState<any>(null);
+  const [ballotSelections, setBallotSelections] = useState<BallotSelections>({});
+
+  // Load saved selections on mount
+  useEffect(() => {
+    setBallotSelections(loadSelections());
+  }, []);
+
+  const handleBallotSelect = useCallback(
+    (stateAbbr: string, office: string, candidateId: string) => {
+      setBallotSelections((prev) => {
+        const stateSelections = prev[stateAbbr] ?? {};
+        const isDeselect = stateSelections[office] === candidateId;
+        const updated = {
+          ...prev,
+          [stateAbbr]: {
+            ...stateSelections,
+            ...(isDeselect
+              ? (() => { const { [office]: _, ...rest } = stateSelections; return rest; })()
+              : { [office]: candidateId }),
+          },
+        };
+        // Clean up empty state objects
+        if (isDeselect && Object.keys(updated[stateAbbr]!).filter(k => k !== office).length === 0) {
+          const { [stateAbbr]: _, ...rest } = updated;
+          saveSelections(rest);
+          return rest;
+        }
+        saveSelections(updated);
+        return updated;
+      });
+    },
+    []
+  );
 
   useEffect(() => {
     fetch("/data/states-10m.json")
@@ -203,6 +260,8 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
         isMobile={isMobile}
         isOpen={!!selectedAbbr}
         onClose={() => setSelectedAbbr(null)}
+        selections={selectedAbbr ? (ballotSelections[selectedAbbr] ?? {}) : {}}
+        onSelect={selectedAbbr ? (office, candidateId) => handleBallotSelect(selectedAbbr, office, candidateId) : () => {}}
       />
     </div>
   );
@@ -245,6 +304,8 @@ interface BallotPanelProps {
   isMobile: boolean;
   isOpen: boolean;
   onClose: () => void;
+  selections: Record<string, string>;
+  onSelect: (office: string, candidateId: string) => void;
 }
 
 function BallotPanel({
@@ -253,6 +314,8 @@ function BallotPanel({
   isMobile,
   isOpen,
   onClose,
+  selections,
+  onSelect,
 }: BallotPanelProps) {
   if (!stateInfo) {
     return (
@@ -327,7 +390,7 @@ function BallotPanel({
 
       <div className="px-4 py-3">
         <p className="text-xs text-slate-500 mb-3 italic">
-          This is a preview of what you might see on your ballot. Actual candidates may vary.
+          Tap a candidate to mark your pick. Your selections are saved on this device only.
         </p>
 
         {/* ── FEDERAL OFFICES ── */}
@@ -339,13 +402,20 @@ function BallotPanel({
           status={hasSenateRace ? "on-ballot" : "not-this-year"}
         >
           {senateRace ? (
-            <CompetitiveRaceCard race={senateRace} />
+            <CompetitiveRaceCard
+              race={senateRace}
+              selectedId={selections["senate"]}
+              onSelect={(candidateId) => onSelect("senate", candidateId)}
+            />
           ) : stateInfo.senateClass2Senator ? (
             <div className="px-3 py-2">
               <BallotBubble
                 name={stateInfo.senateClass2Senator}
                 party={stateInfo.senateClass2Party ?? "Republican"}
                 detail="Incumbent — running for re-election"
+                candidateId={`incumbent-${stateInfo.abbr}-senate`}
+                isSelected={selections["senate"] === `incumbent-${stateInfo.abbr}-senate`}
+                onSelect={(id) => onSelect("senate", id)}
               />
               <EmptyBallotBubble
                 party={stateInfo.senateClass2Party === "Democrat" ? "Republican" : "Democrat"}
@@ -403,6 +473,7 @@ function BallotPanel({
                 ) || senateRace?.candidates.republican.some(
                   c => c.name === stateInfo.currentGovernor
                 );
+                const govId = `gov-${stateInfo.abbr}`;
                 return govRunningForSenate ? (
                   <p className="text-[11px] text-slate-500 mb-1">
                     Gov. {stateInfo.currentGovernor} is running for U.S. Senate, so this seat will be open.
@@ -412,6 +483,9 @@ function BallotPanel({
                     name={`Gov. ${stateInfo.currentGovernor}`}
                     party={stateInfo.currentGovernorParty ?? "Republican"}
                     detail="Current governor"
+                    candidateId={govId}
+                    isSelected={selections["governor"] === govId}
+                    onSelect={(id) => onSelect("governor", id)}
                   />
                 );
               })()}
@@ -504,26 +578,49 @@ function BallotBubble({
   detail,
   isIncumbent,
   website,
+  candidateId,
+  isSelected,
+  onSelect,
 }: {
   name: string;
   party: string;
   detail?: string;
   isIncumbent?: boolean;
   website?: string;
+  candidateId?: string;
+  isSelected?: boolean;
+  onSelect?: (candidateId: string) => void;
 }) {
   const partyAbbr =
     party === "Democrat" ? "DEM" : party === "Republican" ? "REP" : "IND";
-  const partyDot =
+  const partyBorderColor =
     party === "Democrat"
       ? "border-dem"
       : party === "Republican"
         ? "border-gop"
         : "border-ind";
+  const partyFillColor =
+    party === "Democrat"
+      ? "bg-dem"
+      : party === "Republican"
+        ? "bg-gop"
+        : "bg-ind";
+
+  const canSelect = !!candidateId && !!onSelect;
 
   return (
-    <div className="flex items-start gap-2 py-1">
+    <div
+      className={`flex items-start gap-2 py-1 ${canSelect ? "cursor-pointer group/bubble" : ""}`}
+      onClick={canSelect ? () => onSelect(candidateId) : undefined}
+      role={canSelect ? "radio" : undefined}
+      aria-checked={canSelect ? isSelected : undefined}
+      tabIndex={canSelect ? 0 : undefined}
+      onKeyDown={canSelect ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(candidateId); } } : undefined}
+    >
       <span
-        className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 ${partyDot} flex-shrink-0`}
+        className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 ${partyBorderColor} flex-shrink-0 transition-all duration-150 ${
+          isSelected ? `${partyFillColor} scale-110 shadow-sm` : canSelect ? "group-hover/bubble:scale-105" : ""
+        }`}
       />
       <div className="min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -532,17 +629,23 @@ function BallotBubble({
               href={website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-slate-800 underline decoration-1 underline-offset-2 hover:decoration-2"
+              className={`text-sm font-semibold underline decoration-1 underline-offset-2 hover:decoration-2 ${isSelected ? "text-slate-900" : "text-slate-800"}`}
+              onClick={(e) => e.stopPropagation()}
             >
               {name}
             </a>
           ) : (
-            <span className="text-sm font-semibold text-slate-800">{name}</span>
+            <span className={`text-sm font-semibold ${isSelected ? "text-slate-900" : "text-slate-800"}`}>{name}</span>
           )}
           <span className="text-[10px] text-slate-400 font-medium">{partyAbbr}</span>
           {isIncumbent && (
             <span className="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-medium">
               Incumbent
+            </span>
+          )}
+          {isSelected && (
+            <span className="text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold tracking-wide">
+              YOUR PICK
             </span>
           )}
         </div>
@@ -583,7 +686,15 @@ function EmptyBallotBubble({ party }: { party: string }) {
 
 // --- Competitive Race Card ---
 
-function CompetitiveRaceCard({ race }: { race: SenateRace }) {
+function CompetitiveRaceCard({
+  race,
+  selectedId,
+  onSelect,
+}: {
+  race: SenateRace;
+  selectedId?: string;
+  onSelect?: (candidateId: string) => void;
+}) {
   const ratingColor = RATING_COLORS[race.rating] ?? NEUTRAL_COLOR;
 
   const allCandidates = [
@@ -615,7 +726,7 @@ function CompetitiveRaceCard({ race }: { race: SenateRace }) {
       </div>
 
       {/* Candidate bubbles */}
-      <div className="space-y-0.5">
+      <div className="space-y-0.5" role="radiogroup" aria-label="Select a candidate">
         {allCandidates.map((candidate) => (
           <BallotBubble
             key={candidate.id}
@@ -624,6 +735,9 @@ function CompetitiveRaceCard({ race }: { race: SenateRace }) {
             detail={candidate.currentRole}
             isIncumbent={candidate.isIncumbent}
             website={candidate.website}
+            candidateId={candidate.id}
+            isSelected={selectedId === candidate.id}
+            onSelect={onSelect}
           />
         ))}
         {race.candidates.democrat.length === 0 && (

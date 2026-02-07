@@ -1,1 +1,88 @@
-{"name":"The Midterm Project","short_name":"TMP","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#1E293B","background_color":"#ffffff","display":"standalone"}
+{
+  "name": "The Midterm Project",
+  "short_name": "Midterms 2026",
+  "description": "Nonpartisan voter education for the 2026 U.S. midterm elections. Explore Senate races, preview your ballot, and learn how Congress works.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "theme_color": "#1E293B",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "any",
+  "categories": ["education", "news", "politics"],
+  "screenshots": [
+    {
+      "src": "/screenshots/home_countdown.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Election countdown and homepage"
+    },
+    {
+      "src": "/screenshots/ballot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interactive sample ballot preview"
+    },
+    {
+      "src": "/screenshots/home_current_state.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Senate and House race overview"
+    },
+    {
+      "src": "/screenshots/understanding_senate_race.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Learn how Senate races work"
+    },
+    {
+      "src": "/screenshots/explore_candidate_swipe_cards.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Swipe through candidates"
+    },
+    {
+      "src": "/screenshots/glossary.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Political glossary in plain English"
+    },
+    {
+      "src": "/screenshots/about_tmp.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "About The Midterm Project"
+    },
+    {
+      "src": "/screenshots/map-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Interactive Senate race map"
+    }
+  ]
+}
