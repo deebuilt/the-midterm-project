@@ -87,21 +87,23 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
       setBallotSelections((prev) => {
         const stateSelections = prev[stateAbbr] ?? {};
         const isDeselect = stateSelections[office] === candidateId;
-        const updated = {
-          ...prev,
-          [stateAbbr]: {
-            ...stateSelections,
-            ...(isDeselect
-              ? (() => { const { [office]: _, ...rest } = stateSelections; return rest; })()
-              : { [office]: candidateId }),
-          },
-        };
+
+        let newStateSelections: Record<string, string>;
+        if (isDeselect) {
+          const { [office]: _, ...rest } = stateSelections;
+          newStateSelections = rest;
+        } else {
+          newStateSelections = { ...stateSelections, [office]: candidateId };
+        }
+
         // Clean up empty state objects
-        if (isDeselect && Object.keys(updated[stateAbbr]!).filter(k => k !== office).length === 0) {
-          const { [stateAbbr]: _, ...rest } = updated;
+        if (Object.keys(newStateSelections).length === 0) {
+          const { [stateAbbr]: _, ...rest } = prev;
           saveSelections(rest);
           return rest;
         }
+
+        const updated = { ...prev, [stateAbbr]: newStateSelections };
         saveSelections(updated);
         return updated;
       });
