@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "org.themidtermproject.twa",
+        "sha256_cert_fingerprints": ["A8:95:66:4E:8D:6F:C0:06:EC:AC:B4:A4:70:47:48:C1:EF:A2:4A:B9:35:DB:B2:64:DB:5C:1D:A3:F3:00:58:93"]
+      }
+    }]
