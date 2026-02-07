@@ -29,6 +29,15 @@ const { title, description = "Nonpartisan voter education for the 2026 U.S. midt
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Midterms 2026" />
     <title>{title} | The Midterm Project</title>
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FNNZND969F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FNNZND969F');
+    </script>
   </head>
   <body class="bg-white text-slate-800 min-h-screen flex flex-col">
     <Header />
