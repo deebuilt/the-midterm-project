@@ -1,4 +1,5 @@
 {
+  "id": "the-midterm-project",
   "name": "The Midterm Project",
   "short_name": "Midterms 2026",
   "description": "Nonpartisan voter education for the 2026 U.S. midterm elections. Explore Senate races, preview your ballot, and learn how Congress works.",
@@ -30,56 +31,56 @@
   "screenshots": [
     {
       "src": "/screenshots/home_countdown.png",
-      "sizes": "390x844",
+      "sizes": "385x804",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Election countdown and homepage"
     },
     {
       "src": "/screenshots/ballot-mobile.png",
-      "sizes": "390x844",
+      "sizes": "388x782",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Interactive sample ballot preview"
     },
     {
       "src": "/screenshots/home_current_state.png",
-      "sizes": "390x844",
+      "sizes": "388x776",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Senate and House race overview"
     },
     {
       "src": "/screenshots/understanding_senate_race.png",
-      "sizes": "390x844",
+      "sizes": "388x765",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Learn how Senate races work"
     },
     {
       "src": "/screenshots/explore_candidate_swipe_cards.png",
-      "sizes": "390x844",
+      "sizes": "388x779",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Swipe through candidates"
     },
     {
       "src": "/screenshots/glossary.png",
-      "sizes": "390x844",
+      "sizes": "388x777",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Political glossary in plain English"
     },
     {
       "src": "/screenshots/about_tmp.png",
-      "sizes": "390x844",
+      "sizes": "387x775",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "About The Midterm Project"
     },
     {
       "src": "/screenshots/map-wide.png",
-      "sizes": "1280x720",
+      "sizes": "1154x818",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Interactive Senate race map"
