@@ -2,7 +2,11 @@
 import Layout from "../../layouts/Layout.astro";
 import Tooltip from "../../components/ui/Tooltip.astro";
 import SenateGuide from "../../components/ui/SenateGuide";
-import { senateRaces, senateOverview, allClass2Seats } from "../../data/senate-races";
+import { fetchSenateRaces, fetchSenateOverview, fetchAllClass2Seats } from "../../lib/queries";
+
+const senateRaces = await fetchSenateRaces();
+const { senateOverview } = await fetchSenateOverview();
+const allClass2Seats = await fetchAllClass2Seats();
 
 const tossups = senateRaces.filter((r) => r.rating === "Toss-up");
 const leanR = senateRaces.filter((r) => r.rating === "Lean R");

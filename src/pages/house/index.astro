@@ -1,6 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import { houseOverview } from "../../data/house-overview";
+import { fetchHouseOverview } from "../../lib/queries";
+
+const houseOverview = await fetchHouseOverview();
 ---
 
 <Layout title="2026 House Races" description="All 435 House seats are up for election in 2026. See the battleground districts.">

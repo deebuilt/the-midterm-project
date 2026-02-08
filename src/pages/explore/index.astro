@@ -1,7 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import SwipeCards from "../../components/ui/SwipeCards";
-import { swipeCards } from "../../data/swipe-cards";
+import { fetchSwipeCards } from "../../lib/queries";
+
+const swipeCards = await fetchSwipeCards();
 ---
 
 <Layout title="Explore Candidates" description="Swipe through 2026 candidates and learn key facts about the midterm elections.">

@@ -1,8 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import USMap from "../components/ui/USMap";
-import { states, statesByFips } from "../data/states";
-import { senateRaces } from "../data/senate-races";
+import { fetchStates, fetchSenateRaces } from "../lib/queries";
+
+const states = await fetchStates();
+const senateRaces = await fetchSenateRaces();
+const statesByFips: Record<string, (typeof states)[0]> = Object.fromEntries(
+  states.map((s) => [s.fips, s])
+);
 ---
 
 <Layout

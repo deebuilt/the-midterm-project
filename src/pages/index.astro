@@ -1,8 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Countdown from "../components/ui/Countdown";
-import { senateOverview } from "../data/senate-races";
-import { houseOverview } from "../data/house-overview";
+import { fetchSenateOverview, fetchHouseOverview } from "../lib/queries";
+
+const { senateOverview } = await fetchSenateOverview();
+const houseOverview = await fetchHouseOverview();
 import type { NewsItem } from "../types";
 import Parser from "rss-parser";
 
