@@ -1,8 +1,26 @@
-import { useState, useEffect } from "react";
-import { Table, Tag, Badge, Typography, Spin, Card } from "antd";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  Table,
+  Tag,
+  Badge,
+  Typography,
+  Spin,
+  Card,
+  Button,
+  Space,
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  Switch,
+  message,
+} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
 
-const { Title } = Typography;
+const { Text } = Typography;
 
 interface CycleRow {
   id: number;
@@ -19,38 +37,97 @@ interface RaceBreakdown {
   count: number;
 }
 
-export default function CyclesPage() {
+interface CyclesPageProps {
+  setHeaderActions: (actions: ReactNode) => void;
+}
+
+const typeOptions = [
+  { value: "midterm", label: "Midterm" },
+  { value: "presidential", label: "Presidential" },
+  { value: "special", label: "Special" },
+  { value: "primary", label: "Primary" },
+  { value: "runoff", label: "Runoff" },
+];
+
+export default function CyclesPage({ setHeaderActions }: CyclesPageProps) {
   const [cycles, setCycles] = useState<CycleRow[]>([]);
   const [raceCounts, setRaceCounts] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
-  useEffect(() => {
-    async function load() {
-      const { data: cycleData } = await supabase
-        .from("election_cycles")
-        .select("*")
-        .order("year", { ascending: false });
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data: cycleData } = await supabase
+      .from("election_cycles")
+      .select("*")
+      .order("year", { ascending: false });
 
-      setCycles(cycleData ?? []);
+    setCycles(cycleData ?? []);
 
-      // Get race counts per cycle
-      if (cycleData?.length) {
-        const { data: races } = await supabase
-          .from("races")
-          .select("id, cycle_id");
+    if (cycleData?.length) {
+      const { data: races } = await supabase
+        .from("races")
+        .select("id, cycle_id");
 
-        const counts: Record<number, number> = {};
-        for (const race of races ?? []) {
-          counts[race.cycle_id] = (counts[race.cycle_id] ?? 0) + 1;
-        }
-        setRaceCounts(counts);
+      const counts: Record<number, number> = {};
+      for (const race of races ?? []) {
+        counts[race.cycle_id] = (counts[race.cycle_id] ?? 0) + 1;
       }
-
-      setLoading(false);
+      setRaceCounts(counts);
     }
 
-    load();
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    setHeaderActions(
+      <Button
+        size="small"
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => {
+          form.resetFields();
+          form.setFieldValue("is_active", false);
+          setModalOpen(true);
+        }}
+      >
+        Cycle
+      </Button>
+    );
+    return () => setHeaderActions(null);
+  }, [setHeaderActions, form]);
+
+  async function handleSave(values: any) {
+    setModalLoading(true);
+    const payload = {
+      name: values.name,
+      year: values.year,
+      type: values.type,
+      election_date: values.election_date
+        ? values.election_date.format("YYYY-MM-DD")
+        : null,
+      is_active: values.is_active ?? false,
+      description: values.description || null,
+    };
+
+    const { error } = await supabase.from("election_cycles").insert(payload);
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success("Election cycle created");
+      setModalOpen(false);
+      form.resetFields();
+      load();
+    }
+    setModalLoading(false);
+  }
 
   const typeColors: Record<string, string> = {
     midterm: "blue",
@@ -113,9 +190,7 @@ export default function CyclesPage() {
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24 }}>
-        Election Cycles
-      </Title>
+      {contextHolder}
 
       <Card style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
         <Table
@@ -130,6 +205,74 @@ export default function CyclesPage() {
           }}
         />
       </Card>
+
+      {/* Create Modal */}
+      <Modal
+        title="Add Election Cycle"
+        open={modalOpen}
+        onCancel={() => {
+          setModalOpen(false);
+          form.resetFields();
+        }}
+        footer={null}
+        width={520}
+      >
+        <Form form={form} layout="vertical" onFinish={handleSave}>
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: "Required" }]}
+          >
+            <Input placeholder="e.g., 2026 Midterm Elections" />
+          </Form.Item>
+
+          <div style={{ display: "flex", gap: 16 }}>
+            <Form.Item
+              name="year"
+              label="Year"
+              rules={[{ required: true, message: "Required" }]}
+              style={{ flex: 1 }}
+            >
+              <Input type="number" placeholder="2026" />
+            </Form.Item>
+            <Form.Item
+              name="type"
+              label="Type"
+              rules={[{ required: true, message: "Required" }]}
+              style={{ flex: 1 }}
+            >
+              <Select options={typeOptions} placeholder="Select type..." />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="election_date"
+            label="Election Date"
+            rules={[{ required: true, message: "Required" }]}
+          >
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={2} placeholder="Optional notes about this cycle..." />
+          </Form.Item>
+
+          <Form.Item
+            name="is_active"
+            label="Set as Active"
+            valuePropName="checked"
+            extra="Only one cycle can be active at a time. Setting this active will be the default cycle for new races."
+          >
+            <Switch />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={modalLoading} block>
+              Create Cycle
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
@@ -141,7 +284,7 @@ function CycleDetail({
   cycleId: number;
   description: string | null;
 }) {
-  const [breakdown, setBreakdown] = useState<RaceBreakdown[]>([]);
+  const [breakdown, setBreakdown] = useState<{ body_name: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

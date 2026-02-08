@@ -1,8 +1,8 @@
 ---
 // Admin panel — standalone page, no public site Layout
 // Uses client:only="react" — no SSR, browser APIs required
+// NOTE: Do NOT import global.css — Tailwind v4 preflight conflicts with Ant Design
 import AdminApp from "../components/admin/AdminApp";
-import "../styles/global.css";
 ---
 
 <!doctype html>

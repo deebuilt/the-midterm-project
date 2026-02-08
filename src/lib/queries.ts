@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, Candidate, SwipeCard } from "../types";
+import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure } from "../types";
 
 // ─── States ───
 
@@ -539,6 +539,46 @@ export async function fetchSwipeCards(): Promise<SwipeCard[]> {
   }
 
   return swipeCards;
+}
+
+// ─── Ballot Measures ───
+
+export async function fetchBallotMeasures(): Promise<BallotMeasure[]> {
+  const { data: cycle } = await supabase
+    .from("election_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .single();
+
+  if (!cycle) return [];
+
+  const { data, error } = await supabase
+    .from("ballot_measures")
+    .select("*, state:states!inner(name, abbr)")
+    .eq("cycle_id", cycle.id)
+    .neq("status", "withdrawn")
+    .order("state_id")
+    .order("sort_order");
+
+  // Table may not exist yet if migration hasn't been run
+  if (error) {
+    console.warn(`Ballot measures unavailable: ${error.message}`);
+    return [];
+  }
+
+  return (data ?? []).map((bm: any) => ({
+    id: bm.id,
+    title: bm.title,
+    shortTitle: bm.short_title,
+    description: bm.description,
+    category: bm.category,
+    yesMeans: bm.yes_means,
+    noMeans: bm.no_means,
+    status: bm.status,
+    stateAbbr: bm.state.abbr,
+    stateName: bm.state.name,
+    sourceUrl: bm.source_url,
+  }));
 }
 
 // ─── Helpers ───

@@ -4,7 +4,7 @@ import {
   Geographies,
   Geography,
 } from "@vnedyalk0v/react19-simple-maps";
-import type { StateInfo, SenateRace } from "../../types";
+import type { StateInfo, SenateRace, BallotMeasure } from "../../types";
 
 // --- Types ---
 
@@ -12,6 +12,7 @@ interface USMapProps {
   states: StateInfo[];
   senateRaces: SenateRace[];
   statesByFips: Record<string, StateInfo>;
+  ballotMeasures?: Record<string, BallotMeasure[]>;
 }
 
 // --- Ballot selections (localStorage) ---
@@ -69,7 +70,7 @@ const PARTY_COLORS: Record<string, { bg: string; text: string; dot: string }> = 
 
 // --- Main Component ---
 
-export default function USMap({ states, senateRaces, statesByFips }: USMapProps) {
+export default function USMap({ states, senateRaces, statesByFips, ballotMeasures }: USMapProps) {
   const [selectedAbbr, setSelectedAbbr] = useState<string | null>(null);
   const [hoveredAbbr, setHoveredAbbr] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -259,6 +260,7 @@ export default function USMap({ states, senateRaces, statesByFips }: USMapProps)
       <BallotPanel
         stateInfo={selectedState}
         senateRace={selectedRace}
+        stateMeasures={selectedAbbr && ballotMeasures ? (ballotMeasures[selectedAbbr] ?? []) : []}
         isMobile={isMobile}
         isOpen={!!selectedAbbr}
         onClose={() => setSelectedAbbr(null)}
@@ -303,6 +305,7 @@ function MapLegend() {
 interface BallotPanelProps {
   stateInfo: StateInfo | null;
   senateRace: SenateRace | undefined;
+  stateMeasures: BallotMeasure[];
   isMobile: boolean;
   isOpen: boolean;
   onClose: () => void;
@@ -313,6 +316,7 @@ interface BallotPanelProps {
 function BallotPanel({
   stateInfo,
   senateRace,
+  stateMeasures,
   isMobile,
   isOpen,
   onClose,
@@ -507,17 +511,28 @@ function BallotPanel({
         {/* ── BALLOT MEASURES ── */}
         <BallotSectionHeader title="Ballot Measures" />
 
-        <BallotRow office="Statewide Ballot Measures" status="unknown">
-          <div className="px-3 py-2">
-            <p className="text-xs text-slate-500">
-              Ballot measures are yes-or-no votes on new laws, constitutional amendments,
-              or policy changes. They go directly to voters instead of through the legislature.
-            </p>
-            <p className="text-[11px] text-tossup mt-1.5">
-              Details for {stateInfo.name} coming soon
-            </p>
-          </div>
-        </BallotRow>
+        {stateMeasures.length > 0 ? (
+          stateMeasures.map((bm) => (
+            <BallotMeasureRow
+              key={bm.id}
+              measure={bm}
+              selected={selections[`measure-${bm.id}`]}
+              onSelect={(value) => onSelect(`measure-${bm.id}`, value)}
+            />
+          ))
+        ) : (
+          <BallotRow office="Statewide Ballot Measures" status="unknown">
+            <div className="px-3 py-2">
+              <p className="text-xs text-slate-500">
+                Ballot measures are yes-or-no votes on new laws, constitutional amendments,
+                or policy changes. They go directly to voters instead of through the legislature.
+              </p>
+              <p className="text-[11px] text-tossup mt-1.5">
+                No ballot measures tracked yet for {stateInfo.name}
+              </p>
+            </div>
+          </BallotRow>
+        )}
 
         {/* Footer */}
         <div className="border-t-2 border-black mt-4 pt-3">
@@ -527,6 +542,127 @@ function BallotPanel({
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+// --- Collapsible ballot measure row ---
+
+const MEASURE_STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  proposed: { label: "Proposed", color: "bg-amber-100 text-amber-700" },
+  qualified: { label: "On Ballot", color: "bg-green-100 text-green-700" },
+  passed: { label: "Passed", color: "bg-blue-100 text-blue-700" },
+  failed: { label: "Failed", color: "bg-red-100 text-red-700" },
+};
+
+function BallotMeasureRow({
+  measure: bm,
+  selected,
+  onSelect,
+}: {
+  measure: BallotMeasure;
+  selected: string | undefined;
+  onSelect: (value: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const statusInfo = MEASURE_STATUS_LABELS[bm.status] ?? { label: bm.status, color: "bg-slate-100 text-slate-600" };
+
+  return (
+    <div className="border-x border-b border-slate-300">
+      {/* Header — tappable to expand/collapse */}
+      <button
+        type="button"
+        className="w-full flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200 text-left cursor-pointer hover:bg-slate-150"
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+      >
+        <div className="min-w-0 flex-1">
+          <span className="text-xs font-bold text-slate-700 block">{bm.shortTitle || bm.title}</span>
+          <span className={`text-[9px] font-semibold uppercase tracking-wide px-1 py-0.5 rounded inline-block mt-0.5 ${statusInfo.color}`}>
+            {statusInfo.label}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+          <span className="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5">
+            Yes or No
+          </span>
+          <svg
+            className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+
+      {/* Collapsible content */}
+      {expanded && (
+        <div className="px-3 py-2">
+          {bm.shortTitle && (
+            <p className="text-[11px] text-slate-600 font-medium mb-1">{bm.title}</p>
+          )}
+          <p className="text-xs text-slate-500 mb-2 leading-relaxed">{bm.description}</p>
+
+          {/* Yes bubble */}
+          <div
+            className="flex items-start gap-2 py-1 cursor-pointer group/yes"
+            onClick={() => onSelect(`${bm.id}-yes`)}
+            role="radio"
+            aria-checked={selected === `${bm.id}-yes`}
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(`${bm.id}-yes`); } }}
+          >
+            <span className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 border-green-600 flex-shrink-0 transition-all duration-150 ${
+              selected === `${bm.id}-yes` ? "bg-green-600 scale-110 shadow-sm" : "group-hover/yes:scale-105"
+            }`} />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-sm font-semibold ${selected === `${bm.id}-yes` ? "text-green-800" : "text-slate-800"}`}>Yes</span>
+                {selected === `${bm.id}-yes` && (
+                  <span className="text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold tracking-wide">YOUR PICK</span>
+                )}
+              </div>
+              {bm.yesMeans && <p className="text-[11px] text-slate-400 leading-snug">{bm.yesMeans}</p>}
+            </div>
+          </div>
+
+          {/* No bubble */}
+          <div
+            className="flex items-start gap-2 py-1 cursor-pointer group/no"
+            onClick={() => onSelect(`${bm.id}-no`)}
+            role="radio"
+            aria-checked={selected === `${bm.id}-no`}
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(`${bm.id}-no`); } }}
+          >
+            <span className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 border-red-600 flex-shrink-0 transition-all duration-150 ${
+              selected === `${bm.id}-no` ? "bg-red-600 scale-110 shadow-sm" : "group-hover/no:scale-105"
+            }`} />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-sm font-semibold ${selected === `${bm.id}-no` ? "text-red-800" : "text-slate-800"}`}>No</span>
+                {selected === `${bm.id}-no` && (
+                  <span className="text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold tracking-wide">YOUR PICK</span>
+                )}
+              </div>
+              {bm.noMeans && <p className="text-[11px] text-slate-400 leading-snug">{bm.noMeans}</p>}
+            </div>
+          </div>
+
+          {bm.sourceUrl && (
+            <a
+              href={bm.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-blue-600 hover:underline mt-1 inline-block pl-6"
+            >
+              Learn more
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -554,15 +690,15 @@ function BallotRow({
 }) {
   return (
     <div className="border-x border-b border-slate-300">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-100 border-b border-slate-200">
-        <span className="text-xs font-bold text-slate-700">{office}</span>
+      <div className="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+        <span className="text-xs font-bold text-slate-700 min-w-0">{office}</span>
         {status === "on-ballot" && (
-          <span className="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5">
+          <span className="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">
             Vote for one
           </span>
         )}
         {status === "not-this-year" && (
-          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex-shrink-0">
             Not this year
           </span>
         )}

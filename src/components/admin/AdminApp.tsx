@@ -5,15 +5,18 @@ import { getSession, isAdmin, onAuthStateChange, signOut } from "../../lib/supab
 import LoginPage from "./LoginPage";
 import AdminLayout from "./AdminLayout";
 
-export type AdminRoute = "dashboard" | "volunteers" | "cycles";
+export type AdminRoute = "dashboard" | "volunteers" | "cycles" | "candidates" | "races" | "ballot-measures";
 
-const VALID_ROUTES: AdminRoute[] = ["dashboard", "volunteers", "cycles"];
+const VALID_ROUTES: AdminRoute[] = ["dashboard", "volunteers", "cycles", "candidates", "races", "ballot-measures"];
 
 const theme = {
   token: {
     colorPrimary: "#1E293B",
     colorLink: "#1E293B",
     borderRadius: 6,
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontSize: 14,
   },
 };
 

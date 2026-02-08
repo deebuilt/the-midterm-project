@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import {
   Table,
   Button,
@@ -15,7 +15,7 @@ import {
   message,
   Spin,
 } from "antd";
-import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import {
   VOLUNTEER_ROLE_LABELS,
@@ -23,7 +23,7 @@ import {
   type VolunteerStatus,
 } from "../../lib/database.types";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface VolunteerRow {
   id: number;
@@ -47,6 +47,10 @@ interface StateOption {
   abbr: string;
 }
 
+interface VolunteersPageProps {
+  setHeaderActions: (actions: ReactNode) => void;
+}
+
 const statusColors: Record<string, string> = {
   active: "green",
   pending: "orange",
@@ -63,7 +67,7 @@ const roleColors: Record<string, string> = {
   translation: "gold",
 };
 
-export default function VolunteersPage() {
+export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps) {
   const [volunteers, setVolunteers] = useState<VolunteerRow[]>([]);
   const [states, setStates] = useState<StateOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +102,20 @@ export default function VolunteersPage() {
     loadVolunteers();
     loadStates();
   }, [loadVolunteers, loadStates]);
+
+  useEffect(() => {
+    setHeaderActions(
+      <Button
+        size="small"
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => setInviteOpen(true)}
+      >
+        Invite
+      </Button>
+    );
+    return () => setHeaderActions(null);
+  }, [setHeaderActions]);
 
   async function handleInvite(values: {
     name: string;
@@ -263,31 +281,6 @@ export default function VolunteersPage() {
   return (
     <div>
       {contextHolder}
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 24,
-        }}
-      >
-        <Title level={3} style={{ margin: 0 }}>
-          Volunteers
-        </Title>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={loadVolunteers}>
-            Refresh
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setInviteOpen(true)}
-          >
-            Invite Volunteer
-          </Button>
-        </Space>
-      </div>
 
       <Table
         dataSource={volunteers}

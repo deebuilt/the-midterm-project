@@ -171,6 +171,53 @@ export interface DbCycleStats {
   updated_at: string;
 }
 
+export type BallotMeasureStatus = "proposed" | "qualified" | "passed" | "failed" | "withdrawn";
+export type BallotMeasureCategory =
+  | "constitutional_amendment"
+  | "statute"
+  | "bond"
+  | "veto_referendum"
+  | "initiative"
+  | "legislative_referral"
+  | "other";
+
+export const BALLOT_MEASURE_STATUS_LABELS: Record<BallotMeasureStatus, string> = {
+  proposed: "Proposed",
+  qualified: "Qualified",
+  passed: "Passed",
+  failed: "Failed",
+  withdrawn: "Withdrawn",
+};
+
+export const BALLOT_MEASURE_CATEGORY_LABELS: Record<BallotMeasureCategory, string> = {
+  constitutional_amendment: "Constitutional Amendment",
+  statute: "Statute",
+  bond: "Bond Measure",
+  veto_referendum: "Veto Referendum",
+  initiative: "Citizen Initiative",
+  legislative_referral: "Legislative Referral",
+  other: "Other",
+};
+
+export interface DbBallotMeasure {
+  id: number;
+  cycle_id: number;
+  state_id: number;
+  title: string;
+  slug: string;
+  short_title: string | null;
+  description: string;
+  category: BallotMeasureCategory;
+  yes_means: string | null;
+  no_means: string | null;
+  status: BallotMeasureStatus;
+  election_date: string | null;
+  source_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbVolunteer {
   id: number;
   email: string;

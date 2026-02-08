@@ -1,13 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import USMap from "../components/ui/USMap";
-import { fetchStates, fetchSenateRaces } from "../lib/queries";
+import { fetchStates, fetchSenateRaces, fetchBallotMeasures } from "../lib/queries";
+import type { BallotMeasure } from "../types";
 
 const states = await fetchStates();
 const senateRaces = await fetchSenateRaces();
+const ballotMeasures = await fetchBallotMeasures();
 const statesByFips: Record<string, (typeof states)[0]> = Object.fromEntries(
   states.map((s) => [s.fips, s])
 );
+const measuresByState: Record<string, BallotMeasure[]> = {};
+for (const bm of ballotMeasures) {
+  if (!measuresByState[bm.stateAbbr]) measuresByState[bm.stateAbbr] = [];
+  measuresByState[bm.stateAbbr].push(bm);
+}
 ---
 
 <Layout
@@ -25,6 +32,7 @@ const statesByFips: Record<string, (typeof states)[0]> = Object.fromEntries(
       states={states}
       senateRaces={senateRaces}
       statesByFips={statesByFips}
+      ballotMeasures={measuresByState}
     />
   </section>
 </Layout>

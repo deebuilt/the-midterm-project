@@ -84,6 +84,20 @@ export interface NewsItem {
   author?: string;
 }
 
+export interface BallotMeasure {
+  id: number;
+  title: string;
+  shortTitle: string | null;
+  description: string;
+  category: string;
+  yesMeans: string | null;
+  noMeans: string | null;
+  status: string;
+  stateAbbr: string;
+  stateName: string;
+  sourceUrl: string | null;
+}
+
 export interface StateInfo {
   name: string;
   abbr: string;
