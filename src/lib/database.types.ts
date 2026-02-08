@@ -15,6 +15,24 @@ export type Chamber = "upper" | "lower" | "executive";
 export type CycleType = "midterm" | "presidential" | "special" | "primary" | "runoff";
 export type Stance = "supports" | "opposes" | "mixed" | "unknown";
 export type VolunteerStatus = "active" | "inactive" | "pending";
+export type VolunteerRole =
+  | "data_research"
+  | "local_elections"
+  | "ballot_measures"
+  | "content_writing"
+  | "social_media"
+  | "community_outreach"
+  | "translation";
+
+export const VOLUNTEER_ROLE_LABELS: Record<VolunteerRole, string> = {
+  data_research: "Data Research",
+  local_elections: "Local Elections",
+  ballot_measures: "Ballot Measures",
+  content_writing: "Content Writing",
+  social_media: "Social Media",
+  community_outreach: "Community Outreach",
+  translation: "Translation",
+};
 
 export interface DbState {
   id: number;
@@ -153,34 +171,20 @@ export interface DbCycleStats {
   updated_at: string;
 }
 
-export interface DbGlossary {
-  id: number;
-  term: string;
-  slug: string;
-  short_def: string;
-  long_def: string;
-  created_at: string;
-}
-
 export interface DbVolunteer {
   id: number;
   email: string;
   name: string;
+  auth_id: string | null;
   state_id: number | null;
   interests: string[] | null;
+  roles: string[] | null;
+  experience: string | null;
+  availability: string | null;
   status: VolunteerStatus;
   notes: string | null;
+  applied_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface DbResource {
-  id: number;
-  title: string;
-  url: string;
-  description: string | null;
-  category: "voter_tool" | "news" | "education" | "data" | "government";
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-}

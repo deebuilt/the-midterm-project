@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@astrojs/react": "^4.4.2",
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/typography": "^0.5.19",
@@ -16,6 +17,7 @@
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "@vnedyalk0v/react19-simple-maps": "^2.0.2",
+    "antd": "^6.2.3",
     "astro": "^5.17.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

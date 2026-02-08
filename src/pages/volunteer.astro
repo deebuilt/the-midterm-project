@@ -1,0 +1,17 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VolunteerForm from "../components/admin/VolunteerForm";
+---
+
+<Layout title="Volunteer" description="Apply to volunteer with The Midterm Project and help with nonpartisan voter education.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Volunteer with Us</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      Help make nonpartisan voter education accessible to everyone. We're looking
+      for volunteers to help with data research, local election coverage, content
+      writing, and more.
+    </p>
+
+    <VolunteerForm client:load />
+  </section>
+</Layout>
