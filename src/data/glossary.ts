@@ -84,4 +84,22 @@ export const glossary: GlossaryTerm[] = [
     short: "A group of lawmakers who share an interest or identity.",
     long: "A caucus is an informal group of members of Congress who come together around a shared interest, identity, or goal. Examples include the Congressional Black Caucus, the Freedom Caucus (conservative Republicans), or the Progressive Caucus (liberal Democrats). Caucuses can influence legislation and party strategy.",
   },
+  {
+    term: "Statement of Candidacy",
+    slug: "statement-of-candidacy",
+    short: "The FEC form that officially makes someone a federal candidate.",
+    long: "FEC Form 2 — the Statement of Candidacy — must be filed within 15 days of a candidate raising or spending more than $5,000 for their campaign. Once filed, the candidate's financial activity becomes public record and they must file regular disclosure reports with the Federal Election Commission.",
+  },
+  {
+    term: "PAC",
+    slug: "pac",
+    short: "An organization that collects donations and gives them to candidates.",
+    long: "A Political Action Committee (PAC) pools contributions from its members — employees of a company, members of a union, or people in an industry — and donates that money to candidates. Regular PACs are limited to giving $5,000 per candidate per election. They're different from Super PACs, which can spend unlimited amounts but can't give directly to candidates.",
+  },
+  {
+    term: "Super PAC",
+    slug: "super-pac",
+    short: "An organization that can spend unlimited money on elections but can't coordinate with candidates.",
+    long: "A Super PAC (officially an 'independent expenditure-only political action committee') can raise and spend unlimited money to support or oppose candidates, but cannot donate directly to campaigns or coordinate spending with a candidate. They were made possible by the 2010 Citizens United Supreme Court decision. Super PACs must disclose their donors to the FEC.",
+  },
 ];

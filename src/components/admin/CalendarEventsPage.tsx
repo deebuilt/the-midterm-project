@@ -376,7 +376,7 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
               rules={[{ required: true, message: "Required" }]}
               style={{ flex: 1 }}
             >
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="MM/DD/YYYY" changeOnBlur needConfirm={false} />
             </Form.Item>
             <Form.Item
               name="cycle_id"

@@ -204,6 +204,73 @@ export default function CalendarView({ events }: CalendarViewProps) {
               }}
               onSelect={handleDateSelect}
               fullscreen={true}
+              headerRender={({ value, onChange }) => {
+                const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+                  value: i,
+                  label: dayjs().month(i).format("MMMM"),
+                }));
+                const yearOptions = Array.from({ length: 5 }, (_, i) => {
+                  const y = 2025 + i;
+                  return { value: y, label: String(y) };
+                });
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "12px 16px",
+                    }}
+                  >
+                    <button
+                      onClick={() => onChange(value.subtract(1, "month"))}
+                      style={{
+                        background: "none",
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 6,
+                        padding: "6px 12px",
+                        cursor: "pointer",
+                        fontSize: 14,
+                        color: "#334155",
+                      }}
+                    >
+                      &larr; Prev
+                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Select
+                        value={value.month()}
+                        onChange={(m) => onChange(value.month(m))}
+                        options={monthOptions}
+                        style={{ width: 130 }}
+                        variant="borderless"
+                        popupMatchSelectWidth={false}
+                      />
+                      <Select
+                        value={value.year()}
+                        onChange={(y) => onChange(value.year(y))}
+                        options={yearOptions}
+                        style={{ width: 80 }}
+                        variant="borderless"
+                        popupMatchSelectWidth={false}
+                      />
+                    </div>
+                    <button
+                      onClick={() => onChange(value.add(1, "month"))}
+                      style={{
+                        background: "none",
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 6,
+                        padding: "6px 12px",
+                        cursor: "pointer",
+                        fontSize: 14,
+                        color: "#334155",
+                      }}
+                    >
+                      Next &rarr;
+                    </button>
+                  </div>
+                );
+              }}
             />
           </div>
         )}
@@ -241,6 +308,73 @@ export default function CalendarView({ events }: CalendarViewProps) {
                   );
                 }}
                 onSelect={handleDateSelect}
+                headerRender={({ value, onChange }) => {
+                  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+                    value: i,
+                    label: dayjs().month(i).format("MMM"),
+                  }));
+                  const yearOptions = Array.from({ length: 5 }, (_, i) => {
+                    const y = 2025 + i;
+                    return { value: y, label: String(y) };
+                  });
+                  return (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 12px",
+                      }}
+                    >
+                      <button
+                        onClick={() => onChange(value.subtract(1, "month"))}
+                        style={{
+                          background: "none",
+                          border: "1px solid #E2E8F0",
+                          borderRadius: 6,
+                          padding: "4px 10px",
+                          cursor: "pointer",
+                          fontSize: 13,
+                          color: "#334155",
+                        }}
+                      >
+                        &larr;
+                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Select
+                          value={value.month()}
+                          onChange={(m) => onChange(value.month(m))}
+                          options={monthOptions}
+                          style={{ width: 80 }}
+                          variant="borderless"
+                          popupMatchSelectWidth={false}
+                        />
+                        <Select
+                          value={value.year()}
+                          onChange={(y) => onChange(value.year(y))}
+                          options={yearOptions}
+                          style={{ width: 70 }}
+                          variant="borderless"
+                          popupMatchSelectWidth={false}
+                        />
+                      </div>
+                      <button
+                        onClick={() => onChange(value.add(1, "month"))}
+                        style={{
+                          background: "none",
+                          border: "1px solid #E2E8F0",
+                          borderRadius: 6,
+                          padding: "4px 10px",
+                          cursor: "pointer",
+                          fontSize: 13,
+                          color: "#334155",
+                        }}
+                      >
+                        &rarr;
+                      </button>
+                    </div>
+                  );
+                }}
               />
             </div>
 
@@ -362,7 +496,7 @@ function EventRow({ event, showDate }: { event: CalendarEvent; showDate: boolean
           </span>
         )}
         <a
-          href="/map"
+          href={`/map?state=${event.stateAbbr}`}
           style={{
             fontSize: 11,
             fontWeight: 600,

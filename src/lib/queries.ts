@@ -189,6 +189,7 @@ export async function fetchSenateRaces(): Promise<SenateRace[]> {
           role_title,
           is_incumbent,
           bioguide_id,
+          fec_candidate_id,
           candidate_positions(
             summary,
             stance,
@@ -220,12 +221,16 @@ export async function fetchSenateRaces(): Promise<SenateRace[]> {
       : undefined;
 
     // Group candidates by party
+    // Only show incumbents or candidates promoted from FEC filings (post-primary)
     const democrats: Candidate[] = [];
     const republicans: Candidate[] = [];
     const independents: Candidate[] = [];
 
     for (const rc of rcs) {
-      const c = dbCandidateToCandidate(rc.candidate);
+      const cand = rc.candidate as any;
+      const isIncumbent = rc.is_incumbent || cand.is_incumbent;
+      if (!isIncumbent && !cand.fec_candidate_id) continue;
+      const c = dbCandidateToCandidate(cand);
       if (c.party === "Democrat") democrats.push(c);
       else if (c.party === "Republican") republicans.push(c);
       else independents.push(c);

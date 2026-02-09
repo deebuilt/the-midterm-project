@@ -1,0 +1,364 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="How to Run for Congress" description="How regular people become candidates for the U.S. Senate and House — eligibility, filing, primaries, fundraising, and getting on the ballot.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-6">How to Run for Congress</h1>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        You don't need to be a lawyer, a millionaire, or a career politician. Running for Congress is something ordinary people actually do &mdash; teachers, nurses, business owners, community organizers. This page walks you through what it takes to go from "regular person" to "name on the ballot."
+      </p>
+
+      <!-- Who Can Run? -->
+      <h2 class="text-2xl font-bold">Who Can Run?</h2>
+      <p class="text-slate-600">
+        The Constitution sets surprisingly few requirements. If you meet these, you're legally eligible:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+        <div class="bg-dem-light rounded-xl p-6 border border-dem/20">
+          <h3 class="text-xl font-bold text-dem-dark mb-3">U.S. Senate</h3>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li><strong>30 years old</strong> or older</li>
+            <li>A U.S. citizen for at least <strong>9 years</strong></li>
+            <li>An <strong>inhabitant</strong> of the state you represent</li>
+          </ul>
+          <a href="/learn/senate-101" class="text-dem text-sm font-medium mt-4 inline-block hover:underline">
+            Senate 101 &rarr;
+          </a>
+        </div>
+
+        <div class="bg-gop-light rounded-xl p-6 border border-gop/20">
+          <h3 class="text-xl font-bold text-gop-dark mb-3">U.S. House</h3>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li><strong>25 years old</strong> or older</li>
+            <li>A U.S. citizen for at least <strong>7 years</strong></li>
+            <li>An <strong>inhabitant</strong> of the state (and by custom, the district)</li>
+          </ul>
+          <a href="/learn/house-101" class="text-gop text-sm font-medium mt-4 inline-block hover:underline">
+            House 101 &rarr;
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 rounded-lg p-4 not-prose">
+        <p class="text-sm text-slate-600">
+          <strong>About "inhabitant":</strong> The Constitution says you must be an "inhabitant" of the state, but it doesn't define what that means. For the Senate, it's been interpreted loosely &mdash; candidates have moved to a state shortly before running. For the House, there's a strong tradition that you live in your district, but it's not technically required by the Constitution. In practice, voters usually expect you to actually live there.
+        </p>
+      </div>
+
+      <!-- Where Do Candidates Come From? -->
+      <h2 class="text-2xl font-bold">Where Do Candidates Come From?</h2>
+      <p class="text-slate-600">
+        There's no single path into politics. Candidates come from all kinds of backgrounds:
+      </p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 not-prose">
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#127963;</div>
+          <p class="text-sm font-bold text-slate-800">State Legislature</p>
+          <p class="text-xs text-slate-500">State reps stepping up to federal office</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#9878;</div>
+          <p class="text-sm font-bold text-slate-800">Law</p>
+          <p class="text-xs text-slate-500">Lawyers &amp; prosecutors &mdash; the most common background</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#127970;</div>
+          <p class="text-sm font-bold text-slate-800">Local Government</p>
+          <p class="text-xs text-slate-500">Mayors, city council, county officials</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#127968;</div>
+          <p class="text-sm font-bold text-slate-800">Governors</p>
+          <p class="text-xs text-slate-500">Current or former governors running for Senate</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#128188;</div>
+          <p class="text-sm font-bold text-slate-800">Business</p>
+          <p class="text-xs text-slate-500">CEOs, entrepreneurs, and executives</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#127894;</div>
+          <p class="text-sm font-bold text-slate-800">Military</p>
+          <p class="text-xs text-slate-500">Veterans and former officers</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#9994;</div>
+          <p class="text-sm font-bold text-slate-800">Activism</p>
+          <p class="text-xs text-slate-500">Community organizers &amp; advocacy leaders</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4 text-center">
+          <div class="text-2xl mb-1">&#128101;</div>
+          <p class="text-sm font-bold text-slate-800">Everyday People</p>
+          <p class="text-xs text-slate-500">Teachers, nurses, bartenders, coaches</p>
+        </div>
+      </div>
+
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-sm text-slate-700">
+          <strong>Anyone can run.</strong> Alexandria Ocasio-Cortez was a bartender and community organizer before winning her House seat at 29. Tommy Tuberville went from coaching college football to the U.S. Senate. Beto O'Rourke was on the El Paso city council before nearly winning a Senate seat in Texas. The "typical" politician background is changing.
+        </p>
+      </div>
+
+      <!-- Step 1: File with the FEC -->
+      <h2 class="text-2xl font-bold">Step 1: File with the FEC</h2>
+      <p class="text-slate-600">
+        The <strong>Federal Election Commission (FEC)</strong> is the agency that tracks money in federal elections. To officially become a candidate, you file a <a href="/glossary#statement-of-candidacy" class="text-tossup underline">Statement of Candidacy</a> (FEC Form 2) within <strong>15 days</strong> of raising or spending more than <strong>$5,000</strong> for your campaign.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-6 not-prose">
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <p class="text-2xl font-bold text-slate-800">$5,000</p>
+            <p class="text-xs text-slate-500">Threshold to trigger filing</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">15 days</p>
+            <p class="text-xs text-slate-500">Deadline after hitting threshold</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">Form 2</p>
+            <p class="text-xs text-slate-500">Statement of Candidacy</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">FEC.gov</p>
+            <p class="text-xs text-slate-500">Where it's all public record</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Once you file, you're officially a federal candidate. Your name appears in public FEC records, your fundraising is tracked, and you must file regular financial reports. This is how we know who's running &mdash; it's where our <a href="/whos-running" class="text-tossup underline">Who's Running</a> data comes from.
+      </p>
+      <p class="text-sm text-slate-400">
+        You can also file before hitting $5,000 &mdash; some candidates file early to signal they're serious.
+      </p>
+
+      <!-- Step 2: Get on the Ballot -->
+      <h2 class="text-2xl font-bold">Step 2: Get on the Ballot</h2>
+      <p class="text-slate-600">
+        Filing with the FEC makes you a candidate in the federal government's eyes, but getting your name on the actual ballot is controlled by <strong>your state</strong>. Each state has its own rules, and they vary quite a bit.
+      </p>
+
+      <p class="text-slate-600">Most states require some combination of:</p>
+      <ol class="list-decimal list-inside space-y-2 text-slate-600">
+        <li><strong>Filing paperwork</strong> with the Secretary of State (or equivalent office)</li>
+        <li><strong>Paying a filing fee</strong> &mdash; varies from a few hundred to several thousand dollars depending on the state and office</li>
+        <li><strong>Collecting petition signatures</strong> from registered voters &mdash; can be hundreds or thousands depending on the state</li>
+        <li><strong>Meeting the state's deadline</strong> &mdash; these are firm. Miss it and you're not on the ballot.</li>
+      </ol>
+
+      <div class="bg-slate-50 rounded-lg p-4 not-prose">
+        <p class="text-sm text-slate-600">
+          <strong>Third-party and independent candidates</strong> often face steeper requirements. They may need significantly more petition signatures and earlier filing deadlines than major-party candidates. This is one reason you see fewer third-party names on your ballot.
+        </p>
+      </div>
+
+      <!-- Step 3: Win Your Primary -->
+      <h2 class="text-2xl font-bold">Step 3: Win Your Primary</h2>
+      <p class="text-slate-600">
+        When multiple candidates from the same party want the same seat, voters decide which one advances to the general election. This is the <a href="/glossary#primary" class="text-tossup underline">primary election</a> &mdash; and it's where a lot of the real competition happens, especially in states where one party dominates.
+      </p>
+
+      <p class="text-slate-600">
+        Not all primaries work the same way. The rules depend on your state:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">Closed Primary</p>
+          <p class="text-sm text-slate-600">Only registered party members can vote. If you're registered Democrat, you vote in the Democratic primary. The most common type.</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">Open Primary</p>
+          <p class="text-sm text-slate-600">Any registered voter can vote in either party's primary (but not both). You choose on election day.</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">Semi-Closed Primary</p>
+          <p class="text-sm text-slate-600">Party members vote in their own primary. Unaffiliated voters can pick either, but you can't cross party lines.</p>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">Top-Two / Jungle Primary</p>
+          <p class="text-sm text-slate-600">All candidates on one ballot. Top two advance regardless of party. Used in California and Washington. Can result in two same-party candidates in November.</p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Your state's primary date is on our <a href="/calendar" class="text-tossup underline">election calendar</a>. Primary dates vary widely &mdash; some states vote as early as March, others as late as September.
+      </p>
+
+      <!-- Step 4: Fund Your Campaign -->
+      <h2 class="text-2xl font-bold">Step 4: Fund Your Campaign</h2>
+      <p class="text-slate-600">
+        Running for Congress costs money &mdash; often a lot of it. A competitive House race can cost <strong>$2&ndash;10 million</strong>. A competitive Senate race can cost <strong>$20&ndash;100+ million</strong>. Where does that money come from?
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-6 not-prose">
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <p class="text-2xl font-bold text-slate-800">~$3,300</p>
+            <p class="text-xs text-slate-500">Max individual donation per election</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">$2M&ndash;$10M+</p>
+            <p class="text-xs text-slate-500">Typical competitive House race</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">$20M&ndash;$100M+</p>
+            <p class="text-xs text-slate-500">Typical competitive Senate race</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-slate-800">Quarterly</p>
+            <p class="text-xs text-slate-500">FEC reporting frequency</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Campaign money comes from several sources:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li><strong>Individual contributions</strong> &mdash; regular people donating, subject to the ~$3,300 limit per election. Primary and general are separate elections, so effectively ~$6,600 total per candidate.</li>
+        <li><strong><a href="/glossary#pac" class="text-tossup underline">PACs</a></strong> &mdash; organizations that pool contributions from their members. Limited to $5,000 per candidate per election.</li>
+        <li><strong><a href="/glossary#super-pac" class="text-tossup underline">Super PACs</a></strong> &mdash; can spend unlimited money but cannot coordinate directly with the candidate's campaign. They run their own ads.</li>
+        <li><strong>Self-funding</strong> &mdash; candidates can spend unlimited personal money on their own campaign.</li>
+        <li><strong>Small-dollar donations</strong> &mdash; platforms like ActBlue and WinRed have made it possible to raise millions from small $5&ndash;$50 contributions.</li>
+      </ul>
+
+      <p class="text-slate-600">
+        Fundraising takes up an enormous amount of a candidate's time. Members of Congress have described spending 4&ndash;6 hours per day making fundraising calls. This is one of the most commonly cited frustrations with American politics &mdash; and one reason some people push for campaign finance reform.
+      </p>
+      <p class="text-slate-600">
+        You can see how much 2026 candidates have raised on our <a href="/whos-running" class="text-tossup underline">Who's Running</a> page &mdash; every dollar is public record thanks to FEC filings.
+      </p>
+
+      <!-- Step 5: Campaign and Win -->
+      <h2 class="text-2xl font-bold">Step 5: Campaign and Win</h2>
+      <p class="text-slate-600">
+        Once you've filed, gotten on the ballot, and survived the primary, it's general election time. This is what most people think of as "the election" &mdash; the one on the first Tuesday after the first Monday in November.
+      </p>
+
+      <p class="text-slate-600">What campaigning looks like:</p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>Knocking on doors (canvassing)</li>
+        <li>Town halls and debates</li>
+        <li>TV, radio, and digital advertising</li>
+        <li>Building a ground game (volunteers, phone banks, text banking)</li>
+        <li>Earning endorsements from other politicians, organizations, and newspapers</li>
+        <li>Getting out the vote (GOTV) in the final weeks</li>
+      </ul>
+
+      <p class="text-slate-600">
+        In 2026, Election Day is <strong>November 3</strong>. But early voting starts weeks earlier in many states. Check our <a href="/calendar" class="text-tossup underline">election calendar</a> for your state's key dates.
+      </p>
+
+      <!-- The Full Pipeline -->
+      <h2 class="text-2xl font-bold">The Full Pipeline</h2>
+      <p class="text-slate-600">Here's the whole process at a glance:</p>
+
+      <!-- Desktop: horizontal stepper -->
+      <div class="hidden md:block bg-slate-50 rounded-xl p-6 not-prose">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-slate-300 text-white flex items-center justify-center mx-auto text-sm font-bold mb-2">1</div>
+            <p class="text-sm font-bold text-slate-800">Decide</p>
+            <p class="text-xs text-slate-500">Assess your race, build a team</p>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-tossup text-white flex items-center justify-center mx-auto text-sm font-bold mb-2 ring-2 ring-tossup/30">2</div>
+            <p class="text-sm font-bold text-slate-800">File</p>
+            <p class="text-xs text-slate-500">Register with the FEC</p>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-slate-300 text-white flex items-center justify-center mx-auto text-sm font-bold mb-2">3</div>
+            <p class="text-sm font-bold text-slate-800">Qualify</p>
+            <p class="text-xs text-slate-500">Meet state ballot access rules</p>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-slate-300 text-white flex items-center justify-center mx-auto text-sm font-bold mb-2">4</div>
+            <p class="text-sm font-bold text-slate-800">Primary</p>
+            <p class="text-xs text-slate-500">Win your party's nomination</p>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-slate-300 text-white flex items-center justify-center mx-auto text-sm font-bold mb-2">5</div>
+            <p class="text-sm font-bold text-slate-800">Campaign</p>
+            <p class="text-xs text-slate-500">Raise money, reach voters</p>
+          </div>
+          <div class="flex-1 text-center">
+            <div class="w-10 h-10 rounded-full bg-slate-300 text-white flex items-center justify-center mx-auto text-sm font-bold mb-2">6</div>
+            <p class="text-sm font-bold text-slate-800">Election Day</p>
+            <p class="text-xs text-slate-500">Voters decide</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile: vertical stepper -->
+      <div class="md:hidden bg-slate-50 rounded-xl p-6 not-prose">
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">Decide</p>
+              <p class="text-xs text-slate-500">Assess your race, build a team</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 ring-2 ring-tossup/30">2</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">File</p>
+              <p class="text-xs text-slate-500">Register with the FEC</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold shrink-0">3</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">Qualify</p>
+              <p class="text-xs text-slate-500">Meet state ballot access rules</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold shrink-0">4</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">Primary</p>
+              <p class="text-xs text-slate-500">Win your party's nomination</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold shrink-0">5</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">Campaign</p>
+              <p class="text-xs text-slate-500">Raise money, reach voters</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-full bg-slate-300 text-white flex items-center justify-center text-sm font-bold shrink-0">6</div>
+            <div>
+              <p class="text-sm font-bold text-slate-800">Election Day</p>
+              <p class="text-xs text-slate-500">Voters decide</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-sm font-medium text-slate-700 mb-2">
+          Now that you know how the process works, see who's actually running in 2026:
+        </p>
+        <p class="text-sm font-medium">
+          <a href="/whos-running" class="text-tossup underline">Who's Running</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/senate" class="text-dem underline">Senate Races</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/house" class="text-gop underline">House Races</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/map" class="text-navy underline">Interactive Map</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

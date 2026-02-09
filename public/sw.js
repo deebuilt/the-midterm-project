@@ -1,4 +1,4 @@
-const CACHE_NAME = "tmp-v4";
+const CACHE_NAME = "tmp-v5";
 
 const PRECACHE_URLS = [
   "/",
@@ -11,6 +11,7 @@ const PRECACHE_URLS = [
   "/admin",
   "/volunteer",
   "/data/states-10m.json",
+  "/learn/how-to-run",
 ];
 
 // Install — precache key pages

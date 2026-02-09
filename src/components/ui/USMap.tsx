@@ -124,6 +124,15 @@ export default function USMap({ states, senateRaces, statesByFips, ballotMeasure
     senateRaces.map((r) => [r.stateAbbr, r])
   );
 
+  // Open ballot for state if ?state=XX param is present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stateParam = params.get("state")?.toUpperCase();
+    if (stateParam && statesByAbbrMap[stateParam]) {
+      setSelectedAbbr(stateParam);
+    }
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
     setIsMobile(mq.matches);
