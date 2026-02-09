@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Countdown from "../components/ui/Countdown";
+import ElectionTracker from "../components/ui/ElectionTracker";
 import { fetchSenateOverview, fetchHouseOverview } from "../lib/queries";
 
 const { senateOverview } = await fetchSenateOverview();
@@ -81,25 +82,11 @@ function timeAgo(dateStr: string): string {
     </div>
   </section>
 
-  <!-- Numbers -->
-  <section class="border-b border-slate-100">
-    <div class="max-w-5xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-      <div>
-        <div class="text-3xl font-black text-navy">{senateOverview.seatsUpForElection + senateOverview.specialElections}</div>
-        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Senate seats</div>
-      </div>
-      <div>
-        <div class="text-3xl font-black text-navy">{houseOverview.totalSeats}</div>
-        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">House seats</div>
-      </div>
-      <div>
-        <div class="text-3xl font-black text-tossup">{houseOverview.retirements.total + senateOverview.retirements.length}</div>
-        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Retiring</div>
-      </div>
-      <div>
-        <div class="text-3xl font-black text-navy">{houseOverview.battlegroundDistricts}</div>
-        <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Battlegrounds</div>
-      </div>
+  <!-- Election Tracker -->
+  <section class="py-12 px-4 border-b border-slate-100">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-6">Where we are</h2>
+      <ElectionTracker client:load />
     </div>
   </section>
 
