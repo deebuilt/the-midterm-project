@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent } from "../types";
+import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState } from "../types";
 
 // ─── States ───
 
@@ -642,4 +642,121 @@ function dbCandidateToCandidate(dbCandidate: any): Candidate {
     website: dbCandidate.website ?? undefined,
     twitter: dbCandidate.twitter ?? undefined,
   };
+}
+
+// ─── FEC Filings ───
+
+/**
+ * Fetch FEC filings for the active cycle, grouped by state with primary dates.
+ * Returns only Senate filings with funds_raised >= $5,000.
+ * Sorted by primary date ascending (earliest primaries first).
+ */
+export async function fetchFecFilings(): Promise<FilingsByState[]> {
+  try {
+    const { data: cycle } = await supabase
+      .from("election_cycles")
+      .select("id")
+      .eq("is_active", true)
+      .single();
+
+    if (!cycle) return [];
+
+    const { data: filings, error } = await supabase
+      .from("fec_filings")
+      .select(`*, state:states!inner(name, abbr)`)
+      .eq("cycle_id", cycle.id)
+      .eq("office", "S")
+      .gte("funds_raised", 5000)
+      .is("promoted_to_candidate_id", null)
+      .order("funds_raised", { ascending: false });
+
+    if (error || !filings) {
+      console.warn(`FEC filings unavailable: ${error?.message}`);
+      return [];
+    }
+
+    // Get primary dates for all states in this cycle
+    const { data: primaryEvents } = await supabase
+      .from("calendar_events")
+      .select("state_id, event_date")
+      .eq("cycle_id", cycle.id)
+      .eq("event_type", "primary");
+
+    const primaryDateByStateId = new Map<number, string>();
+    for (const ev of primaryEvents ?? []) {
+      primaryDateByStateId.set(ev.state_id, ev.event_date);
+    }
+
+    // Group filings by state
+    const grouped = new Map<
+      string,
+      {
+        stateAbbr: string;
+        stateName: string;
+        primaryDate: string | null;
+        stateId: number;
+        filings: FecFiling[];
+      }
+    >();
+
+    for (const row of filings) {
+      const state = row.state as unknown as { name: string; abbr: string };
+      const abbr = state.abbr;
+
+      if (!grouped.has(abbr)) {
+        grouped.set(abbr, {
+          stateAbbr: abbr,
+          stateName: state.name,
+          primaryDate: primaryDateByStateId.get(row.state_id) ?? null,
+          stateId: row.state_id,
+          filings: [],
+        });
+      }
+
+      grouped.get(abbr)!.filings.push({
+        id: row.id,
+        fecCandidateId: row.fec_candidate_id,
+        stateName: state.name,
+        stateAbbr: abbr,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        party: row.party as FecFiling["party"],
+        office: "Senate",
+        district: null,
+        isIncumbent: row.is_incumbent,
+        fundsRaised: Number(row.funds_raised),
+        fundsSpent: Number(row.funds_spent),
+        cashOnHand: Number(row.cash_on_hand),
+        primaryDate: primaryDateByStateId.get(row.state_id) ?? null,
+        isPromoted: false,
+        lastSyncedAt: row.last_synced_at,
+      });
+    }
+
+    // Sort by primary date ascending
+    const now = new Date();
+    return Array.from(grouped.values())
+      .map((g) => ({
+        stateAbbr: g.stateAbbr,
+        stateName: g.stateName,
+        primaryDate: g.primaryDate,
+        daysUntilPrimary: g.primaryDate
+          ? Math.ceil((new Date(g.primaryDate).getTime() - now.getTime()) / 86_400_000)
+          : null,
+        filings: g.filings,
+      }))
+      .sort((a, b) => {
+        if (a.primaryDate && b.primaryDate) {
+          const dateCompare = a.primaryDate.localeCompare(b.primaryDate);
+          if (dateCompare !== 0) return dateCompare;
+          return a.stateName.localeCompare(b.stateName);
+        }
+        if (a.primaryDate) return -1;
+        if (b.primaryDate) return 1;
+        return a.stateName.localeCompare(b.stateName);
+      });
+  } catch {
+    console.warn("FEC filings table may not exist yet");
+    return [];
+  }
 }

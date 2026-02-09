@@ -109,6 +109,33 @@ export interface CalendarEvent {
   sourceUrl: string | null;
 }
 
+export interface FecFiling {
+  id: number;
+  fecCandidateId: string;
+  stateName: string;
+  stateAbbr: string;
+  firstName: string;
+  lastName: string;
+  party: "Democrat" | "Republican" | "Independent" | "Libertarian" | "Green" | "Other";
+  office: "Senate" | "House";
+  district: number | null;
+  isIncumbent: boolean;
+  fundsRaised: number;
+  fundsSpent: number;
+  cashOnHand: number;
+  primaryDate: string | null;
+  isPromoted: boolean;
+  lastSyncedAt: string;
+}
+
+export interface FilingsByState {
+  stateAbbr: string;
+  stateName: string;
+  primaryDate: string | null;
+  daysUntilPrimary: number | null;
+  filings: FecFiling[];
+}
+
 export interface StateInfo {
   name: string;
   abbr: string;

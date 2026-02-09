@@ -4,6 +4,7 @@ import {
   TeamOutlined,
   FlagOutlined,
   CalendarOutlined,
+  FileSearchOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import type { AdminRoute } from "./AdminApp";
@@ -12,6 +13,8 @@ interface DashboardStats {
   volunteerTotal: number;
   volunteerPending: number;
   raceCount: number;
+  filingsTotal: number;
+  filingsUnpromoted: number;
   activeCycleName: string;
 }
 
@@ -25,7 +28,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
 
   useEffect(() => {
     async function loadDashboard() {
-      const [volunteersRes, cycleRes, racesRes] = await Promise.all([
+      const [volunteersRes, cycleRes, racesRes, filingsRes] = await Promise.all([
         supabase.from("volunteers").select("id, status"),
         supabase
           .from("election_cycles")
@@ -33,13 +36,17 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           .eq("is_active", true)
           .single(),
         supabase.from("races").select("id", { count: "exact", head: true }),
+        supabase.from("fec_filings").select("id, promoted_to_candidate_id"),
       ]);
 
       const volunteers = volunteersRes.data ?? [];
+      const filings = filingsRes.data ?? [];
       setStats({
         volunteerTotal: volunteers.length,
         volunteerPending: volunteers.filter((v) => v.status === "pending").length,
         raceCount: racesRes.count ?? 0,
+        filingsTotal: filings.length,
+        filingsUnpromoted: filings.filter((f) => !f.promoted_to_candidate_id).length,
         activeCycleName: cycleRes.data?.name ?? "None",
       });
       setLoading(false);
@@ -58,7 +65,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
 
   return (
     <Row gutter={[12, 12]}>
-      <Col xs={24} sm={8}>
+      <Col xs={12} sm={6}>
         <Card
           hoverable
           onClick={() => navigate("volunteers")}
@@ -97,7 +104,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           </div>
         </Card>
       </Col>
-      <Col xs={24} sm={8}>
+      <Col xs={12} sm={6}>
         <Card
           hoverable
           onClick={() => navigate("races")}
@@ -131,7 +138,46 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           </div>
         </Card>
       </Col>
-      <Col xs={24} sm={8}>
+      <Col xs={12} sm={6}>
+        <Card
+          hoverable
+          onClick={() => navigate("fec")}
+          style={{ borderRadius: 8 }}
+          styles={{ body: { padding: "14px 16px" } }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: "#f1f5f9",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 16,
+                color: "#475569",
+              }}
+            >
+              <FileSearchOutlined />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
+                FEC Filings
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
+                {stats?.filingsTotal ?? 0}
+                {stats?.filingsUnpromoted ? (
+                  <span style={{ fontSize: 12, fontWeight: 400, color: "#F59E0B", marginLeft: 6 }}>
+                    {stats.filingsUnpromoted} unpromoted
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </Card>
+      </Col>
+      <Col xs={12} sm={6}>
         <Card
           hoverable
           onClick={() => navigate("cycles")}

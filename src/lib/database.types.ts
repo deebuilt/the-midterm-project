@@ -257,6 +257,27 @@ export interface DbCalendarEvent {
   updated_at: string;
 }
 
+export interface DbFecFiling {
+  id: number;
+  fec_candidate_id: string;
+  cycle_id: number;
+  state_id: number;
+  name: string;
+  first_name: string;
+  last_name: string;
+  party: string;
+  office: "S" | "H";
+  district_number: number | null;
+  is_incumbent: boolean;
+  funds_raised: number;
+  funds_spent: number;
+  cash_on_hand: number;
+  promoted_to_candidate_id: number | null;
+  last_synced_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbVolunteer {
   id: number;
   email: string;

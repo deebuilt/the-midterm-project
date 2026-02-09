@@ -55,8 +55,8 @@ interface PreviewCandidate {
   mappedParty: string;
   slug: string;
   isIncumbent: boolean;
-  existsInDb: boolean;
-  existingDbId: number | null;
+  existsInFilings: boolean;
+  existingFilingId: number | null;
   selected: boolean;
   financials: { raised: number; spent: number; cash: number } | null;
 }
@@ -66,8 +66,6 @@ interface ImportResult {
   updated: number;
   skipped: number;
   errors: string[];
-  districtsCreated: number;
-  racesCreated: number;
 }
 
 const STORAGE_KEY = "tmp-fec-api-key";
@@ -83,7 +81,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
   const [onlyActive, setOnlyActive] = useState(true);
   const [onlyFunded, setOnlyFunded] = useState(true);
   const [majorPartiesOnly, setMajorPartiesOnly] = useState(true);
-  const [fetchFinancials, setFetchFinancials] = useState(true);
+  const [minFiveK, setMinFiveK] = useState(true);
 
   const [previewing, setPreviewing] = useState(false);
   const [previewCandidates, setPreviewCandidates] = useState<PreviewCandidate[]>([]);
@@ -174,24 +172,34 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
       }
       candidates = deduped;
 
-      // Get existing candidates from DB to mark duplicates
-      const { data: existingCandidates } = await supabase
-        .from("candidates")
-        .select("id, fec_candidate_id, first_name, last_name, slug");
+      // Get active cycle
+      const { data: activeCycle } = await supabase
+        .from("election_cycles")
+        .select("id")
+        .eq("is_active", true)
+        .single();
+
+      if (!activeCycle) {
+        setPreviewError("No active election cycle found. Create one first.");
+        setPreviewing(false);
+        return;
+      }
+
+      // Get existing filings from DB to mark duplicates
+      const { data: existingFilings } = await supabase
+        .from("fec_filings")
+        .select("id, fec_candidate_id")
+        .eq("cycle_id", activeCycle.id);
 
       const fecIdMap = new Map<string, number>();
-      const slugMap = new Map<string, number>();
-      for (const ec of existingCandidates ?? []) {
-        if (ec.fec_candidate_id) fecIdMap.set(ec.fec_candidate_id, ec.id);
-        slugMap.set(ec.slug, ec.id);
+      for (const ef of existingFilings ?? []) {
+        if (ef.fec_candidate_id) fecIdMap.set(ef.fec_candidate_id, ef.id);
       }
 
       const preview: PreviewCandidate[] = candidates.map((fec) => {
         const { first, last } = parseFecName(fec.name);
         const slug = slugifyName(first, last);
-        const existingById = fecIdMap.get(fec.candidate_id);
-        const existingBySlug = slugMap.get(slug);
-        const existingDbId = existingById ?? existingBySlug ?? null;
+        const existingFilingId = fecIdMap.get(fec.candidate_id) ?? null;
 
         return {
           fec,
@@ -200,80 +208,81 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
           mappedParty: mapFecParty(fec.party_full),
           slug,
           isIncumbent: fec.incumbent_challenge === "I",
-          existsInDb: existingDbId !== null,
-          existingDbId,
-          selected: !existingDbId, // auto-select new candidates
+          existsInFilings: existingFilingId !== null,
+          existingFilingId,
+          selected: !existingFilingId, // auto-select new filings
           financials: null,
         };
       });
 
       // Sort: new first, then by state, then by name
       preview.sort((a, b) => {
-        if (a.existsInDb !== b.existsInDb) return a.existsInDb ? 1 : -1;
+        if (a.existsInFilings !== b.existsInFilings) return a.existsInFilings ? 1 : -1;
         const stateCompare = a.fec.state.localeCompare(b.fec.state);
         if (stateCompare !== 0) return stateCompare;
         return a.parsedLast.localeCompare(b.parsedLast);
       });
 
-      // Fetch financials if enabled (uses 1 API call per candidate)
-      if (fetchFinancials) {
-        setImportStatus(`Fetching financials for ${preview.length} candidates...`);
-        for (let i = 0; i < preview.length; i++) {
-          const item = preview[i];
-          setImportProgress(Math.round(((i + 1) / preview.length) * 100));
-          setImportStatus(`Fetching financials: ${item.parsedFirst} ${item.parsedLast} (${i + 1}/${preview.length})`);
-          try {
-            const totals = await client.getCandidateTotals(item.fec.candidate_id, cycle);
-            if (totals) {
-              item.financials = {
-                raised: totals.receipts ?? 0,
-                spent: totals.disbursements ?? 0,
-                cash: totals.cash_on_hand_end_period ?? 0,
-              };
-            }
-          } catch {
-            // Non-fatal — just leave financials null
+      // Fetch financials (always enabled for filings - we need this for the public page)
+      setImportStatus(`Fetching financials for ${preview.length} candidates...`);
+      for (let i = 0; i < preview.length; i++) {
+        const item = preview[i];
+        setImportProgress(Math.round(((i + 1) / preview.length) * 100));
+        setImportStatus(`Fetching financials: ${item.parsedFirst} ${item.parsedLast} (${i + 1}/${preview.length})`);
+        try {
+          const totals = await client.getCandidateTotals(item.fec.candidate_id, cycle);
+          if (totals) {
+            item.financials = {
+              raised: totals.receipts ?? 0,
+              spent: totals.disbursements ?? 0,
+              cash: totals.cash_on_hand_end_period ?? 0,
+            };
           }
+        } catch {
+          // Non-fatal — just leave financials null
         }
-        setImportStatus("");
-        setImportProgress(0);
+      }
+      setImportStatus("");
+      setImportProgress(0);
+
+      // Filter by min $5K if enabled
+      let filtered = preview;
+      if (minFiveK) {
+        filtered = preview.filter((p) => (p.financials?.raised ?? 0) >= 5000);
       }
 
-      setPreviewCandidates(preview);
+      setPreviewCandidates(filtered);
       setStep("preview");
     } catch (err: any) {
       setPreviewError(err.message);
     } finally {
       setPreviewing(false);
     }
-  }, [apiKey, cycle, officeFilter, stateFilter, onlyActive, onlyFunded, majorPartiesOnly, fetchFinancials, connectionStatus, messageApi]);
+  }, [apiKey, cycle, officeFilter, stateFilter, onlyActive, onlyFunded, majorPartiesOnly, minFiveK, connectionStatus, messageApi]);
 
   // ─── Import ───
 
   async function runImport() {
     const selected = previewCandidates.filter((p) => p.selected);
     if (selected.length === 0) {
-      messageApi.warning("Select at least one candidate to import");
+      messageApi.warning("Select at least one candidate to sync");
       return;
     }
 
     Modal.confirm({
-      title: `Import ${selected.length} candidates?`,
+      title: `Sync ${selected.length} filings?`,
       content: (
         <div>
           <p>This will:</p>
           <ul style={{ paddingLeft: 20 }}>
-            <li>Create {selected.filter((s) => !s.existsInDb).length} new candidate records</li>
-            <li>Update {selected.filter((s) => s.existsInDb).length} existing records (FEC ID + financials)</li>
-            <li>Create any missing districts and races for the active cycle</li>
-            {fetchFinancials && (
-              <li>Fetch financial data ({selected.length} extra API calls — ~{Math.ceil(selected.length / 1000)} hr of rate limit)</li>
-            )}
+            <li>Create {selected.filter((s) => !s.existsInFilings).length} new filing records</li>
+            <li>Update {selected.filter((s) => s.existsInFilings).length} existing filings (FEC ID + financials)</li>
+            <li>Store data in the staging table (not live candidates table)</li>
           </ul>
-          <p>Existing bio, photo, position, and race rating data will NOT be overwritten.</p>
+          <p>After primaries, promote winners to the candidates table from the Filed Candidates page.</p>
         </div>
       ),
-      okText: "Import",
+      okText: "Sync to Filings",
       onOk: () => executeImport(selected),
     });
   }
@@ -282,15 +291,13 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
     setStep("importing");
     setImporting(true);
     setImportProgress(0);
-    setImportStatus("Starting import...");
+    setImportStatus("Starting sync...");
 
     const result: ImportResult = {
       created: 0,
       updated: 0,
       skipped: 0,
       errors: [],
-      districtsCreated: 0,
-      racesCreated: 0,
     };
 
     try {
@@ -308,53 +315,12 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
         return;
       }
 
-      // Get government bodies
-      const { data: bodies } = await supabase
-        .from("government_bodies")
-        .select("id, slug");
-
-      const senateBodyId = bodies?.find((b) => b.slug === "us-senate")?.id;
-      const houseBodyId = bodies?.find((b) => b.slug === "us-house")?.id;
-
-      if (!senateBodyId || !houseBodyId) {
-        result.errors.push("Government bodies (us-senate, us-house) not found in database.");
-        setImportResult(result);
-        setStep("done");
-        return;
-      }
-
       // Get states lookup
       const { data: states } = await supabase.from("states").select("id, abbr");
       const stateMap = new Map<string, number>();
       for (const s of states ?? []) stateMap.set(s.abbr, s.id);
 
-      // Get existing districts
-      const { data: existingDistricts } = await supabase
-        .from("districts")
-        .select("id, state_id, body_id, number, senate_class");
-
-      // Build district lookup key
-      function districtKey(stateId: number, bodyId: number, num: number | null, senateClass: number | null) {
-        return `${stateId}-${bodyId}-${num ?? "null"}-${senateClass ?? "null"}`;
-      }
-
-      const districtMap = new Map<string, number>();
-      for (const d of existingDistricts ?? []) {
-        districtMap.set(districtKey(d.state_id, d.body_id, d.number, d.senate_class), d.id);
-      }
-
-      // Get existing races for active cycle
-      const { data: existingRaces } = await supabase
-        .from("races")
-        .select("id, district_id")
-        .eq("cycle_id", activeCycle.id);
-
-      const raceByDistrictId = new Map<number, number>();
-      for (const r of existingRaces ?? []) {
-        raceByDistrictId.set(r.district_id, r.id);
-      }
-
-      // Process candidates
+      // Process filings
       const total = selected.length;
       for (let i = 0; i < selected.length; i++) {
         const item = selected[i];
@@ -369,193 +335,44 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
           continue;
         }
 
-        const bodyId = item.fec.office === "S" ? senateBodyId : houseBodyId;
+        // Prepare upsert payload
+        const upsertPayload = {
+          fec_candidate_id: item.fec.candidate_id,
+          cycle_id: activeCycle.id,
+          state_id: stateId,
+          name: item.fec.name,
+          first_name: item.parsedFirst,
+          last_name: item.parsedLast,
+          party: item.mappedParty,
+          office: item.fec.office,
+          district_number: item.fec.office === "H" ? parseInt(item.fec.district, 10) : null,
+          is_incumbent: item.isIncumbent,
+          funds_raised: item.financials?.raised ?? null,
+          funds_spent: item.financials?.spent ?? null,
+          cash_on_hand: item.financials?.cash ?? null,
+          last_synced_at: new Date().toISOString(),
+        };
 
-        // ── Use pre-fetched financials from preview ──
-        const financialData = item.financials
-          ? { funds_raised: item.financials.raised, funds_spent: item.financials.spent, cash_on_hand: item.financials.cash }
-          : null;
+        // Upsert into fec_filings
+        const { error } = await supabase
+          .from("fec_filings")
+          .upsert(upsertPayload, {
+            onConflict: "cycle_id,fec_candidate_id",
+          })
+          .select("id")
+          .single();
 
-        // ── Upsert candidate ──
-        if (item.existsInDb && item.existingDbId) {
-          // Link FEC ID + update financials
-          const updatePayload: Record<string, unknown> = {
-            fec_candidate_id: item.fec.candidate_id,
-          };
-          if (financialData) {
-            updatePayload.funds_raised = financialData.funds_raised;
-            updatePayload.funds_spent = financialData.funds_spent;
-            updatePayload.cash_on_hand = financialData.cash_on_hand;
-            updatePayload.fec_financials_updated_at = new Date().toISOString();
-          }
-
-          const { error } = await supabase
-            .from("candidates")
-            .update(updatePayload)
-            .eq("id", item.existingDbId);
-
-          if (error) {
-            result.errors.push(`Update error for ${item.parsedFirst} ${item.parsedLast}: ${error.message}`);
-          } else {
-            result.updated++;
-          }
-        } else {
-          // Create new candidate
-          const insertPayload: Record<string, unknown> = {
-            first_name: item.parsedFirst,
-            last_name: item.parsedLast,
-            slug: item.slug,
-            party: item.mappedParty,
-            is_incumbent: item.isIncumbent,
-            fec_candidate_id: item.fec.candidate_id,
-            role_title: item.isIncumbent
-              ? item.fec.office === "S"
-                ? "U.S. Senator"
-                : `U.S. Representative (${item.fec.state}-${item.fec.district})`
-              : null,
-          };
-          if (financialData) {
-            insertPayload.funds_raised = financialData.funds_raised;
-            insertPayload.funds_spent = financialData.funds_spent;
-            insertPayload.cash_on_hand = financialData.cash_on_hand;
-            insertPayload.fec_financials_updated_at = new Date().toISOString();
-          }
-
-          const { data: newCandidate, error } = await supabase
-            .from("candidates")
-            .insert(insertPayload)
-            .select("id")
-            .single();
-
-          if (error) {
-            // Might be a slug collision — try with state suffix
-            if (error.message.includes("duplicate") || error.message.includes("unique")) {
-              const altSlug = `${item.slug}-${item.fec.state.toLowerCase()}`;
-              const retryPayload = { ...insertPayload, slug: altSlug };
-              const { data: retry, error: retryErr } = await supabase
-                .from("candidates")
-                .insert(retryPayload)
-                .select("id")
-                .single();
-
-              if (retryErr) {
-                result.errors.push(`Create error for ${item.parsedFirst} ${item.parsedLast}: ${retryErr.message}`);
-                result.skipped++;
-                continue;
-              }
-
-              // Proceed with district/race linking using retry data
-              await ensureDistrictAndRace(retry!.id);
-              result.created++;
-              continue;
-            }
-
-            result.errors.push(`Create error for ${item.parsedFirst} ${item.parsedLast}: ${error.message}`);
-            result.skipped++;
-            continue;
-          }
-
-          // Link to district/race
-          await ensureDistrictAndRace(newCandidate!.id);
-          result.created++;
+        if (error) {
+          result.errors.push(`Sync error for ${item.parsedFirst} ${item.parsedLast}: ${error.message}`);
+          result.skipped++;
+          continue;
         }
 
-        // Helper: ensure district + race exist and link candidate
-        async function ensureDistrictAndRace(candidateId: number) {
-          // Determine district params
-          const distNum = item.fec.office === "H" ? parseInt(item.fec.district, 10) : null;
-          // For Senate, we default to class 2 (2026 midterms) unless it's a known special
-          const senateClass = item.fec.office === "S" ? 2 : null;
-
-          const dKey = districtKey(stateId!, bodyId, distNum, senateClass);
-          let districtId = districtMap.get(dKey);
-
-          if (!districtId) {
-            // Create district
-            const districtName = item.fec.office === "S"
-              ? `${item.fec.state} Senate Class ${senateClass}`
-              : `${item.fec.state} House District ${distNum}`;
-
-            const { data: newDist, error: distErr } = await supabase
-              .from("districts")
-              .insert({
-                state_id: stateId!,
-                body_id: bodyId,
-                number: distNum,
-                senate_class: senateClass,
-                name: districtName,
-              })
-              .select("id")
-              .single();
-
-            if (distErr) {
-              // District might already exist from a previous iteration
-              if (distErr.message.includes("duplicate") || distErr.message.includes("unique")) {
-                const { data: existing } = await supabase
-                  .from("districts")
-                  .select("id")
-                  .eq("state_id", stateId!)
-                  .eq("body_id", bodyId)
-                  .eq(item.fec.office === "H" ? "number" : "senate_class", item.fec.office === "H" ? distNum! : senateClass!)
-                  .single();
-                districtId = existing?.id;
-              }
-              if (!districtId) return; // Can't proceed without district
-            } else {
-              districtId = newDist!.id;
-              districtMap.set(dKey, districtId as number);
-              result.districtsCreated++;
-            }
-          }
-
-          // Ensure race exists for this district in the active cycle
-          let raceId = raceByDistrictId.get(districtId!);
-          if (!raceId) {
-            const { data: newRace, error: raceErr } = await supabase
-              .from("races")
-              .insert({
-                cycle_id: activeCycle!.id,
-                district_id: districtId!,
-                is_special_election: false,
-                is_open_seat: item.isIncumbent ? false : true,
-              })
-              .select("id")
-              .single();
-
-            if (raceErr) {
-              // Race might already exist
-              const { data: existing } = await supabase
-                .from("races")
-                .select("id")
-                .eq("cycle_id", activeCycle!.id)
-                .eq("district_id", districtId!)
-                .single();
-              raceId = existing?.id;
-            } else {
-              raceId = newRace!.id;
-              raceByDistrictId.set(districtId as number, raceId as number);
-              result.racesCreated++;
-            }
-          }
-
-          // Link candidate to race (if not already linked)
-          if (raceId) {
-            const { data: existingLink } = await supabase
-              .from("race_candidates")
-              .select("id")
-              .eq("race_id", raceId)
-              .eq("candidate_id", candidateId)
-              .single();
-
-            if (!existingLink) {
-              await supabase.from("race_candidates").insert({
-                race_id: raceId,
-                candidate_id: candidateId,
-                status: "announced",
-                is_incumbent: item.isIncumbent,
-              });
-            }
-          }
+        // Determine if this was a create or update
+        if (item.existsInFilings) {
+          result.updated++;
+        } else {
+          result.created++;
         }
       }
     } catch (err: any) {
@@ -583,8 +400,8 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
 
   // ─── Render ───
 
-  const newCount = previewCandidates.filter((p) => !p.existsInDb).length;
-  const existingCount = previewCandidates.filter((p) => p.existsInDb).length;
+  const newCount = previewCandidates.filter((p) => !p.existsInFilings).length;
+  const existingCount = previewCandidates.filter((p) => p.existsInFilings).length;
   const selectedCount = previewCandidates.filter((p) => p.selected).length;
 
   return (
@@ -598,9 +415,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
         message="OpenFEC Integration"
         description={
           <span>
-            Pull federal candidate data from the FEC (Federal Election Commission).
-            This imports candidate names, parties, states, and districts.
-            Bios, photos, issue positions, and race ratings must still be added manually.
+            Sync FEC filings to staging table. After primaries, promote winners to the candidates table from the Filed Candidates page.
             {" "}
             <a href="https://api.open.fec.gov/developers/" target="_blank" rel="noopener noreferrer">
               Get a free API key
@@ -694,12 +509,66 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>State</Text>
-              <Input
+              <Select
                 placeholder="All states"
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value.toUpperCase().slice(0, 2))}
-                style={{ width: 80 }}
-                maxLength={2}
+                value={stateFilter || undefined}
+                onChange={(val) => setStateFilter(val ?? "")}
+                allowClear
+                showSearch
+                style={{ width: 140 }}
+                options={[
+                  { value: "AL", label: "AL — Alabama" },
+                  { value: "AK", label: "AK — Alaska" },
+                  { value: "AZ", label: "AZ — Arizona" },
+                  { value: "AR", label: "AR — Arkansas" },
+                  { value: "CA", label: "CA — California" },
+                  { value: "CO", label: "CO — Colorado" },
+                  { value: "CT", label: "CT — Connecticut" },
+                  { value: "DE", label: "DE — Delaware" },
+                  { value: "FL", label: "FL — Florida" },
+                  { value: "GA", label: "GA — Georgia" },
+                  { value: "HI", label: "HI — Hawaii" },
+                  { value: "ID", label: "ID — Idaho" },
+                  { value: "IL", label: "IL — Illinois" },
+                  { value: "IN", label: "IN — Indiana" },
+                  { value: "IA", label: "IA — Iowa" },
+                  { value: "KS", label: "KS — Kansas" },
+                  { value: "KY", label: "KY — Kentucky" },
+                  { value: "LA", label: "LA — Louisiana" },
+                  { value: "ME", label: "ME — Maine" },
+                  { value: "MD", label: "MD — Maryland" },
+                  { value: "MA", label: "MA — Massachusetts" },
+                  { value: "MI", label: "MI — Michigan" },
+                  { value: "MN", label: "MN — Minnesota" },
+                  { value: "MS", label: "MS — Mississippi" },
+                  { value: "MO", label: "MO — Missouri" },
+                  { value: "MT", label: "MT — Montana" },
+                  { value: "NE", label: "NE — Nebraska" },
+                  { value: "NV", label: "NV — Nevada" },
+                  { value: "NH", label: "NH — New Hampshire" },
+                  { value: "NJ", label: "NJ — New Jersey" },
+                  { value: "NM", label: "NM — New Mexico" },
+                  { value: "NY", label: "NY — New York" },
+                  { value: "NC", label: "NC — North Carolina" },
+                  { value: "ND", label: "ND — North Dakota" },
+                  { value: "OH", label: "OH — Ohio" },
+                  { value: "OK", label: "OK — Oklahoma" },
+                  { value: "OR", label: "OR — Oregon" },
+                  { value: "PA", label: "PA — Pennsylvania" },
+                  { value: "RI", label: "RI — Rhode Island" },
+                  { value: "SC", label: "SC — South Carolina" },
+                  { value: "SD", label: "SD — South Dakota" },
+                  { value: "TN", label: "TN — Tennessee" },
+                  { value: "TX", label: "TX — Texas" },
+                  { value: "UT", label: "UT — Utah" },
+                  { value: "VT", label: "VT — Vermont" },
+                  { value: "VA", label: "VA — Virginia" },
+                  { value: "WA", label: "WA — Washington" },
+                  { value: "WV", label: "WV — West Virginia" },
+                  { value: "WI", label: "WI — Wisconsin" },
+                  { value: "WY", label: "WY — Wyoming" },
+                  { value: "DC", label: "DC — District of Columbia" },
+                ]}
               />
             </div>
             <div style={{ display: "flex", gap: 16, paddingBottom: 4, flexWrap: "wrap" }}>
@@ -716,9 +585,9 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                   <span style={{ borderBottom: "1px dashed #999" }}>Major parties only</span>
                 </Tooltip>
               </Checkbox>
-              <Checkbox checked={fetchFinancials} onChange={(e) => setFetchFinancials(e.target.checked)}>
-                <Tooltip title="Pulls funds raised, spent, and cash on hand for each candidate. Uses 1 extra API call per candidate during import.">
-                  <span style={{ borderBottom: "1px dashed #999" }}>Import financials</span>
+              <Checkbox checked={minFiveK} onChange={(e) => setMinFiveK(e.target.checked)}>
+                <Tooltip title="Only show candidates who have raised at least $5,000 — filters out non-serious campaigns">
+                  <span style={{ borderBottom: "1px dashed #999" }}>Min $5K raised</span>
                 </Tooltip>
               </Checkbox>
             </div>
@@ -760,7 +629,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
               <span>Preview ({previewCandidates.length} candidates)</span>
               <Badge count={newCount} style={{ backgroundColor: "#52c41a" }} title={`${newCount} new`} />
               {existingCount > 0 && (
-                <Badge count={existingCount} style={{ backgroundColor: "#faad14" }} title={`${existingCount} already in DB`} />
+                <Badge count={existingCount} style={{ backgroundColor: "#faad14" }} title={`${existingCount} already in filings`} />
               )}
             </Space>
           }
@@ -775,7 +644,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                 size="small"
                 onClick={() =>
                   setPreviewCandidates((prev) =>
-                    prev.map((p) => ({ ...p, selected: !p.existsInDb }))
+                    prev.map((p) => ({ ...p, selected: !p.existsInFilings }))
                   )
                 }
               >
@@ -788,7 +657,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                 onClick={runImport}
                 disabled={selectedCount === 0}
               >
-                Import Selected ({selectedCount})
+                Sync to Filings ({selectedCount})
               </Button>
             </Space>
           }
@@ -820,10 +689,10 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                   { text: "Exists", value: "exists" },
                 ],
                 onFilter: (value, record) =>
-                  value === "new" ? !record.existsInDb : record.existsInDb,
+                  value === "new" ? !record.existsInFilings : record.existsInFilings,
                 render: (_, record: PreviewCandidate) =>
-                  record.existsInDb ? (
-                    <Tag color="warning">In DB</Tag>
+                  record.existsInFilings ? (
+                    <Tag color="warning">In Filings</Tag>
                   ) : (
                     <Tag color="success">New</Tag>
                   ),
@@ -986,11 +855,11 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
       {/* Step 5: Done */}
       {step === "done" && importResult && (
         <Card
-          title="Import Complete"
+          title="Sync Complete"
           style={{ marginBottom: 16 }}
         >
           <Row gutter={16} style={{ marginBottom: 20 }}>
-            <Col span={6}>
+            <Col span={8}>
               <Statistic
                 title="Created"
                 value={importResult.created}
@@ -998,7 +867,7 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                 prefix={<CheckCircleOutlined />}
               />
             </Col>
-            <Col span={6}>
+            <Col span={8}>
               <Statistic
                 title="Updated"
                 value={importResult.updated}
@@ -1006,23 +875,10 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                 prefix={<SyncOutlined />}
               />
             </Col>
-            <Col span={6}>
+            <Col span={8}>
               <Statistic title="Skipped" value={importResult.skipped} />
             </Col>
-            <Col span={6}>
-              <Statistic
-                title="Districts Created"
-                value={importResult.districtsCreated}
-                valueStyle={{ color: "#722ed1" }}
-              />
-            </Col>
           </Row>
-
-          {importResult.racesCreated > 0 && (
-            <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-              {importResult.racesCreated} new race records were also created (no ratings — set them on the Races page).
-            </Text>
-          )}
 
           {importResult.errors.length > 0 && (
             <Alert
@@ -1048,13 +904,10 @@ export default function FecImportPage({ setHeaderActions }: FecImportPageProps) 
                 setImportResult(null);
               }}
             >
-              Import More
+              Sync More
             </Button>
-            <Button onClick={() => window.location.hash = "candidates"}>
-              View Candidates
-            </Button>
-            <Button onClick={() => window.location.hash = "races"}>
-              View Races
+            <Button onClick={() => window.location.hash = "filings"}>
+              View Filed Candidates
             </Button>
           </Space>
         </Card>

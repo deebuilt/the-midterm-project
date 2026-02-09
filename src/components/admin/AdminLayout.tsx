@@ -20,8 +20,8 @@ import CyclesPage from "./CyclesPage";
 import CandidatesPage from "./CandidatesPage";
 import RacesPage from "./RacesPage";
 import BallotMeasuresPage from "./BallotMeasuresPage";
-import FecImportPage from "./FecImportPage";
 import CalendarEventsPage from "./CalendarEventsPage";
+import FecPage from "./FecPage";
 
 const { Sider, Content, Header } = Layout;
 const { Text } = Typography;
@@ -40,7 +40,7 @@ const menuItems = [
   { key: "races", icon: <TrophyOutlined />, label: "Races" },
   { key: "ballot-measures", icon: <FileTextOutlined />, label: "Ballot Measures" },
   { key: "calendar-events", icon: <ScheduleOutlined />, label: "Calendar Events" },
-  { key: "fec-import", icon: <CloudDownloadOutlined />, label: "FEC Import" },
+  { key: "fec", icon: <CloudDownloadOutlined />, label: "FEC" },
 ];
 
 const ROUTE_TITLES: Record<AdminRoute, string> = {
@@ -51,7 +51,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   races: "Races",
   "ballot-measures": "Ballot Measures",
   "calendar-events": "Calendar Events",
-  "fec-import": "FEC Import",
+  fec: "FEC",
 };
 
 /** CSS-only animated hamburger/arrow toggle */
@@ -225,7 +225,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "races" && <RacesPage setHeaderActions={setHeaderActions} />}
           {route === "ballot-measures" && <BallotMeasuresPage setHeaderActions={setHeaderActions} />}
           {route === "calendar-events" && <CalendarEventsPage setHeaderActions={setHeaderActions} />}
-          {route === "fec-import" && <FecImportPage setHeaderActions={setHeaderActions} />}
+          {route === "fec" && <FecPage setHeaderActions={setHeaderActions} />}
         </Content>
       </Layout>
     </Layout>

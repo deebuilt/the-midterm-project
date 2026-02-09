@@ -16,6 +16,6 @@ const events = await fetchCalendarEvents();
       Primary elections, filing deadlines, and key dates for the 2026 midterms.
     </p>
 
-    <CalendarView client:load events={events} />
+    <CalendarView client:only="react" events={events} />
   </section>
 </Layout>
