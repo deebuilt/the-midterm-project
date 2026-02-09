@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure } from "../types";
+import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent } from "../types";
 
 // ─── States ───
 
@@ -578,6 +578,41 @@ export async function fetchBallotMeasures(): Promise<BallotMeasure[]> {
     stateAbbr: bm.state.abbr,
     stateName: bm.state.name,
     sourceUrl: bm.source_url,
+  }));
+}
+
+// ─── Calendar Events ───
+
+export async function fetchCalendarEvents(): Promise<CalendarEvent[]> {
+  const { data: cycle } = await supabase
+    .from("election_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .single();
+
+  if (!cycle) return [];
+
+  const { data, error } = await supabase
+    .from("calendar_events")
+    .select("*, state:states!inner(name, abbr)")
+    .eq("cycle_id", cycle.id)
+    .order("event_date")
+    .order("state_id");
+
+  if (error) {
+    console.warn(`Calendar events unavailable: ${error.message}`);
+    return [];
+  }
+
+  return (data ?? []).map((ev: any) => ({
+    id: ev.id,
+    eventType: ev.event_type,
+    eventDate: ev.event_date,
+    title: ev.title,
+    description: ev.description,
+    stateAbbr: ev.state.abbr,
+    stateName: ev.state.name,
+    sourceUrl: ev.source_url,
   }));
 }
 

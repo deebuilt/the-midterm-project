@@ -223,6 +223,40 @@ export interface DbBallotMeasure {
   updated_at: string;
 }
 
+export type CalendarEventType =
+  | "primary"
+  | "runoff"
+  | "general"
+  | "filing_deadline"
+  | "registration_deadline"
+  | "early_voting_start"
+  | "early_voting_end"
+  | "other";
+
+export const CALENDAR_EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
+  primary: "Primary Election",
+  runoff: "Runoff Election",
+  general: "General Election",
+  filing_deadline: "Filing Deadline",
+  registration_deadline: "Registration Deadline",
+  early_voting_start: "Early Voting Starts",
+  early_voting_end: "Early Voting Ends",
+  other: "Other",
+};
+
+export interface DbCalendarEvent {
+  id: number;
+  cycle_id: number;
+  state_id: number;
+  event_type: CalendarEventType;
+  event_date: string;
+  title: string;
+  description: string | null;
+  source_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbVolunteer {
   id: number;
   email: string;

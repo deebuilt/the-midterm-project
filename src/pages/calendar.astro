@@ -1,0 +1,21 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CalendarView from "../components/ui/CalendarView";
+import { fetchCalendarEvents } from "../lib/queries";
+
+const events = await fetchCalendarEvents();
+---
+
+<Layout
+  title="Election Calendar — 2026 Primaries & Key Dates"
+  description="Every state's primary election date, filing deadline, and key 2026 midterm election dates on one calendar."
+>
+  <section class="max-w-5xl mx-auto py-12 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Election Calendar</h1>
+    <p class="text-lg text-slate-500 mb-8">
+      Primary elections, filing deadlines, and key dates for the 2026 midterms.
+    </p>
+
+    <CalendarView client:load events={events} />
+  </section>
+</Layout>

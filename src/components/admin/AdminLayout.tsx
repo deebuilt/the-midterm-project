@@ -4,6 +4,7 @@ import {
   DashboardOutlined,
   TeamOutlined,
   CalendarOutlined,
+  ScheduleOutlined,
   UserOutlined,
   TrophyOutlined,
   FileTextOutlined,
@@ -20,6 +21,7 @@ import CandidatesPage from "./CandidatesPage";
 import RacesPage from "./RacesPage";
 import BallotMeasuresPage from "./BallotMeasuresPage";
 import FecImportPage from "./FecImportPage";
+import CalendarEventsPage from "./CalendarEventsPage";
 
 const { Sider, Content, Header } = Layout;
 const { Text } = Typography;
@@ -37,6 +39,7 @@ const menuItems = [
   { key: "candidates", icon: <UserOutlined />, label: "Candidates" },
   { key: "races", icon: <TrophyOutlined />, label: "Races" },
   { key: "ballot-measures", icon: <FileTextOutlined />, label: "Ballot Measures" },
+  { key: "calendar-events", icon: <ScheduleOutlined />, label: "Calendar Events" },
   { key: "fec-import", icon: <CloudDownloadOutlined />, label: "FEC Import" },
 ];
 
@@ -47,6 +50,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   candidates: "Candidates",
   races: "Races",
   "ballot-measures": "Ballot Measures",
+  "calendar-events": "Calendar Events",
   "fec-import": "FEC Import",
 };
 
@@ -121,6 +125,8 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
       >
         <a
           href="/"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display: "block",
             padding: collapsed ? "16px 8px" : "16px",
@@ -128,7 +134,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
             borderBottom: "1px solid rgba(255,255,255,0.1)",
             textDecoration: "none",
           }}
-          title="Back to main site"
+          title="Open main site in new tab"
         >
           <Text
             strong
@@ -218,6 +224,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "candidates" && <CandidatesPage setHeaderActions={setHeaderActions} />}
           {route === "races" && <RacesPage setHeaderActions={setHeaderActions} />}
           {route === "ballot-measures" && <BallotMeasuresPage setHeaderActions={setHeaderActions} />}
+          {route === "calendar-events" && <CalendarEventsPage setHeaderActions={setHeaderActions} />}
           {route === "fec-import" && <FecImportPage setHeaderActions={setHeaderActions} />}
         </Content>
       </Layout>

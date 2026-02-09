@@ -61,6 +61,12 @@ export const glossary: GlossaryTerm[] = [
     long: "Before the general election in November, each party holds a primary election where voters choose which candidate will represent that party. For example, if 3 Republicans are running for a Senate seat, the primary narrows it down to 1 Republican who then faces the Democrat (and any independents) in November.",
   },
   {
+    term: "Runoff Election",
+    slug: "runoff",
+    short: "A second election held when no candidate wins enough votes in the first round.",
+    long: "A runoff election happens when no candidate reaches the required percentage of votes (usually 50%) to win outright. The top two finishers face off in a second election weeks later. States like Georgia and Louisiana use runoff systems. Runoffs can delay final results and sometimes change the outcome since turnout is usually lower the second time around.",
+  },
+  {
     term: "Flip",
     slug: "flip",
     short: "When a seat changes from one party to the other.",

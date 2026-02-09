@@ -98,6 +98,17 @@ export interface BallotMeasure {
   sourceUrl: string | null;
 }
 
+export interface CalendarEvent {
+  id: number;
+  eventType: string;
+  eventDate: string;
+  title: string;
+  description: string | null;
+  stateAbbr: string;
+  stateName: string;
+  sourceUrl: string | null;
+}
+
 export interface StateInfo {
   name: string;
   abbr: string;

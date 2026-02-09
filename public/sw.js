@@ -1,8 +1,9 @@
-const CACHE_NAME = "tmp-v2";
+const CACHE_NAME = "tmp-v3";
 
 const PRECACHE_URLS = [
   "/",
   "/map",
+  "/calendar",
   "/news",
   "/resources",
   "/about",
