@@ -7,6 +7,7 @@ import {
   UserOutlined,
   TrophyOutlined,
   FileTextOutlined,
+  CloudDownloadOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
@@ -18,6 +19,7 @@ import CyclesPage from "./CyclesPage";
 import CandidatesPage from "./CandidatesPage";
 import RacesPage from "./RacesPage";
 import BallotMeasuresPage from "./BallotMeasuresPage";
+import FecImportPage from "./FecImportPage";
 
 const { Sider, Content, Header } = Layout;
 const { Text } = Typography;
@@ -35,6 +37,7 @@ const menuItems = [
   { key: "candidates", icon: <UserOutlined />, label: "Candidates" },
   { key: "races", icon: <TrophyOutlined />, label: "Races" },
   { key: "ballot-measures", icon: <FileTextOutlined />, label: "Ballot Measures" },
+  { key: "fec-import", icon: <CloudDownloadOutlined />, label: "FEC Import" },
 ];
 
 const ROUTE_TITLES: Record<AdminRoute, string> = {
@@ -44,6 +47,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   candidates: "Candidates",
   races: "Races",
   "ballot-measures": "Ballot Measures",
+  "fec-import": "FEC Import",
 };
 
 /** CSS-only animated hamburger/arrow toggle */
@@ -214,6 +218,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "candidates" && <CandidatesPage setHeaderActions={setHeaderActions} />}
           {route === "races" && <RacesPage setHeaderActions={setHeaderActions} />}
           {route === "ballot-measures" && <BallotMeasuresPage setHeaderActions={setHeaderActions} />}
+          {route === "fec-import" && <FecImportPage setHeaderActions={setHeaderActions} />}
         </Content>
       </Layout>
     </Layout>

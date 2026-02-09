@@ -12,6 +12,7 @@ import {
   Typography,
   Space,
   Drawer,
+  Dropdown,
   Segmented,
   Popconfirm,
   Tooltip,
@@ -25,6 +26,7 @@ import {
   EyeOutlined,
   CloseOutlined,
   InfoCircleOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
@@ -237,7 +239,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
       .select("id, name, senate_class, body:government_bodies!inner(name, slug)")
       .eq("state_id", stateId)
       .order("name");
-    setDistricts((data as DistrictOption[]) ?? []);
+    setDistricts((data as unknown as DistrictOption[]) ?? []);
   }
 
   function openCreateModal() {
@@ -518,35 +520,46 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
       render: (val: boolean) => (val ? <Tag color="orange">Yes</Tag> : null),
     },
     {
-      title: "Actions",
+      title: "",
       key: "actions",
-      width: 120,
+      width: 48,
       render: (_: unknown, record: RaceRow) => (
-        <Space size="small">
-          <Button
-            type="text"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => setPreviewRace(record)}
-            title="Preview"
-          />
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openEditModal(record)}
-            title="Edit"
-          />
-          <Popconfirm
-            title="Delete this race?"
-            description="This will also remove all candidate assignments."
-            onConfirm={() => handleDelete(record.id)}
-            okText="Delete"
-            okType="danger"
-          >
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: [
+              {
+                key: "preview",
+                label: "Preview",
+                icon: <EyeOutlined />,
+                onClick: () => setPreviewRace(record),
+              },
+              {
+                key: "edit",
+                label: "Edit",
+                icon: <EditOutlined />,
+                onClick: () => openEditModal(record),
+              },
+              { type: "divider" },
+              {
+                key: "delete",
+                label: "Delete",
+                icon: <DeleteOutlined />,
+                danger: true,
+                onClick: () =>
+                  Modal.confirm({
+                    title: "Delete this race?",
+                    content: "This will also remove all candidate assignments.",
+                    okText: "Delete",
+                    okType: "danger",
+                    onOk: () => handleDelete(record.id),
+                  }),
+              },
+            ],
+          }}
+        >
+          <Button type="text" size="small" icon={<MoreOutlined />} />
+        </Dropdown>
       ),
     },
   ];

@@ -47,6 +47,10 @@ interface CandidateRow {
   role_title: string | null;
   is_incumbent: boolean;
   bioguide_id: string | null;
+  fec_candidate_id: string | null;
+  funds_raised: number | null;
+  funds_spent: number | null;
+  cash_on_hand: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -238,6 +242,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       role_title: record.role_title ?? "",
       is_incumbent: record.is_incumbent,
       bioguide_id: record.bioguide_id ?? "",
+      fec_candidate_id: record.fec_candidate_id ?? "",
     });
     setPhotoPreview(record.photo_url ?? "");
     setPhotoError(false);
@@ -263,6 +268,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       role_title: values.role_title || null,
       is_incumbent: values.is_incumbent ?? false,
       bioguide_id: values.bioguide_id || null,
+      fec_candidate_id: values.fec_candidate_id || null,
     };
 
     if (editingCandidate) {
@@ -422,6 +428,21 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       responsive: ["lg"] as ("lg")[],
       render: (role: string | null) =>
         role || <Text type="secondary">—</Text>,
+    },
+    {
+      title: "Raised",
+      dataIndex: "funds_raised",
+      key: "funds_raised",
+      width: 100,
+      responsive: ["lg"] as ("lg")[],
+      sorter: (a: CandidateRow, b: CandidateRow) =>
+        (a.funds_raised ?? 0) - (b.funds_raised ?? 0),
+      render: (val: number | null) =>
+        val != null ? (
+          <Text style={{ fontSize: 12, fontFamily: "monospace" }}>
+            ${val >= 1_000_000 ? `${(val / 1_000_000).toFixed(1)}M` : val >= 1_000 ? `${(val / 1_000).toFixed(0)}K` : val.toFixed(0)}
+          </Text>
+        ) : <Text type="secondary" style={{ fontSize: 12 }}>—</Text>,
     },
     {
       title: "Incumbent",
@@ -635,14 +656,27 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               <Input placeholder="e.g., C001035" />
             </Form.Item>
             <Form.Item
-              name="is_incumbent"
-              valuePropName="checked"
-              label=" "
-              style={{ flex: 1, paddingTop: 4 }}
+              name="fec_candidate_id"
+              label={
+                <span>
+                  FEC ID{" "}
+                  <Tooltip title="OpenFEC candidate ID (e.g., S8CA00502). Auto-populated by FEC Import. Used to sync with FEC data.">
+                    <InfoCircleOutlined style={{ color: "#999" }} />
+                  </Tooltip>
+                </span>
+              }
+              style={{ flex: 1 }}
             >
-              <Checkbox>Incumbent</Checkbox>
+              <Input placeholder="e.g., S8CA00502" />
             </Form.Item>
           </div>
+          <Form.Item
+            name="is_incumbent"
+            valuePropName="checked"
+            style={{ marginBottom: 16 }}
+          >
+            <Checkbox>Incumbent</Checkbox>
+          </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={modalLoading} block>

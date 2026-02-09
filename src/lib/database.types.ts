@@ -93,6 +93,11 @@ export interface DbCandidate {
   role_title: string | null;
   is_incumbent: boolean;
   bioguide_id: string | null;
+  fec_candidate_id: string | null;
+  funds_raised: number | null;
+  funds_spent: number | null;
+  cash_on_hand: number | null;
+  fec_financials_updated_at: string | null;
   created_at: string;
   updated_at: string;
 }
