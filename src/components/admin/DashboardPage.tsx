@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
-import { Row, Col, Card, Spin } from "antd";
+import { useState, useEffect, useRef } from "react";
+import { Card, Spin, Button } from "antd";
 import {
   TeamOutlined,
   FlagOutlined,
   CalendarOutlined,
   FileSearchOutlined,
+  EnvironmentOutlined,
+  LeftOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import type { AdminRoute } from "./AdminApp";
@@ -16,19 +19,85 @@ interface DashboardStats {
   filingsTotal: number;
   filingsUnpromoted: number;
   activeCycleName: string;
+  statesWithGov: number;
+  totalStates: number;
 }
 
 interface DashboardPageProps {
   navigate: (route: AdminRoute) => void;
 }
 
+function StatCard({ icon, label, value, sub, onClick }: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+  sub?: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <Card
+      hoverable
+      onClick={onClick}
+      style={{ borderRadius: 8, minWidth: 200, flex: "0 0 auto" }}
+      styles={{ body: { padding: "14px 16px" } }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            background: "#f1f5f9",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 16,
+            color: "#475569",
+          }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
+            {label}
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
+            {value}
+            {sub && (
+              <span style={{ fontSize: 12, fontWeight: 400, color: "#F59E0B", marginLeft: 6 }}>
+                {sub}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function DashboardPage({ navigate }: DashboardPageProps) {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  function checkScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }
+
+  function scroll(dir: "left" | "right") {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -220 : 220, behavior: "smooth" });
+  }
 
   useEffect(() => {
     async function loadDashboard() {
-      const [volunteersRes, cycleRes, racesRes, filingsRes] = await Promise.all([
+      const [volunteersRes, cycleRes, racesRes, filingsRes, statesRes] = await Promise.all([
         supabase.from("volunteers").select("id, status"),
         supabase
           .from("election_cycles")
@@ -37,10 +106,12 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           .single(),
         supabase.from("races").select("id", { count: "exact", head: true }),
         supabase.from("fec_filings").select("id, promoted_to_candidate_id"),
+        supabase.from("states").select("id, current_governor"),
       ]);
 
       const volunteers = volunteersRes.data ?? [];
       const filings = filingsRes.data ?? [];
+      const statesData = statesRes.data ?? [];
       setStats({
         volunteerTotal: volunteers.length,
         volunteerPending: volunteers.filter((v) => v.status === "pending").length,
@@ -48,8 +119,12 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
         filingsTotal: filings.length,
         filingsUnpromoted: filings.filter((f) => !f.promoted_to_candidate_id).length,
         activeCycleName: cycleRes.data?.name ?? "None",
+        totalStates: statesData.length,
+        statesWithGov: statesData.filter((s) => s.current_governor).length,
       });
       setLoading(false);
+      // Defer scroll check until cards render
+      setTimeout(checkScroll, 50);
     }
 
     loadDashboard();
@@ -63,154 +138,96 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
     );
   }
 
+  const missingGov = (stats?.totalStates ?? 0) - (stats?.statesWithGov ?? 0);
+
   return (
-    <Row gutter={[12, 12]}>
-      <Col xs={12} sm={6}>
-        <Card
-          hoverable
+    <div style={{ position: "relative" }}>
+      {canScrollLeft && (
+        <Button
+          type="text"
+          icon={<LeftOutlined />}
+          onClick={() => scroll("left")}
+          style={{
+            position: "absolute",
+            left: -4,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 2,
+            background: "rgba(255,255,255,0.9)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+            borderRadius: "50%",
+            width: 28,
+            height: 28,
+          }}
+          size="small"
+        />
+      )}
+      {canScrollRight && (
+        <Button
+          type="text"
+          icon={<RightOutlined />}
+          onClick={() => scroll("right")}
+          style={{
+            position: "absolute",
+            right: -4,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 2,
+            background: "rgba(255,255,255,0.9)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+            borderRadius: "50%",
+            width: 28,
+            height: 28,
+          }}
+          size="small"
+        />
+      )}
+      <div
+        ref={scrollRef}
+        onScroll={checkScroll}
+        onLoad={checkScroll}
+        style={{
+          display: "flex",
+          gap: 12,
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          padding: "2px 0",
+        }}
+      >
+        <StatCard
+          icon={<TeamOutlined />}
+          label="Volunteers"
+          value={stats?.volunteerTotal ?? 0}
+          sub={stats?.volunteerPending ? `${stats.volunteerPending} pending` : undefined}
           onClick={() => navigate("volunteers")}
-          style={{ borderRadius: 8 }}
-          styles={{ body: { padding: "14px 16px" } }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                background: "#f1f5f9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 16,
-                color: "#475569",
-              }}
-            >
-              <TeamOutlined />
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
-                Volunteers
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
-                {stats?.volunteerTotal ?? 0}
-                {stats?.volunteerPending ? (
-                  <span style={{ fontSize: 12, fontWeight: 400, color: "#F59E0B", marginLeft: 6 }}>
-                    {stats.volunteerPending} pending
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Col>
-      <Col xs={12} sm={6}>
-        <Card
-          hoverable
+        />
+        <StatCard
+          icon={<FlagOutlined />}
+          label="Races"
+          value={stats?.raceCount ?? 0}
           onClick={() => navigate("races")}
-          style={{ borderRadius: 8 }}
-          styles={{ body: { padding: "14px 16px" } }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                background: "#f1f5f9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 16,
-                color: "#475569",
-              }}
-            >
-              <FlagOutlined />
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
-                Races
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
-                {stats?.raceCount ?? 0}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Col>
-      <Col xs={12} sm={6}>
-        <Card
-          hoverable
+        />
+        <StatCard
+          icon={<FileSearchOutlined />}
+          label="FEC Filings"
+          value={stats?.filingsTotal ?? 0}
+          sub={stats?.filingsUnpromoted ? `${stats.filingsUnpromoted} unpromoted` : undefined}
           onClick={() => navigate("fec")}
-          style={{ borderRadius: 8 }}
-          styles={{ body: { padding: "14px 16px" } }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                background: "#f1f5f9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 16,
-                color: "#475569",
-              }}
-            >
-              <FileSearchOutlined />
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
-                FEC Filings
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
-                {stats?.filingsTotal ?? 0}
-                {stats?.filingsUnpromoted ? (
-                  <span style={{ fontSize: 12, fontWeight: 400, color: "#F59E0B", marginLeft: 6 }}>
-                    {stats.filingsUnpromoted} unpromoted
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Col>
-      <Col xs={12} sm={6}>
-        <Card
-          hoverable
+        />
+        <StatCard
+          icon={<CalendarOutlined />}
+          label="Active Cycle"
+          value={<span style={{ fontSize: 16, fontWeight: 600 }}>{stats?.activeCycleName ?? "—"}</span>}
           onClick={() => navigate("cycles")}
-          style={{ borderRadius: 8 }}
-          styles={{ body: { padding: "14px 16px" } }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                background: "#f1f5f9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 16,
-                color: "#475569",
-              }}
-            >
-              <CalendarOutlined />
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
-                Active Cycle
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", lineHeight: 1.3 }}>
-                {stats?.activeCycleName ?? "—"}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Col>
-    </Row>
+        />
+        <StatCard
+          icon={<EnvironmentOutlined />}
+          label="States"
+          value={stats?.totalStates ?? 0}
+          sub={missingGov > 0 ? `${missingGov} missing gov` : undefined}
+          onClick={() => navigate("states")}
+        />
+      </div>
+    </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   Dropdown,
   message,
   Spin,
+  Alert,
 } from "antd";
 import {
   PlusOutlined,
@@ -27,9 +28,10 @@ import {
   InfoCircleOutlined,
   LinkOutlined,
   MoreOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
-import type { Party, Stance } from "../../lib/database.types";
+import type { Party, Stance, CandidateStatus } from "../../lib/database.types";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -53,6 +55,9 @@ interface CandidateRow {
   cash_on_hand: number | null;
   created_at: string;
   updated_at: string;
+  // Loaded separately and merged in
+  race_id?: number | null;
+  race_label?: string | null;
 }
 
 interface CandidatePosition {
@@ -78,6 +83,16 @@ interface CandidateRaceInfo {
 interface TopicOption {
   id: number;
   name: string;
+}
+
+interface RaceOption {
+  id: number;
+  cycle_name: string;
+  state_abbr: string;
+  state_name: string;
+  body_name: string;
+  district_name: string;
+  rating: string | null;
 }
 
 interface CandidatesPageProps {
@@ -135,6 +150,14 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [photoError, setPhotoError] = useState(false);
   const [drawerWidth, setDrawerWidth] = useState(560);
   const [editingPositionId, setEditingPositionId] = useState<number | null>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
+  const [bulkAssignLoading, setBulkAssignLoading] = useState(false);
+  const [allRaces, setAllRaces] = useState<RaceOption[]>([]);
+  const [racesLoading, setRacesLoading] = useState(false);
+  const [bulkAssignRaceId, setBulkAssignRaceId] = useState<number | null>(null);
+  const [bulkAssignStatus, setBulkAssignStatus] = useState<CandidateStatus>("announced");
+  const [bulkAssignIncumbent, setBulkAssignIncumbent] = useState(false);
   const [editPositionForm] = Form.useForm();
   const [form] = Form.useForm();
   const [positionForm] = Form.useForm();
@@ -142,11 +165,43 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
 
   const loadCandidates = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("candidates")
-      .select("*")
-      .order("last_name");
-    setCandidates((data as CandidateRow[]) ?? []);
+    const [candidatesRes, assignmentsRes] = await Promise.all([
+      supabase.from("candidates").select("*").order("last_name"),
+      supabase.from("race_candidates").select(`
+        candidate_id, race_id,
+        race:races!inner(
+          rating,
+          district:districts!inner(
+            state:states!inner(abbr),
+            body:government_bodies!inner(name)
+          )
+        )
+      `),
+    ]);
+
+    // Build a map of candidate_id → first race info
+    const raceMap = new Map<number, { race_id: number; label: string }>();
+    for (const rc of (assignmentsRes.data ?? []) as any[]) {
+      if (!raceMap.has(rc.candidate_id)) {
+        const abbr = rc.race?.district?.state?.abbr ?? "??";
+        const body = rc.race?.district?.body?.name ?? "";
+        raceMap.set(rc.candidate_id, {
+          race_id: rc.race_id,
+          label: `${abbr} — ${body}`,
+        });
+      }
+    }
+
+    const rows = ((candidatesRes.data as CandidateRow[]) ?? []).map((c) => {
+      const assignment = raceMap.get(c.id);
+      return {
+        ...c,
+        race_id: assignment?.race_id ?? null,
+        race_label: assignment?.label ?? null,
+      };
+    });
+
+    setCandidates(rows);
     setLoading(false);
   }, []);
 
@@ -155,10 +210,39 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     setTopics(data ?? []);
   }, []);
 
+  const loadRaces = useCallback(async () => {
+    setRacesLoading(true);
+    const { data } = await supabase
+      .from("races")
+      .select(`
+        id, rating,
+        cycle:election_cycles!inner(name),
+        district:districts!inner(
+          name,
+          state:states!inner(name, abbr),
+          body:government_bodies!inner(name)
+        )
+      `)
+      .order("id", { ascending: false });
+    setAllRaces(
+      (data ?? []).map((r: any) => ({
+        id: r.id,
+        cycle_name: r.cycle?.name ?? "",
+        state_abbr: r.district?.state?.abbr ?? "",
+        state_name: r.district?.state?.name ?? "",
+        body_name: r.district?.body?.name ?? "",
+        district_name: r.district?.name ?? "",
+        rating: r.rating,
+      }))
+    );
+    setRacesLoading(false);
+  }, []);
+
   useEffect(() => {
     loadCandidates();
     loadTopics();
-  }, [loadCandidates, loadTopics]);
+    loadRaces();
+  }, [loadCandidates, loadTopics, loadRaces]);
 
   useEffect(() => {
     setHeaderActions(
@@ -243,6 +327,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       is_incumbent: record.is_incumbent,
       bioguide_id: record.bioguide_id ?? "",
       fec_candidate_id: record.fec_candidate_id ?? "",
+      race_id: record.race_id ?? undefined,
     });
     setPhotoPreview(record.photo_url ?? "");
     setPhotoError(false);
@@ -256,6 +341,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
 
   async function handleSave(values: any) {
     setModalLoading(true);
+    const raceId = values.race_id || null;
     const payload = {
       first_name: values.first_name,
       last_name: values.last_name,
@@ -279,15 +365,37 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       if (error) {
         messageApi.error(error.message);
       } else {
+        // Update race assignment if changed
+        if (raceId) {
+          await supabase
+            .from("race_candidates")
+            .upsert(
+              { race_id: raceId, candidate_id: editingCandidate.id, status: "announced" as CandidateStatus, is_incumbent: values.is_incumbent ?? false },
+              { onConflict: "race_id,candidate_id" }
+            );
+        }
         messageApi.success("Candidate updated");
         setModalOpen(false);
         loadCandidates();
       }
     } else {
-      const { error } = await supabase.from("candidates").insert(payload);
+      const { data: newCandidate, error } = await supabase
+        .from("candidates")
+        .insert(payload)
+        .select("id")
+        .single();
       if (error) {
         messageApi.error(error.message);
       } else {
+        // Create race assignment if provided
+        if (raceId && newCandidate) {
+          await supabase
+            .from("race_candidates")
+            .upsert(
+              { race_id: raceId, candidate_id: newCandidate.id, status: "announced" as CandidateStatus, is_incumbent: values.is_incumbent ?? false },
+              { onConflict: "race_id,candidate_id" }
+            );
+        }
         messageApi.success("Candidate created");
         form.resetFields();
         setModalOpen(false);
@@ -339,6 +447,125 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     }
   }
 
+  async function handleInlineRaceAssign(candidateId: number, raceId: number | null) {
+    if (!raceId) return;
+    const { error } = await supabase
+      .from("race_candidates")
+      .upsert(
+        { race_id: raceId, candidate_id: candidateId, status: "announced" as CandidateStatus, is_incumbent: false },
+        { onConflict: "race_id,candidate_id" }
+      );
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success("Race assigned");
+      loadCandidates();
+    }
+  }
+
+  async function handleDrawerAddRace(raceId: number) {
+    if (!detailCandidate) return;
+    const { error } = await supabase
+      .from("race_candidates")
+      .upsert(
+        { race_id: raceId, candidate_id: detailCandidate.id, status: "announced" as CandidateStatus, is_incumbent: detailCandidate.is_incumbent },
+        { onConflict: "race_id,candidate_id" }
+      );
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success("Race assigned");
+      loadCandidateDetails(detailCandidate.id);
+      loadCandidates();
+    }
+  }
+
+  async function handleDrawerRemoveRace(raceId: number) {
+    if (!detailCandidate) return;
+    const { error } = await supabase
+      .from("race_candidates")
+      .delete()
+      .eq("race_id", raceId)
+      .eq("candidate_id", detailCandidate.id);
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success("Race removed");
+      loadCandidateDetails(detailCandidate.id);
+      loadCandidates();
+    }
+  }
+
+  async function handleDrawerUpdateRaceStatus(raceId: number, status: CandidateStatus) {
+    if (!detailCandidate) return;
+    const { error } = await supabase
+      .from("race_candidates")
+      .update({ status })
+      .eq("race_id", raceId)
+      .eq("candidate_id", detailCandidate.id);
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      loadCandidateDetails(detailCandidate.id);
+    }
+  }
+
+  function openBulkAssign() {
+    if (allRaces.length === 0) loadRaces();
+    setBulkAssignRaceId(null);
+    setBulkAssignStatus("announced");
+    setBulkAssignIncumbent(false);
+    setBulkAssignOpen(true);
+  }
+
+  async function handleBulkAssign() {
+    if (!bulkAssignRaceId || selectedRowKeys.length === 0) return;
+    setBulkAssignLoading(true);
+
+    const rows = selectedRowKeys.map((candidateId) => ({
+      race_id: bulkAssignRaceId,
+      candidate_id: candidateId as number,
+      status: bulkAssignStatus,
+      is_incumbent: bulkAssignIncumbent,
+    }));
+
+    const { error } = await supabase
+      .from("race_candidates")
+      .upsert(rows, { onConflict: "race_id,candidate_id" });
+
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success(`Assigned ${rows.length} candidate(s) to race`);
+      setBulkAssignOpen(false);
+      setSelectedRowKeys([]);
+    }
+    setBulkAssignLoading(false);
+  }
+
+  async function handleBulkDelete() {
+    const ids = selectedRowKeys as number[];
+    Modal.confirm({
+      title: `Delete ${ids.length} candidate(s)?`,
+      content: "This will also remove their positions and race assignments.",
+      okText: "Delete All",
+      okType: "danger",
+      onOk: async () => {
+        const { error } = await supabase
+          .from("candidates")
+          .delete()
+          .in("id", ids);
+        if (error) {
+          messageApi.error(error.message);
+        } else {
+          messageApi.success(`Deleted ${ids.length} candidate(s)`);
+          setSelectedRowKeys([]);
+          loadCandidates();
+        }
+      },
+    });
+  }
+
   function startEditPosition(pos: CandidatePosition) {
     setEditingPositionId(pos.id);
     editPositionForm.setFieldsValue({
@@ -385,70 +612,110 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     document.addEventListener("mouseup", onUp);
   }
 
+  const raceSelectOptions = allRaces.map((r) => ({
+    value: r.id,
+    label: `${r.state_abbr} — ${r.body_name}${r.rating ? ` (${r.rating})` : ""} — ${r.cycle_name}`,
+  }));
+
+  const partyLetters: Record<string, string> = {
+    Democrat: "D",
+    Republican: "R",
+    Independent: "I",
+    Libertarian: "L",
+    Green: "G",
+    Other: "O",
+  };
+
   const columns = [
     {
-      title: "Photo",
+      title: "",
       key: "photo",
-      width: 50,
+      width: 40,
       render: (_: unknown, record: CandidateRow) => (
         <Avatar
+          size="small"
           src={record.photo_url || undefined}
-          style={{ backgroundColor: record.photo_url ? undefined : "#1E293B" }}
+          style={{ backgroundColor: record.photo_url ? undefined : "#1E293B", fontSize: 11 }}
         >
-          {record.first_name[0]}
-          {record.last_name[0]}
+          {record.first_name[0]}{record.last_name[0]}
         </Avatar>
       ),
     },
     {
       title: "Name",
       key: "name",
+      width: 180,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         a.last_name.localeCompare(b.last_name),
-      render: (_: unknown, record: CandidateRow) => (
-        <a onClick={() => openDetailDrawer(record)}>
-          {record.first_name} {record.last_name}
-        </a>
-      ),
-    },
-    {
-      title: "Party",
-      dataIndex: "party",
-      key: "party",
       filters: partyOptions.map((p) => ({ text: p.label, value: p.value })),
       onFilter: (value: unknown, record: CandidateRow) => record.party === value,
-      render: (party: Party) => (
-        <Tag color={partyColors[party] ?? "default"}>{party}</Tag>
+      render: (_: unknown, record: CandidateRow) => (
+        <span>
+          <a onClick={() => openDetailDrawer(record)}>
+            {record.first_name} {record.last_name}
+          </a>{" "}
+          <Tag
+            color={partyColors[record.party] ?? "default"}
+            style={{ marginLeft: 2, fontSize: 11, lineHeight: "16px", padding: "0 4px" }}
+          >
+            {partyLetters[record.party] ?? "?"}
+          </Tag>
+        </span>
       ),
     },
     {
       title: "Role",
       dataIndex: "role_title",
       key: "role_title",
+      width: 150,
       responsive: ["lg"] as ("lg")[],
+      ellipsis: true,
       render: (role: string | null) =>
         role || <Text type="secondary">—</Text>,
     },
     {
-      title: "Raised",
-      dataIndex: "funds_raised",
-      key: "funds_raised",
-      width: 100,
-      responsive: ["lg"] as ("lg")[],
-      sorter: (a: CandidateRow, b: CandidateRow) =>
-        (a.funds_raised ?? 0) - (b.funds_raised ?? 0),
-      render: (val: number | null) =>
-        val != null ? (
-          <Text style={{ fontSize: 12, fontFamily: "monospace" }}>
-            ${val >= 1_000_000 ? `${(val / 1_000_000).toFixed(1)}M` : val >= 1_000 ? `${(val / 1_000).toFixed(0)}K` : val.toFixed(0)}
-          </Text>
-        ) : <Text type="secondary" style={{ fontSize: 12 }}>—</Text>,
+      title: "Race",
+      key: "race",
+      width: 200,
+      render: (_: unknown, record: CandidateRow) => (
+        <Select
+          size="small"
+          showSearch
+          allowClear
+          placeholder="Assign race..."
+          value={record.race_id ?? undefined}
+          loading={racesLoading}
+          onChange={(val: number | undefined) => handleInlineRaceAssign(record.id, val ?? null)}
+          filterOption={(input, option) =>
+            (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+          }
+          options={raceSelectOptions}
+          style={{ width: "100%" }}
+        />
+      ),
     },
     {
-      title: "Incumbent",
+      title: "FEC",
+      key: "fec",
+      width: 50,
+      filters: [
+        { text: "Linked", value: true },
+        { text: "No FEC", value: false },
+      ],
+      onFilter: (value: unknown, record: CandidateRow) =>
+        (!!record.fec_candidate_id) === value,
+      render: (_: unknown, record: CandidateRow) =>
+        record.fec_candidate_id ? (
+          <Tooltip title={record.fec_candidate_id}>
+            <Tag color="cyan" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>FEC</Tag>
+          </Tooltip>
+        ) : <Text type="secondary" style={{ fontSize: 11 }}>—</Text>,
+    },
+    {
+      title: "Inc.",
       dataIndex: "is_incumbent",
       key: "is_incumbent",
-      width: 90,
+      width: 50,
       filters: [
         { text: "Yes", value: true },
         { text: "No", value: false },
@@ -456,7 +723,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       onFilter: (value: unknown, record: CandidateRow) =>
         record.is_incumbent === value,
       render: (val: boolean) =>
-        val ? <Tag color="green">Yes</Tag> : <Text type="secondary">No</Text>,
+        val ? <Tag color="green" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>Inc</Tag> : <Text type="secondary">—</Text>,
     },
     {
       title: "",
@@ -511,12 +778,61 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
 
       <Text type="secondary" style={{ display: "block", marginBottom: 16, fontSize: 13 }}>
         Candidates appear on the Senate, Map, and Explore pages when assigned to a race.
+        {" "}Select rows to bulk-assign to a race or delete.
       </Text>
+
+      {/* Bulk action toolbar */}
+      {selectedRowKeys.length > 0 && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: "8px 16px",
+            background: "#f0f5ff",
+            borderRadius: 8,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: "1px solid #d6e4ff",
+          }}
+        >
+          <Text strong style={{ fontSize: 13 }}>
+            {selectedRowKeys.length} selected
+          </Text>
+          <Button
+            size="small"
+            type="primary"
+            icon={<TeamOutlined />}
+            onClick={openBulkAssign}
+          >
+            Assign to Race
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleBulkDelete}
+          >
+            Delete
+          </Button>
+          <Button
+            size="small"
+            type="text"
+            onClick={() => setSelectedRowKeys([])}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       <Table
         dataSource={candidates}
         columns={columns}
         rowKey="id"
+        rowSelection={{
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
+          columnWidth: 40,
+        }}
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
         pagination={{ pageSize: 20, showSizeChanger: true }}
       />
@@ -678,12 +994,107 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             <Checkbox>Incumbent</Checkbox>
           </Form.Item>
 
+          <Form.Item
+            name="race_id"
+            label="Race Assignment"
+          >
+            <Select
+              showSearch
+              allowClear
+              loading={racesLoading}
+              placeholder="Assign to a race (optional)..."
+              filterOption={(input, option) =>
+                (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              options={raceSelectOptions}
+            />
+          </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={modalLoading} block>
               {editingCandidate ? "Save Changes" : "Create Candidate"}
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Bulk Assign to Race Modal */}
+      <Modal
+        title={`Assign ${selectedRowKeys.length} candidate(s) to a race`}
+        open={bulkAssignOpen}
+        onCancel={() => setBulkAssignOpen(false)}
+        okText="Assign"
+        okButtonProps={{ disabled: !bulkAssignRaceId, loading: bulkAssignLoading }}
+        onOk={handleBulkAssign}
+        width={600}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            This will link the selected candidates to the chosen race in the race_candidates table.
+            Existing assignments to the same race will be updated (upsert).
+          </Text>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Race</Text>
+          <Select
+            showSearch
+            loading={racesLoading}
+            placeholder="Search by state or body..."
+            value={bulkAssignRaceId}
+            onChange={setBulkAssignRaceId}
+            style={{ width: "100%" }}
+            filterOption={(input, option) =>
+              (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={allRaces.map((r) => ({
+              value: r.id,
+              label: `${r.state_abbr} — ${r.body_name}${r.rating ? ` (${r.rating})` : ""} — ${r.cycle_name}`,
+            }))}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+          <div style={{ flex: 1 }}>
+            <Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Status</Text>
+            <Select
+              value={bulkAssignStatus}
+              onChange={setBulkAssignStatus}
+              style={{ width: "100%" }}
+              options={[
+                { value: "announced", label: "Announced" },
+                { value: "primary_winner", label: "Primary Winner" },
+                { value: "runoff", label: "Runoff" },
+                { value: "withdrawn", label: "Withdrawn" },
+                { value: "won", label: "Won" },
+                { value: "lost", label: "Lost" },
+              ]}
+            />
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
+            <Checkbox
+              checked={bulkAssignIncumbent}
+              onChange={(e) => setBulkAssignIncumbent(e.target.checked)}
+            >
+              Mark as incumbent
+            </Checkbox>
+          </div>
+        </div>
+
+        {bulkAssignRaceId && (
+          <Alert
+            type="info"
+            showIcon
+            style={{ fontSize: 13 }}
+            message={
+              <>
+                Assigning: {selectedRowKeys.length} candidate(s) as{" "}
+                <Tag>{bulkAssignStatus}</Tag>
+                {bulkAssignIncumbent && <Tag color="green">incumbent</Tag>}
+              </>
+            }
+          />
+        )}
       </Modal>
 
       {/* Detail Drawer */}
@@ -962,9 +1373,37 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                     <Spin />
                   ) : (
                     <div>
-                      <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
-                        Races this candidate is running in. To add or remove race assignments, go to the Races page.
-                      </Text>
+                      {/* Add race form */}
+                      <div
+                        style={{
+                          marginBottom: 16,
+                          padding: 12,
+                          background: "#f8f9fa",
+                          borderRadius: 8,
+                          border: "1px solid #f0f0f0",
+                        }}
+                      >
+                        <Text strong style={{ fontSize: 12, display: "block", marginBottom: 8 }}>
+                          Assign to Race
+                        </Text>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <Select
+                            showSearch
+                            size="small"
+                            placeholder="Search by state or body..."
+                            loading={racesLoading}
+                            filterOption={(input, option) =>
+                              (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+                            }
+                            options={raceSelectOptions.filter(
+                              (r) => !races.some((existing) => existing.race_id === r.value)
+                            )}
+                            style={{ flex: 1 }}
+                            onSelect={(raceId: number) => handleDrawerAddRace(raceId)}
+                          />
+                        </div>
+                      </div>
+
                       {races.length === 0 ? (
                         <Text type="secondary">
                           Not assigned to any races yet.
@@ -977,26 +1416,16 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                           pagination={false}
                           columns={[
                             {
-                              title: "Cycle",
-                              dataIndex: "cycle_name",
-                              key: "cycle_name",
-                              width: 120,
-                            },
-                            {
-                              title: "State",
-                              key: "state",
+                              title: "Race",
+                              key: "race",
                               render: (_: unknown, r: CandidateRaceInfo) =>
-                                `${r.state_name} (${r.state_abbr})`,
-                            },
-                            {
-                              title: "Body",
-                              dataIndex: "body_name",
-                              key: "body_name",
+                                `${r.state_abbr} — ${r.body_name}`,
                             },
                             {
                               title: "Rating",
                               dataIndex: "rating",
                               key: "rating",
+                              width: 90,
                               render: (rating: string | null) =>
                                 rating ? <Tag>{rating}</Tag> : <Text type="secondary">—</Text>,
                             },
@@ -1004,7 +1433,38 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                               title: "Status",
                               dataIndex: "status",
                               key: "status",
-                              render: (s: string) => <Tag>{s.charAt(0).toUpperCase() + s.slice(1)}</Tag>,
+                              width: 140,
+                              render: (s: string, r: CandidateRaceInfo) => (
+                                <Select
+                                  size="small"
+                                  value={s}
+                                  onChange={(val) => handleDrawerUpdateRaceStatus(r.race_id, val as CandidateStatus)}
+                                  style={{ width: 130 }}
+                                  options={[
+                                    { value: "announced", label: "Announced" },
+                                    { value: "primary_winner", label: "Primary Winner" },
+                                    { value: "runoff", label: "Runoff" },
+                                    { value: "withdrawn", label: "Withdrawn" },
+                                    { value: "won", label: "Won" },
+                                    { value: "lost", label: "Lost" },
+                                  ]}
+                                />
+                              ),
+                            },
+                            {
+                              title: "",
+                              key: "remove",
+                              width: 48,
+                              render: (_: unknown, r: CandidateRaceInfo) => (
+                                <Popconfirm
+                                  title="Remove from this race?"
+                                  onConfirm={() => handleDrawerRemoveRace(r.race_id)}
+                                  okText="Remove"
+                                  okType="danger"
+                                >
+                                  <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+                                </Popconfirm>
+                              ),
                             },
                           ]}
                         />
