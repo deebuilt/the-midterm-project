@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Layout, Menu, Button, Typography, theme } from "antd";
+import { Layout, Menu, Button, Typography, Popover, theme } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -11,6 +11,7 @@ import {
   CloudDownloadOutlined,
   LogoutOutlined,
   EnvironmentOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
 import type { AdminRoute } from "./AdminApp";
@@ -24,6 +25,7 @@ import BallotMeasuresPage from "./BallotMeasuresPage";
 import CalendarEventsPage from "./CalendarEventsPage";
 import FecPage from "./FecPage";
 import StatesPage from "./StatesPage";
+import SetupGuidePage from "./SetupGuidePage";
 
 const { Sider, Content, Header } = Layout;
 const { Text } = Typography;
@@ -56,6 +58,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   "calendar-events": "Calendar Events",
   fec: "FEC",
   states: "States",
+  "setup-guide": "Setup Guide",
 };
 
 /** CSS-only animated hamburger/arrow toggle */
@@ -167,34 +170,80 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
             position: "absolute",
             bottom: 0,
             width: "100%",
-            padding: collapsed ? "12px 8px" : "12px 16px",
             borderTop: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          {!collapsed && (
-            <Text
+          <Popover
+            placement="topLeft"
+            trigger="click"
+            arrow={false}
+            content={
+              <div style={{ minWidth: 180 }}>
+                <div style={{ padding: "4px 0 8px", borderBottom: "1px solid #f0f0f0", marginBottom: 8 }}>
+                  <Text style={{ fontSize: 12, color: "#64748b" }}>{user.email}</Text>
+                </div>
+                <Button
+                  type="text"
+                  icon={<BookOutlined />}
+                  onClick={() => navigate("setup-guide")}
+                  style={{ width: "100%", textAlign: "left", marginBottom: 4 }}
+                  size="small"
+                >
+                  Setup Guide
+                </Button>
+                <Button
+                  type="text"
+                  danger
+                  icon={<LogoutOutlined />}
+                  onClick={() => signOut()}
+                  style={{ width: "100%", textAlign: "left" }}
+                  size="small"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            }
+          >
+            <div
               style={{
-                color: "rgba(255,255,255,0.5)",
-                fontSize: 12,
-                display: "block",
-                marginBottom: 8,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                padding: collapsed ? "12px 8px" : "12px 16px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
-              {user.email}
-            </Text>
-          )}
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={() => signOut()}
-            style={{ color: "rgba(255,255,255,0.6)", width: "100%", textAlign: "left" }}
-            size="small"
-          >
-            {collapsed ? "" : "Sign Out"}
-          </Button>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.15)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  color: "white",
+                  flexShrink: 0,
+                }}
+              >
+                {(user.email?.[0] ?? "A").toUpperCase()}
+              </div>
+              {!collapsed && (
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: 12,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {user.email}
+                </Text>
+              )}
+            </div>
+          </Popover>
         </div>
       </Sider>
 
@@ -231,6 +280,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "calendar-events" && <CalendarEventsPage setHeaderActions={setHeaderActions} />}
           {route === "fec" && <FecPage setHeaderActions={setHeaderActions} />}
           {route === "states" && <StatesPage setHeaderActions={setHeaderActions} />}
+          {route === "setup-guide" && <SetupGuidePage navigate={navigate} />}
         </Content>
       </Layout>
     </Layout>
