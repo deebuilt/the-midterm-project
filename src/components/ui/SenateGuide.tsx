@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, type TouchEvent } from "react";
-import type { SenateRace } from "../../types";
 
 // --- Types ---
 
@@ -15,10 +14,6 @@ interface SenateGuideProps {
     classUp: number;
     classBreakdown: { republican: number; democrat: number };
   };
-  tossups: SenateRace[];
-  leanRaces: SenateRace[];
-  specials: SenateRace[];
-  allRaces: SenateRace[];
 }
 
 const STEPS = [
@@ -26,7 +21,6 @@ const STEPS = [
   { id: "regular-special", title: "Regular vs Special", short: "Why Special?" },
   { id: "current-score", title: "The Current Score", short: "The Math" },
   { id: "ratings", title: "Race Ratings Explained", short: "Ratings" },
-  { id: "follow-seats", title: "Follow the Seats", short: "Key Races" },
 ];
 
 // --- Main Component ---
@@ -91,7 +85,7 @@ export default function SenateGuide(props: SenateGuideProps) {
               New to Senate elections?
             </div>
             <div className="text-sm text-slate-500">
-              Take a 2-minute walkthrough of how the 2026 races work.
+              Take a 2-minute walkthrough of how Senate races work.
             </div>
           </div>
           <span className="text-slate-400 group-hover:text-tossup transition-colors text-xl">
@@ -156,10 +150,9 @@ export default function SenateGuide(props: SenateGuideProps) {
           onTouchEnd={onTouchEnd}
         >
           {step === 0 && <BigPictureStep overview={props.overview} />}
-          {step === 1 && <RegularVsSpecialStep specials={props.specials} />}
-          {step === 2 && <CurrentScoreStep overview={props.overview} tossups={props.tossups} leanRaces={props.leanRaces} />}
-          {step === 3 && <RatingsExplainedStep allRaces={props.allRaces} />}
-          {step === 4 && <FollowSeatsStep tossups={props.tossups} specials={props.specials} leanRaces={props.leanRaces} />}
+          {step === 1 && <RegularVsSpecialStep overview={props.overview} />}
+          {step === 2 && <CurrentScoreStep overview={props.overview} />}
+          {step === 3 && <RatingsExplainedStep />}
         </div>
 
         {/* Navigation */}
@@ -183,13 +176,11 @@ export default function SenateGuide(props: SenateGuideProps) {
               onClick={() => {
                 setIsOpen(false);
                 setStep(0);
-                setTimeout(() => {
-                  document.getElementById("toss-ups")?.scrollIntoView({ behavior: "smooth" });
-                }, 100);
+                window.location.href = "/map";
               }}
               className="px-5 py-2 rounded-lg bg-tossup text-white text-sm font-medium hover:bg-amber-600 transition-colors"
             >
-              Start Exploring &rarr;
+              Explore the Map &rarr;
             </button>
           )}
         </div>
@@ -327,7 +318,7 @@ function BigPictureStep({ overview }: { overview: SenateGuideProps["overview"] }
 
 // --- Step 2: Regular vs Special ---
 
-function RegularVsSpecialStep({ specials }: { specials: SenateRace[] }) {
+function RegularVsSpecialStep({ overview }: { overview: SenateGuideProps["overview"] }) {
   return (
     <div className="space-y-4 pt-2">
       <p className="text-sm text-slate-600 leading-relaxed">
@@ -345,8 +336,8 @@ function RegularVsSpecialStep({ specials }: { specials: SenateRace[] }) {
           <div className="bg-slate-50 rounded-lg p-3 text-xs">
             <div className="font-semibold text-slate-700">Example:</div>
             <div className="text-slate-600 mt-1">
-              <strong>Susan Collins</strong> (R-ME) has been a senator since 1997.
-              Her term expires in January 2027. She's running for re-election on schedule.
+              A senator elected in 2020 serves until January 2027.
+              Their seat appears on the 2026 ballot on schedule.
             </div>
           </div>
         </div>
@@ -359,10 +350,10 @@ function RegularVsSpecialStep({ specials }: { specials: SenateRace[] }) {
             Still on schedule, but the incumbent chose not to run again (retiring).
           </p>
           <div className="bg-white/70 rounded-lg p-3 text-xs">
-            <div className="font-semibold text-slate-700">Example:</div>
+            <div className="font-semibold text-slate-700">Why it matters:</div>
             <div className="text-slate-600 mt-1">
-              <strong>Joni Ernst</strong> (R-IA) is retiring. Her Class II seat is
-              up on schedule, but she won't be on the ballot. New candidates will compete for it.
+              Without an incumbent on the ballot, open seats are often
+              more competitive. New candidates from both parties compete for it.
             </div>
           </div>
         </div>
@@ -374,25 +365,21 @@ function RegularVsSpecialStep({ specials }: { specials: SenateRace[] }) {
           <p className="text-xs text-slate-500 mb-3">
             Unplanned. The senator left early. Can be from <em>any</em> class.
           </p>
-          <div className="bg-white/70 rounded-lg p-3 text-xs space-y-2">
-            <div className="font-semibold text-slate-700">Examples:</div>
-            {specials.map((race) => (
-              <div key={race.stateAbbr} className="text-slate-600">
-                <strong>{race.incumbent?.name}</strong> ({race.stateAbbr}) &rarr;{" "}
-                {race.incumbent?.currentRole}.{" "}
-                <span className="text-purple-600">
-                  This is a Class {race.class} seat appearing on the 2026 ballot early.
-                </span>
-              </div>
-            ))}
+          <div className="bg-white/70 rounded-lg p-3 text-xs">
+            <div className="font-semibold text-slate-700">In 2026:</div>
+            <div className="text-slate-600 mt-1">
+              {overview.specialElections} special elections &mdash; seats vacated when senators
+              took other government positions. These are Class III seats appearing
+              on the 2026 ballot early.
+            </div>
           </div>
         </div>
       </div>
 
       <div className="bg-slate-50 rounded-lg p-4 text-xs text-slate-600">
-        <strong className="text-slate-700">Key insight:</strong> Ohio and Florida are on the
-        2026 ballot because their senators left for other jobs &mdash; not because those seats
-        were scheduled. They're Class III seats that would normally be up in 2028.
+        <strong className="text-slate-700">Key insight:</strong> Special elections happen because
+        a senator left for another job, passed away, or resigned. The state holds an election
+        to fill the remainder of that term. These seats would normally be up in a different year.
       </div>
     </div>
   );
@@ -400,33 +387,12 @@ function RegularVsSpecialStep({ specials }: { specials: SenateRace[] }) {
 
 // --- Step 3: The Current Score ---
 
-function CurrentScoreStep({
-  overview,
-  tossups,
-  leanRaces,
-}: {
-  overview: SenateGuideProps["overview"];
-  tossups: SenateRace[];
-  leanRaces: SenateRace[];
-}) {
+function CurrentScoreStep({ overview }: { overview: SenateGuideProps["overview"] }) {
   const [barAnimate, setBarAnimate] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setBarAnimate(true), 200);
     return () => clearTimeout(t);
   }, []);
-
-  // Find flip opportunities: R-held toss-ups and leans that Dems could flip
-  const demTargets = [...tossups, ...leanRaces].filter(
-    (r) => r.incumbent?.party === "Republican" || (r.isOpenSeat && !r.candidates.democrat.length && r.candidates.republican.length > 0)
-  ).filter((r) => {
-    // R-held seats or open R seats
-    const incParty = r.incumbent?.party;
-    return incParty === "Republican";
-  });
-
-  const demDefends = [...tossups, ...leanRaces].filter(
-    (r) => r.incumbent?.party === "Democrat"
-  );
 
   return (
     <div className="space-y-5 pt-2">
@@ -473,62 +439,19 @@ function CurrentScoreStep({
         </div>
       </div>
 
-      {/* Where the flips come from */}
-      <div>
-        <h3 className="text-sm font-bold mb-2">Where could flips come from?</h3>
-        <div className="space-y-2">
-          {demTargets.map((race) => {
-            const allCandidates = [
-              ...race.candidates.democrat.map((c) => ({ name: c.name, party: "D" })),
-              ...race.candidates.republican.map((c) => ({ name: c.name, party: "R" })),
-              ...(race.candidates.independent || []).map((c) => ({ name: c.name, party: "I" })),
-            ];
-            return (
-              <div key={race.stateAbbr} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-3">
-                <span className="font-bold text-slate-700 w-8">{race.stateAbbr}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium shrink-0">
-                  R-held
-                </span>
-                <RatingPill rating={race.rating} />
-                <span className="text-xs text-slate-500 truncate">
-                  {allCandidates.map((c) => `${c.name} (${c.party})`).join(" vs ") || "TBD"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="bg-slate-50 rounded-lg p-4">
+        <h3 className="text-sm font-bold mb-2">How do flips happen?</h3>
+        <p className="text-sm text-slate-600">
+          Of the {overview.seatsUpForElection} Class II seats up this cycle,{" "}
+          <strong>{overview.classBreakdown.republican} are Republican-held</strong> and{" "}
+          <strong>{overview.classBreakdown.democrat} are Democrat-held</strong>.
+          Democrats need to flip {overview.demsNeedToFlip} seats while defending all of theirs.
+          The most likely flips come from Toss-up and Lean-rated races.
+        </p>
+        <a href="/map" className="text-sm text-tossup font-medium mt-2 inline-block hover:underline">
+          See which states are competitive on the map &rarr;
+        </a>
       </div>
-
-      {demDefends.length > 0 && (
-        <div>
-          <h3 className="text-sm font-bold mb-2">Seats Dems must defend:</h3>
-          <div className="space-y-2">
-            {demDefends.map((race) => {
-              const allCandidates = [
-                ...race.candidates.democrat.map((c) => ({ name: c.name, party: "D" })),
-                ...race.candidates.republican.map((c) => ({ name: c.name, party: "R" })),
-              ];
-              return (
-                <div key={race.stateAbbr} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-3">
-                  <span className="font-bold text-slate-700 w-8">{race.stateAbbr}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium shrink-0">
-                    D-held
-                  </span>
-                  <RatingPill rating={race.rating} />
-                  <span className="text-xs text-slate-500 truncate">
-                    {allCandidates.map((c) => `${c.name} (${c.party})`).join(" vs ") || "TBD"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <p className="text-xs text-slate-400">
-        Dems need to flip {overview.demsNeedToFlip} of these R-held seats while keeping all their own.
-        If the GOP loses more than {overview.gopsCanLose} seats, they lose the majority.
-      </p>
     </div>
   );
 }
@@ -547,10 +470,9 @@ const RATING_INFO: Record<string, { meaning: string; color: string; bgColor: str
   "Safe R":   { meaning: "Republican is almost certain to win. Deep red state, strong incumbent.", color: "text-red-700", bgColor: "bg-red-500" },
 };
 
-function RatingsExplainedStep({ allRaces }: { allRaces: SenateRace[] }) {
+function RatingsExplainedStep() {
   const [selected, setSelected] = useState<string>("Toss-up");
   const info = RATING_INFO[selected]!;
-  const matchingRaces = allRaces.filter((r) => r.rating === selected);
 
   return (
     <div className="space-y-5 pt-2">
@@ -588,162 +510,19 @@ function RatingsExplainedStep({ allRaces }: { allRaces: SenateRace[] }) {
       }`}>
         <h3 className={`font-bold text-lg ${info.color}`}>{selected}</h3>
         <p className="text-sm text-slate-600 mt-1">{info.meaning}</p>
-
-        {matchingRaces.length > 0 ? (
-          <div className="mt-4 space-y-2">
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide">
-              2026 races with this rating:
-            </div>
-            {matchingRaces.map((race) => (
-              <div key={race.stateAbbr} className="bg-white rounded-lg p-3 border border-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm">{race.state}</span>
-                  {race.isSpecialElection && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
-                      Special
-                    </span>
-                  )}
-                  {race.isOpenSeat && !race.isSpecialElection && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                      Open Seat
-                    </span>
-                  )}
-                </div>
-                {race.whyCompetitive && (
-                  <p className="text-xs text-slate-500 mt-1">{race.whyCompetitive}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-slate-400 mt-3 italic">
-            No 2026 Senate races currently have this rating in our data.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// --- Step 5: Follow the Seats ---
-
-function FollowSeatsStep({
-  tossups,
-  specials,
-  leanRaces,
-}: {
-  tossups: SenateRace[];
-  specials: SenateRace[];
-  leanRaces: SenateRace[];
-}) {
-  const keyRaces = [...tossups, ...specials.slice(0, 1), ...leanRaces.slice(0, 1)];
-
-  return (
-    <div className="space-y-4 pt-2">
-      <p className="text-sm text-slate-600 leading-relaxed">
-        Here's the full story for the key races. Who held the seat, why it's competitive,
-        and who's running for it now.
-      </p>
-
-      <div className="space-y-3">
-        {keyRaces.map((race) => (
-          <SeatJourneyCard key={race.stateAbbr} race={race} />
-        ))}
       </div>
 
-      <div className="bg-tossup/10 border border-tossup/20 rounded-xl p-5 text-center">
-        <h3 className="font-bold mb-1">Now you know the landscape.</h3>
-        <p className="text-sm text-slate-500">
-          Close this guide and explore every race, candidate, and voting record below.
+      <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-600">
+        <strong className="text-slate-700">Who sets these ratings?</strong>
+        <p className="mt-1">
+          Major outlets like the Cook Political Report, Sabato's Crystal Ball, and
+          Inside Elections publish race ratings. They update throughout the cycle
+          as new polls, fundraising data, and events shift the landscape.
         </p>
+        <a href="/map" className="text-tossup font-medium mt-2 inline-block hover:underline">
+          See the current ratings on the map &rarr;
+        </a>
       </div>
     </div>
-  );
-}
-
-function SeatJourneyCard({ race }: { race: SenateRace }) {
-  const allCandidates = [
-    ...race.candidates.democrat,
-    ...race.candidates.republican,
-    ...(race.candidates.independent || []),
-  ];
-
-  return (
-    <div className="border border-slate-200 rounded-xl p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="font-bold">{race.state}</h4>
-        <RatingPill rating={race.rating} />
-      </div>
-
-      {/* Journey */}
-      <div className="relative pl-4 border-l-2 border-dashed border-slate-200 space-y-3">
-        {/* Who held it */}
-        <div className="relative">
-          <div className="absolute -left-[calc(1rem+5px)] top-1 w-2.5 h-2.5 rounded-full bg-slate-300" />
-          <div className="text-xs text-slate-400 font-medium">WHO HELD IT</div>
-          <div className="text-sm text-slate-700">
-            {race.incumbent?.name} ({race.incumbent?.party.charAt(0)})
-            {race.incumbent?.currentRole && (
-              <span className="text-slate-400"> &mdash; {race.incumbent.currentRole}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Why it's competitive */}
-        <div className="relative">
-          <div className="absolute -left-[calc(1rem+5px)] top-1 w-2.5 h-2.5 rounded-full bg-tossup" />
-          <div className="text-xs text-slate-400 font-medium">
-            {race.isSpecialElection ? "WHAT HAPPENED" : "WHY IT'S COMPETITIVE"}
-          </div>
-          <div className="text-sm text-slate-600">
-            {race.whyCompetitive || "Race details pending."}
-          </div>
-        </div>
-
-        {/* Who wants it */}
-        <div className="relative">
-          <div className="absolute -left-[calc(1rem+5px)] top-1 w-2.5 h-2.5 rounded-full bg-green-400" />
-          <div className="text-xs text-slate-400 font-medium">WHO'S RUNNING</div>
-          {allCandidates.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5 mt-1">
-              {allCandidates.map((c) => (
-                <span
-                  key={c.id}
-                  className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    c.party === "Democrat"
-                      ? "bg-blue-100 text-blue-700"
-                      : c.party === "Republican"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-purple-100 text-purple-700"
-                  }`}
-                >
-                  {c.name} ({c.party.charAt(0)})
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm text-slate-400 italic">Candidates TBD</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Shared Components ---
-
-function RatingPill({ rating }: { rating: string }) {
-  const colors =
-    rating === "Toss-up"
-      ? "bg-amber-100 text-amber-700"
-      : rating.includes("D")
-        ? "bg-blue-100 text-blue-700"
-        : "bg-red-100 text-red-700";
-
-  return (
-    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colors}`}>
-      {rating}
-    </span>
   );
 }

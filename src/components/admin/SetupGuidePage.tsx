@@ -483,8 +483,8 @@ function GuideStatic() {
           { url: "/news", name: "News", desc: "RSS feeds from ProPublica, PBS, The Guardian — refreshes on each build", file: "src/pages/news.astro" },
           { url: "/about", name: "About", desc: "Project description and mission", file: "src/pages/about.astro" },
           { url: "/learn/how-congress-works", name: "How Congress Works", desc: "Bicameral system explainer", file: "src/pages/learn/how-congress-works.astro" },
-          { url: "/learn/senate-101", name: "Senate 101", desc: "Senate basics", file: "src/pages/learn/senate-101.astro" },
-          { url: "/learn/house-101", name: "House 101", desc: "House basics", file: "src/pages/learn/house-101.astro" },
+          { url: "/senate#101", name: "Senate 101", desc: "Senate basics (merged into Senate page)", file: "src/pages/senate/index.astro" },
+          { url: "/house#101", name: "House 101", desc: "House basics (merged into House page)", file: "src/pages/house/index.astro" },
           { url: "/learn/what-are-midterms", name: "What Are Midterms?", desc: "Midterm elections explained", file: "src/pages/learn/what-are-midterms.astro" },
           { url: "/learn/how-to-run", name: "How to Run", desc: "Guide to running for office", file: "src/pages/learn/how-to-run.astro" },
         ].map((p) => (

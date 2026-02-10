@@ -435,11 +435,20 @@ export async function fetchAllClass2Seats() {
       "Toss-up", "Lean R", "Lean D", "Likely R", "Likely D",
     ].includes(rating);
 
+    // Derive party: incumbent candidate first, then rating suffix
+    let party: "Democrat" | "Republican" | "Independent" = "Republican";
+    if (c?.party) {
+      party = c.party as typeof party;
+    } else if (rating?.endsWith("D")) {
+      party = "Democrat";
+    }
+    // Ratings ending in "R" or "Toss-up" without incumbent default to Republican
+
     return {
       state: state.name,
       stateAbbr: state.abbr,
       senator: c ? `${c.first_name} ${c.last_name}` : "TBD",
-      party: (c?.party ?? "Republican") as "Democrat" | "Republican" | "Independent",
+      party,
       rating,
       isCompetitive,
     };

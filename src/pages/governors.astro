@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import GovernorRaces from "../components/ui/GovernorRaces";
 import { fetchGovernorRaces } from "../lib/queries";
 
 const govRaces = await fetchGovernorRaces();
@@ -12,9 +11,9 @@ const openSeats = govRaces.filter((r) => r.isOpenSeat);
 const tossups = govRaces.filter((r) => r.rating === "Toss-up");
 ---
 
-<Layout title="2026 Governor Races" description="36 states elect governors in 2026. See which races are competitive and why they matter.">
+<Layout title="Governors" description="How governor elections work, plus the current races and why they matter.">
   <section class="max-w-5xl mx-auto py-16 px-4">
-    <h1 class="text-3xl md:text-4xl font-bold mb-2">2026 Governor Races</h1>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">U.S. Governors</h1>
     <p class="text-lg text-slate-500 mb-10">
       {govRaces.length} states elect governors this cycle. {tossups.length} toss-ups, {competitive.length} competitive overall.
     </p>
@@ -41,28 +40,31 @@ const tossups = govRaces.filter((r) => r.rating === "Toss-up");
     <!-- Explainer -->
     <div class="bg-slate-900 text-white rounded-xl p-6 mb-10">
       <p class="text-sm leading-relaxed">
-        Why 36 and not 50? Governors serve 4-year terms on staggered schedules &mdash;
+        Why {govRaces.length} and not 50? Governors serve 4-year terms on staggered schedules &mdash;
         roughly half the states vote for governor in midterm years. New Hampshire and Vermont are exceptions:
         they elect governors every 2 years.
         Open seats (where the incumbent is term-limited or retiring) are where the biggest shifts happen.
       </p>
     </div>
 
-    <!-- Races -->
-    {govRaces.length > 0 ? (
-      <GovernorRaces client:load races={govRaces} />
-    ) : (
-      <div class="bg-slate-50 border border-slate-200 rounded-lg p-6">
-        <p class="text-sm text-slate-500">
-          Governor race data is being loaded. Check back soon, or explore the
-          <a href="/senate" class="text-dem underline">Senate races</a> or
-          <a href="/house" class="text-dem underline">House races</a>.
-        </p>
+    <!-- Explore races CTA -->
+    <div class="bg-slate-50 rounded-xl p-6 mb-10 text-center">
+      <h2 class="text-xl font-bold mb-2">Explore governor races by state</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Select your state on the map to see governor candidates and other races on your ballot.
+      </p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <a href="/map" class="inline-flex items-center px-5 py-2.5 bg-navy text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
+          Interactive Map &rarr;
+        </a>
+        <a href="/calendar" class="inline-flex items-center px-5 py-2.5 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+          Primary Calendar &rarr;
+        </a>
       </div>
-    )}
+    </div>
 
-    <!-- About Governor Elections -->
-    <div class="space-y-6 mt-12">
+    <!-- About Governor Elections (existing content) -->
+    <div class="space-y-6">
       <h2 class="text-2xl font-bold">Why Governor Races Matter</h2>
       <p class="text-slate-600">
         Governors have enormous power over daily life &mdash; they sign or veto state laws,
@@ -83,8 +85,68 @@ const tossups = govRaces.filter((r) => r.rating === "Toss-up");
       <p class="text-slate-600">
         Governors also play a role in federal politics. They can appoint U.S. Senators to fill vacancies,
         influence state election laws, and shape their party's bench of future presidential candidates.
-        Several 2026 governor candidates are already seen as potential 2028 or 2032 presidential hopefuls.
       </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- Governors 101 — Evergreen educational content -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <div id="101" class="border-t border-slate-200 pt-10 mt-12">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Governors 101</h2>
+
+      <div class="space-y-8 max-w-3xl">
+        <p class="text-lg text-slate-600">
+          A governor is the head of state government &mdash; the state-level equivalent of the president.
+          Each of the 50 states has one governor, elected by the people of that state.
+        </p>
+
+        <div class="bg-slate-50 rounded-xl p-6">
+          <h3 class="text-xl font-bold mb-4">Key Facts</h3>
+          <div class="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <div class="text-3xl font-bold text-slate-700">50</div>
+              <div class="text-sm text-slate-500">Governors (one per state)</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-700">4 years</div>
+              <div class="text-sm text-slate-500">Typical Term Length</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-700">36</div>
+              <div class="text-sm text-slate-500">States with Term Limits</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold text-slate-700">2</div>
+              <div class="text-sm text-slate-500">States with 2-Year Terms</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="text-2xl font-bold">What Does a Governor Do?</h3>
+        <ul class="list-disc list-inside text-slate-600 space-y-2">
+          <li>Signs or vetoes bills passed by the state legislature</li>
+          <li>Proposes the state budget (education, infrastructure, healthcare)</li>
+          <li>Appoints state judges and agency heads</li>
+          <li>Commands the state's National Guard</li>
+          <li>Declares state emergencies (natural disasters, public health crises)</li>
+          <li>Can appoint a U.S. Senator to fill a vacancy (in most states)</li>
+        </ul>
+
+        <h3 class="text-2xl font-bold">Term Limits</h3>
+        <p class="text-slate-600">
+          Most states limit governors to two consecutive 4-year terms. A few (like Virginia) allow only
+          one consecutive term, while others (like Texas) have no term limits at all.
+          New Hampshire and Vermont are unique &mdash; their governors serve 2-year terms.
+        </p>
+
+        <h3 class="text-2xl font-bold">Why Midterm Governor Races Matter</h3>
+        <p class="text-slate-600">
+          About half of all governor races happen during midterm elections (the years between presidential elections).
+          Historically, the president's party tends to lose seats in midterms, which can create opportunities for
+          the opposing party to win governor's mansions &mdash; and with them, control over state policy.
+        </p>
+      </div>
     </div>
   </section>
 </Layout>

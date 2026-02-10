@@ -1,17 +1,15 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import HouseRaces from "../../components/ui/HouseRaces";
-import { fetchHouseOverview, fetchHouseRaces } from "../../lib/queries";
+import { fetchHouseOverview } from "../../lib/queries";
 
 const houseOverview = await fetchHouseOverview();
-const houseRaces = await fetchHouseRaces();
 ---
 
-<Layout title="2026 House Races" description="All 435 House seats are up for election in 2026. See the battleground districts.">
+<Layout title="House" description="How the U.S. House of Representatives works, plus the current balance of power.">
   <section class="max-w-5xl mx-auto py-16 px-4">
-    <h1 class="text-3xl md:text-4xl font-bold mb-2">2026 House Races</h1>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">The U.S. House</h1>
     <p class="text-lg text-slate-500 mb-10">
-      All {houseOverview.totalSeats} seats contested. Currently {houseOverview.currentSplit.republican}R - {houseOverview.currentSplit.democrat}D.
+      All {houseOverview.totalSeats} seats contested every cycle. Currently {houseOverview.currentSplit.republican}R - {houseOverview.currentSplit.democrat}D.
     </p>
 
     <!-- Path to Majority -->
@@ -65,26 +63,29 @@ const houseRaces = await fetchHouseRaces();
     <div class="bg-slate-900 text-white rounded-xl p-6 mb-10">
       <p class="text-sm leading-relaxed">
         All 435 seats are up every two years &mdash; but most are safe for one party.
-        Below are the <strong>~{houseRaces.length} districts</strong> where the outcome is actually in play.
+        About <strong>{houseOverview.battlegroundDistricts} districts</strong> are where the outcome is actually in play.
         These are the races that will determine who controls the House.
       </p>
     </div>
 
-    <!-- Battleground Races -->
-    {houseRaces.length > 0 ? (
-      <HouseRaces client:load races={houseRaces} />
-    ) : (
-      <div class="bg-slate-50 border border-slate-200 rounded-lg p-6">
-        <p class="text-sm text-slate-500">
-          House race data is being loaded. Check back soon, or explore the
-          <a href="/senate" class="text-dem underline">Senate races</a> or
-          <a href="/whos-running" class="text-tossup underline">see who's running</a>.
-        </p>
+    <!-- Explore races CTA -->
+    <div class="bg-slate-50 rounded-xl p-6 mb-10 text-center">
+      <h2 class="text-xl font-bold mb-2">Find your district's race</h2>
+      <p class="text-sm text-slate-500 mb-4">
+        Use the interactive map to see candidates and races in your state, or check who's filed with the FEC.
+      </p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <a href="/map" class="inline-flex items-center px-5 py-2.5 bg-navy text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
+          Interactive Map &rarr;
+        </a>
+        <a href="/whos-running" class="inline-flex items-center px-5 py-2.5 border border-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+          Who's Running &rarr;
+        </a>
       </div>
-    )}
+    </div>
 
-    <!-- About House Elections -->
-    <div class="space-y-6 mt-12">
+    <!-- About House Elections (from current page) -->
+    <div class="space-y-6">
       <h2 class="text-2xl font-bold">How House Elections Work</h2>
       <p class="text-slate-600">
         Unlike the Senate, <strong>every single House seat</strong> is up for election in every cycle. Representatives serve 2-year terms, making them the most directly accountable to voters.
@@ -101,6 +102,53 @@ const houseRaces = await fetchHouseRaces();
         {houseOverview.retirements.total} incumbents are not seeking re-election, creating open seats that are often more competitive.
         Incumbents win re-election over 90% of the time, so open seats are where the action is.
       </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- House 101 — Evergreen educational content -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <div id="101" class="border-t border-slate-200 pt-10 mt-12">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">House 101</h2>
+
+      <div class="space-y-8 max-w-3xl">
+        <p class="text-lg text-slate-600">
+          The House of Representatives is the "people's chamber." Unlike the Senate, where every state gets two seats, House seats are distributed based on population. More people = more representatives.
+        </p>
+
+        <h3 class="text-2xl font-bold">Why Every Seat, Every Time?</h3>
+        <p class="text-slate-600">
+          With only 2-year terms, House members are <strong>always</strong> up for re-election. This is by design &mdash; the founders wanted the House to be the most responsive to the will of the people. If voters are unhappy, they can replace their representative every two years.
+        </p>
+
+        <h3 class="text-2xl font-bold">How Are Seats Distributed?</h3>
+        <p class="text-slate-600">
+          Every 10 years, after the census, seats are <strong>reapportioned</strong> based on population changes. States that grew may gain seats, while states that shrank may lose them.
+        </p>
+        <div class="bg-slate-50 rounded-lg p-4">
+          <h4 class="font-semibold mb-2">Largest Delegations (2026)</h4>
+          <ul class="text-sm text-slate-600 space-y-1">
+            <li>California &mdash; 52 seats</li>
+            <li>Texas &mdash; 38 seats</li>
+            <li>Florida &mdash; 28 seats</li>
+            <li>New York &mdash; 26 seats</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-2">7 states have only 1 representative: Alaska, Delaware, North Dakota, South Dakota, Vermont, Wyoming, and Montana (gained a 2nd in 2022).</p>
+        </div>
+
+        <h3 class="text-2xl font-bold">Districts & Gerrymandering</h3>
+        <p class="text-slate-600">
+          Each representative serves a specific <strong>district</strong> within their state. State legislatures draw district lines, which can be controversial. <strong>Gerrymandering</strong> is when districts are drawn to favor one party &mdash; it's one of the most debated issues in American politics.
+        </p>
+
+        <h3 class="text-2xl font-bold">What Does a Representative Do?</h3>
+        <ul class="list-disc list-inside text-slate-600 space-y-2">
+          <li>Writes and votes on legislation</li>
+          <li>Initiates all revenue (tax) bills &mdash; only the House can do this</li>
+          <li>Brings impeachment charges against federal officials</li>
+          <li>Represents their district's specific needs and interests</li>
+        </ul>
+      </div>
     </div>
   </section>
 </Layout>
