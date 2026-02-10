@@ -12,6 +12,7 @@ import {
   LogoutOutlined,
   EnvironmentOutlined,
   BookOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
 import type { AdminRoute } from "./AdminApp";
@@ -25,6 +26,7 @@ import BallotMeasuresPage from "./BallotMeasuresPage";
 import CalendarEventsPage from "./CalendarEventsPage";
 import FecPage from "./FecPage";
 import StatesPage from "./StatesPage";
+import AutomationPage from "./AutomationPage";
 import SetupGuidePage from "./SetupGuidePage";
 
 const { Sider, Content, Header } = Layout;
@@ -45,6 +47,7 @@ const menuItems = [
   { key: "ballot-measures", icon: <FileTextOutlined />, label: "Ballot Measures" },
   { key: "calendar-events", icon: <ScheduleOutlined />, label: "Calendar Events" },
   { key: "fec", icon: <CloudDownloadOutlined />, label: "FEC" },
+  { key: "automation", icon: <RobotOutlined />, label: "Automation" },
   { key: "states", icon: <EnvironmentOutlined />, label: "States" },
 ];
 
@@ -57,6 +60,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   "ballot-measures": "Ballot Measures",
   "calendar-events": "Calendar Events",
   fec: "FEC",
+  automation: "Automation",
   states: "States",
   "setup-guide": "Setup Guide",
 };
@@ -279,6 +283,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "ballot-measures" && <BallotMeasuresPage setHeaderActions={setHeaderActions} />}
           {route === "calendar-events" && <CalendarEventsPage setHeaderActions={setHeaderActions} />}
           {route === "fec" && <FecPage setHeaderActions={setHeaderActions} />}
+          {route === "automation" && <AutomationPage setHeaderActions={setHeaderActions} />}
           {route === "states" && <StatesPage setHeaderActions={setHeaderActions} />}
           {route === "setup-guide" && <SetupGuidePage navigate={navigate} />}
         </Content>

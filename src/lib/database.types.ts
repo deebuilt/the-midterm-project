@@ -273,8 +273,42 @@ export interface DbFecFiling {
   funds_spent: number;
   cash_on_hand: number;
   promoted_to_candidate_id: number | null;
+  is_active: boolean;
+  incumbent_challenge: string | null;
+  deactivated_at: string | null;
+  fec_candidate_status: string | null;
   last_synced_at: string;
   created_at: string;
+  updated_at: string;
+}
+
+export interface DbSyncLog {
+  id: number;
+  sync_type: string;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  states_synced: string[] | null;
+  filings_created: number;
+  filings_updated: number;
+  filings_deactivated: number;
+  api_requests: number;
+  error_message: string | null;
+  details: Record<string, unknown> | null;
+  triggered_rebuild: boolean;
+}
+
+export interface DbAutomationConfig {
+  id: number;
+  fec_sync_enabled: boolean;
+  lookahead_days: number;
+  lookback_days: number;
+  min_funds_raised: number;
+  major_parties_only: boolean;
+  active_only: boolean;
+  vercel_deploy_hook: string | null;
+  webhook_secret: string | null;
+  last_sync_at: string | null;
   updated_at: string;
 }
 

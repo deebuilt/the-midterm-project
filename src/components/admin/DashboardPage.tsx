@@ -8,6 +8,7 @@ import {
   EnvironmentOutlined,
   LeftOutlined,
   RightOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import type { AdminRoute } from "./AdminApp";
@@ -21,6 +22,7 @@ interface DashboardStats {
   activeCycleName: string;
   statesWithGov: number;
   totalStates: number;
+  lastSyncAt: string | null;
 }
 
 interface DashboardPageProps {
@@ -97,7 +99,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
 
   useEffect(() => {
     async function loadDashboard() {
-      const [volunteersRes, cycleRes, racesRes, filingsRes, statesRes] = await Promise.all([
+      const [volunteersRes, cycleRes, racesRes, filingsRes, statesRes, automationRes] = await Promise.all([
         supabase.from("volunteers").select("id, status"),
         supabase
           .from("election_cycles")
@@ -107,6 +109,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
         supabase.from("races").select("id", { count: "exact", head: true }),
         supabase.from("fec_filings").select("id, promoted_to_candidate_id"),
         supabase.from("states").select("id, current_governor"),
+        supabase.from("automation_config").select("last_sync_at").eq("id", 1).single(),
       ]);
 
       const volunteers = volunteersRes.data ?? [];
@@ -121,6 +124,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
         activeCycleName: cycleRes.data?.name ?? "None",
         totalStates: statesData.length,
         statesWithGov: statesData.filter((s) => s.current_governor).length,
+        lastSyncAt: automationRes.data?.last_sync_at ?? null,
       });
       setLoading(false);
       // Defer scroll check until cards render
@@ -226,6 +230,18 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           value={stats?.totalStates ?? 0}
           sub={missingGov > 0 ? `${missingGov} missing gov` : undefined}
           onClick={() => navigate("states")}
+        />
+        <StatCard
+          icon={<SyncOutlined />}
+          label="Last FEC Sync"
+          value={
+            <span style={{ fontSize: 14, fontWeight: 600 }}>
+              {stats?.lastSyncAt
+                ? new Date(stats.lastSyncAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                : "Never"}
+            </span>
+          }
+          onClick={() => navigate("automation")}
         />
       </div>
     </div>

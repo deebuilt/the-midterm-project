@@ -120,11 +120,13 @@ export interface FecFiling {
   office: "Senate" | "House";
   district: number | null;
   isIncumbent: boolean;
+  incumbentChallenge: "I" | "C" | "O" | null;
   fundsRaised: number;
   fundsSpent: number;
   cashOnHand: number;
   primaryDate: string | null;
   isPromoted: boolean;
+  isActive: boolean;
   lastSyncedAt: string;
 }
 

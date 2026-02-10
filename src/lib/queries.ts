@@ -673,6 +673,7 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
       .eq("office", "S")
       .gte("funds_raised", 5000)
       .is("promoted_to_candidate_id", null)
+      .eq("is_active", true)
       .order("funds_raised", { ascending: false });
 
     if (error || !filings) {
@@ -729,11 +730,13 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
         office: "Senate",
         district: null,
         isIncumbent: row.is_incumbent,
+        incumbentChallenge: (row.incumbent_challenge as "I" | "C" | "O") ?? null,
         fundsRaised: Number(row.funds_raised),
         fundsSpent: Number(row.funds_spent),
         cashOnHand: Number(row.cash_on_hand),
         primaryDate: primaryDateByStateId.get(row.state_id) ?? null,
         isPromoted: false,
+        isActive: row.is_active ?? true,
         lastSyncedAt: row.last_synced_at,
       });
     }

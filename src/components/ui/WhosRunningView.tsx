@@ -29,21 +29,49 @@ function urgencyBadge(days: number | null) {
   return { label: `${days}d away`, color: "bg-slate-100 text-slate-600" };
 }
 
+function challengeBadge(challenge: "I" | "C" | "O" | null) {
+  if (challenge === "I")
+    return { label: "Incumbent", className: "bg-emerald-100 text-emerald-700" };
+  if (challenge === "C")
+    return { label: "Challenger", className: "bg-slate-200 text-slate-600" };
+  if (challenge === "O")
+    return { label: "Open Seat", className: "bg-amber-100 text-amber-700" };
+  return null;
+}
+
+function partyBreakdown(filings: FecFiling[]): string {
+  const counts: Record<string, number> = {};
+  for (const f of filings) {
+    const key = f.party === "Democrat" ? "D" : f.party === "Republican" ? "R" : "I";
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return Object.entries(counts)
+    .sort(([, a], [, b]) => b - a)
+    .map(([k, v]) => `${v}${k}`)
+    .join(", ");
+}
+
 function FilingRow({ filing, maxRaised }: { filing: FecFiling; maxRaised: number }) {
   const colors = PARTY_COLORS[filing.party] ?? PARTY_COLORS.Other;
   const barWidth = maxRaised > 0 ? (filing.fundsRaised / maxRaised) * 100 : 0;
+  const badge = challengeBadge(filing.incumbentChallenge);
 
   return (
     <div className="flex items-center gap-3 py-2 group">
-      {/* Name + party */}
+      {/* Name + party + status */}
       <div className="w-48 sm:w-56 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm text-slate-800">
+          <a
+            href={`https://www.fec.gov/data/candidate/${filing.fecCandidateId}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-sm text-slate-800 hover:underline"
+          >
             {filing.firstName} {filing.lastName}
-          </span>
-          {filing.isIncumbent && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
-              Incumbent
+          </a>
+          {badge && (
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.className}`}>
+              {badge.label}
             </span>
           )}
         </div>
@@ -52,7 +80,7 @@ function FilingRow({ filing, maxRaised }: { filing: FecFiling; maxRaised: number
         </span>
       </div>
 
-      {/* Fundraising bar */}
+      {/* Fundraising bar + details */}
       <div className="flex-1 min-w-0">
         <div className="relative h-6 bg-slate-100 rounded overflow-hidden">
           <div
@@ -61,6 +89,14 @@ function FilingRow({ filing, maxRaised }: { filing: FecFiling; maxRaised: number
           />
           <span className="absolute right-2 top-0 h-full flex items-center text-xs font-semibold text-slate-700">
             {formatMoney(filing.fundsRaised)}
+          </span>
+        </div>
+        <div className="flex gap-3 mt-0.5">
+          <span className="text-[11px] text-slate-400">
+            Spent: {formatMoney(filing.fundsSpent)}
+          </span>
+          <span className="text-[11px] text-slate-400">
+            Cash: {formatMoney(filing.cashOnHand)}
           </span>
         </div>
       </div>
@@ -107,7 +143,8 @@ function StateCard({
             <p className="text-sm text-slate-500">
               {primaryFormatted ? `Primary: ${primaryFormatted}` : "Primary: TBD"}
               <span className="text-slate-300 mx-1.5">&middot;</span>
-              {group.filings.length} candidate{group.filings.length !== 1 ? "s" : ""}
+              {group.filings.length} candidate{group.filings.length !== 1 ? "s" : ""}{" "}
+              ({partyBreakdown(group.filings)})
             </p>
           </div>
         </div>
@@ -127,6 +164,9 @@ function StateCard({
           </div>
           <p className="text-[11px] text-slate-400 mt-2">
             Source: FEC
+            {group.filings[0]?.lastSyncedAt && (
+              <> | Updated {new Date(group.filings[0].lastSyncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</>
+            )}
           </p>
         </div>
       )}
