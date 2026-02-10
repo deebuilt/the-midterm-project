@@ -367,9 +367,10 @@ export async function fetchHouseOverview() {
     totalSeats: houseStats.total_seats ?? 435,
     allSeatsContested: true,
     currentSplit: {
-      republican: houseStats.current_split_r ?? 220,
-      democrat: houseStats.current_split_d ?? 215,
+      republican: houseStats.current_split_r ?? 218,
+      democrat: houseStats.current_split_d ?? 214,
     },
+    vacancies: extraData.vacancies ?? 3,
     majorityNeeded: houseStats.majority_needed ?? 218,
     demsNeedToFlip: houseStats.dems_need_flip ?? 3,
     gopsCanLose: houseStats.gops_can_lose ?? 2,
@@ -379,9 +380,9 @@ export async function fetchHouseOverview() {
       republicanHeld: 20,
     },
     retirements: {
-      democrat: houseStats.retirements_d ?? 21,
-      republican: houseStats.retirements_r ?? 28,
-      total: (houseStats.retirements_d ?? 21) + (houseStats.retirements_r ?? 28),
+      democrat: houseStats.retirements_d ?? 22,
+      republican: houseStats.retirements_r ?? 30,
+      total: (houseStats.retirements_d ?? 22) + (houseStats.retirements_r ?? 30),
     },
     termLength: 2,
   };
@@ -662,10 +663,10 @@ function dbCandidateToCandidate(dbCandidate: any): Candidate {
 
 /**
  * Fetch FEC filings for the active cycle, grouped by state with primary dates.
- * Returns only Senate filings with funds_raised >= $5,000.
+ * Returns filings with funds_raised >= $5,000 for the specified office(s).
  * Sorted by primary date ascending (earliest primaries first).
  */
-export async function fetchFecFilings(): Promise<FilingsByState[]> {
+export async function fetchFecFilings(office: "S" | "H" | "both" = "S"): Promise<FilingsByState[]> {
   try {
     const { data: cycle } = await supabase
       .from("election_cycles")
@@ -675,15 +676,19 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
 
     if (!cycle) return [];
 
-    const { data: filings, error } = await supabase
+    let query = supabase
       .from("fec_filings")
       .select(`*, state:states!inner(name, abbr)`)
       .eq("cycle_id", cycle.id)
-      .eq("office", "S")
       .gte("funds_raised", 5000)
       .is("promoted_to_candidate_id", null)
-      .eq("is_active", true)
-      .order("funds_raised", { ascending: false });
+      .eq("is_active", true);
+
+    if (office !== "both") {
+      query = query.eq("office", office);
+    }
+
+    const { data: filings, error } = await query.order("funds_raised", { ascending: false });
 
     if (error || !filings) {
       console.warn(`FEC filings unavailable: ${error?.message}`);
@@ -700,6 +705,29 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
     const primaryDateByStateId = new Map<number, string>();
     for (const ev of primaryEvents ?? []) {
       primaryDateByStateId.set(ev.state_id, ev.event_date);
+    }
+
+    // Get race ratings for House districts (for battleground badges)
+    const { data: races } = await supabase
+      .from("races")
+      .select(`
+        rating,
+        district:districts!inner(
+          state:states!inner(abbr),
+          number
+        )
+      `)
+      .eq("cycle_id", cycle.id);
+
+    const ratingByDistrictKey = new Map<string, string>();
+    for (const race of races ?? []) {
+      const dist = race.district as any;
+      const stateAbbr = dist.state?.abbr;
+      const districtNum = dist.number;
+      if (stateAbbr && districtNum) {
+        const key = `${stateAbbr}-${districtNum}`;
+        ratingByDistrictKey.set(key, race.rating);
+      }
     }
 
     // Group filings by state
@@ -728,6 +756,13 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
         });
       }
 
+      const districtKey = row.office === "H" && row.district_number
+        ? `${abbr}-${row.district_number}`
+        : null;
+      const rating = districtKey
+        ? (ratingByDistrictKey.get(districtKey) as FecFiling["rating"]) ?? null
+        : null;
+
       grouped.get(abbr)!.filings.push({
         id: row.id,
         fecCandidateId: row.fec_candidate_id,
@@ -736,8 +771,8 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
         firstName: row.first_name,
         lastName: row.last_name,
         party: row.party as FecFiling["party"],
-        office: "Senate",
-        district: null,
+        office: row.office === "H" ? "House" : "Senate",
+        district: row.district_number,
         isIncumbent: row.is_incumbent,
         incumbentChallenge: (row.incumbent_challenge as "I" | "C" | "O") ?? null,
         fundsRaised: Number(row.funds_raised),
@@ -747,6 +782,7 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
         isPromoted: false,
         isActive: row.is_active ?? true,
         lastSyncedAt: row.last_synced_at,
+        rating,
       });
     }
 

@@ -296,34 +296,36 @@ Deno.serve(async (req: Request) => {
 
     for (const target of targetStates) {
       try {
-        // Fetch FEC candidates for this state
-        let candidates = await fetchFecCandidates(fecApiKey, {
-          cycle: CYCLE,
-          office: "S",
-          state: target.abbr,
-          is_active_candidate: config.active_only ?? true,
-          has_raised_funds: true,
-        });
+        // Sync both Senate and House for each state
+        for (const office of ["S", "H"] as const) {
+          // Fetch FEC candidates for this state + office
+          let candidates = await fetchFecCandidates(fecApiKey, {
+            cycle: CYCLE,
+            office,
+            state: target.abbr,
+            is_active_candidate: config.active_only ?? true,
+            has_raised_funds: true,
+          });
 
-        // Filter major parties
-        if (config.major_parties_only) {
-          candidates = candidates.filter(
-            (c) => majorParties.has(c.party) || !c.party,
-          );
-        }
+          // Filter major parties
+          if (config.major_parties_only) {
+            candidates = candidates.filter(
+              (c) => majorParties.has(c.party) || !c.party,
+            );
+          }
 
-        // Deduplicate by candidate_id
-        const seen = new Set<string>();
-        candidates = candidates.filter((c) => {
-          if (seen.has(c.candidate_id)) return false;
-          seen.add(c.candidate_id);
-          return true;
-        });
+          // Deduplicate by candidate_id
+          const seen = new Set<string>();
+          candidates = candidates.filter((c) => {
+            if (seen.has(c.candidate_id)) return false;
+            seen.add(c.candidate_id);
+            return true;
+          });
 
-        // Track which FEC IDs we see from the API for dropout detection
-        const fecIdsFromApi = new Set<string>();
+          // Track which FEC IDs we see from the API for dropout detection
+          const fecIdsFromApi = new Set<string>();
 
-        for (const c of candidates) {
+          for (const c of candidates) {
           fecIdsFromApi.add(c.candidate_id);
 
           // Fetch financial totals
@@ -382,12 +384,13 @@ Deno.serve(async (req: Request) => {
           else totalCreated++;
         }
 
-        // Deactivate candidates no longer returned by FEC for this state
+        // Deactivate candidates no longer returned by FEC for this state + office
         const { data: existingFilings } = await supabase
           .from("fec_filings")
           .select("id, fec_candidate_id")
           .eq("cycle_id", cycle.id)
           .eq("state_id", target.stateId)
+          .eq("office", office)
           .eq("is_active", true)
           .is("promoted_to_candidate_id", null);
 
@@ -403,6 +406,7 @@ Deno.serve(async (req: Request) => {
             totalDeactivated++;
           }
         }
+        } // End office loop
 
         statesSynced.push(target.abbr);
       } catch (err: any) {

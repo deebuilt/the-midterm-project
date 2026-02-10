@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { FilingsByState, FecFiling } from "../../types";
 
 interface WhosRunningViewProps {
-  filingsByState: FilingsByState[];
+  senateFilings: FilingsByState[];
+  houseFilings: FilingsByState[];
 }
 
 const PARTY_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
@@ -51,16 +52,19 @@ function partyBreakdown(filings: FecFiling[]): string {
     .join(", ");
 }
 
-function FilingRow({ filing, maxRaised }: { filing: FecFiling; maxRaised: number }) {
+function FilingRow({ filing, maxRaised, office }: { filing: FecFiling; maxRaised: number; office: "S" | "H" }) {
   const colors = PARTY_COLORS[filing.party] ?? PARTY_COLORS.Other;
   const barWidth = maxRaised > 0 ? (filing.fundsRaised / maxRaised) * 100 : 0;
   const badge = challengeBadge(filing.incumbentChallenge);
+
+  // Check if this is a battleground district (competitive rating)
+  const isBattleground = filing.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(filing.rating);
 
   return (
     <div className="flex items-center gap-3 py-2 group">
       {/* Name + party + status */}
       <div className="w-48 sm:w-56 flex-shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <a
             href={`https://www.fec.gov/data/candidate/${filing.fecCandidateId}/`}
             target="_blank"
@@ -69,6 +73,16 @@ function FilingRow({ filing, maxRaised }: { filing: FecFiling; maxRaised: number
           >
             {filing.firstName} {filing.lastName}
           </a>
+          {office === "H" && filing.district && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
+              {filing.stateAbbr}-{String(filing.district).padStart(2, "0")}
+            </span>
+          )}
+          {isBattleground && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-tossup-light text-tossup" title={`Battleground: ${filing.rating}`}>
+              ⭐ {filing.rating}
+            </span>
+          )}
           {badge && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.className}`}>
               {badge.label}
@@ -108,10 +122,12 @@ function StateCard({
   group,
   isOpen,
   onToggle,
+  office,
 }: {
   group: FilingsByState;
   isOpen: boolean;
   onToggle: () => void;
+  office: "S" | "H";
 }) {
   const maxRaised = Math.max(...group.filings.map((f) => f.fundsRaised), 1);
   const badge = urgencyBadge(group.daysUntilPrimary);
@@ -122,6 +138,24 @@ function StateCard({
         year: "numeric",
       })
     : null;
+
+  // Count battleground districts for House
+  const battlegroundCount = office === "H"
+    ? group.filings.filter((f) => f.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(f.rating)).length
+    : 0;
+
+  // Sort battlegrounds to top for House districts
+  const sortedFilings = office === "H"
+    ? [...group.filings].sort((a, b) => {
+        const aIsBattleground = a.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(a.rating);
+        const bIsBattleground = b.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(b.rating);
+        if (aIsBattleground && !bIsBattleground) return -1;
+        if (!aIsBattleground && bIsBattleground) return 1;
+        // Within battlegrounds or non-battlegrounds, sort by district number
+        if (a.district && b.district) return a.district - b.district;
+        return 0;
+      })
+    : group.filings;
 
   return (
     <div className="border border-slate-200 rounded-xl mb-3 overflow-hidden">
@@ -145,6 +179,14 @@ function StateCard({
               <span className="text-slate-300 mx-1.5">&middot;</span>
               {group.filings.length} candidate{group.filings.length !== 1 ? "s" : ""}{" "}
               ({partyBreakdown(group.filings)})
+              {battlegroundCount > 0 && (
+                <>
+                  <span className="text-slate-300 mx-1.5">&middot;</span>
+                  <span className="text-tossup font-semibold">
+                    {battlegroundCount} battleground{battlegroundCount !== 1 ? "s" : ""}
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -158,8 +200,8 @@ function StateCard({
       {isOpen && (
         <div className="px-5 pb-4 border-t border-slate-100">
           <div className="divide-y divide-slate-100 pt-2">
-            {group.filings.map((filing) => (
-              <FilingRow key={filing.fecCandidateId} filing={filing} maxRaised={maxRaised} />
+            {sortedFilings.map((filing) => (
+              <FilingRow key={filing.fecCandidateId} filing={filing} maxRaised={maxRaised} office={office} />
             ))}
           </div>
           <p className="text-[11px] text-slate-400 mt-2">
@@ -174,10 +216,25 @@ function StateCard({
   );
 }
 
-export default function WhosRunningView({ filingsByState }: WhosRunningViewProps) {
+export default function WhosRunningView({ senateFilings, houseFilings }: WhosRunningViewProps) {
+  const [activeTab, setActiveTab] = useState<"senate" | "house">("senate");
   const [stateFilter, setStateFilter] = useState("");
   const [sortBy, setSortBy] = useState<"primary" | "state" | "filings">("primary");
   const [openStates, setOpenStates] = useState<Set<string>>(new Set());
+
+  // Read hash on mount to set initial tab
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash === "house") setActiveTab("house");
+  }, []);
+
+  // Update hash when tab changes
+  useEffect(() => {
+    window.location.hash = activeTab;
+  }, [activeTab]);
+
+  const filingsByState = activeTab === "senate" ? senateFilings : houseFilings;
+  const office = activeTab === "senate" ? "S" : "H";
 
   const stateOptions = useMemo(
     () =>
@@ -222,6 +279,30 @@ export default function WhosRunningView({ filingsByState }: WhosRunningViewProps
 
   return (
     <div>
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab("senate")}
+          className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
+            activeTab === "senate"
+              ? "border-navy text-navy"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          Senate
+        </button>
+        <button
+          onClick={() => setActiveTab("house")}
+          className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
+            activeTab === "house"
+              ? "border-navy text-navy"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          House
+        </button>
+      </div>
+
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <select
@@ -275,6 +356,7 @@ export default function WhosRunningView({ filingsByState }: WhosRunningViewProps
             group={group}
             isOpen={openStates.has(group.stateAbbr)}
             onToggle={() => toggleState(group.stateAbbr)}
+            office={office}
           />
         ))
       ) : (

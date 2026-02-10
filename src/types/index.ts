@@ -133,6 +133,7 @@ export interface FecFiling {
   isPromoted: boolean;
   isActive: boolean;
   lastSyncedAt: string;
+  rating: "Safe D" | "Likely D" | "Lean D" | "Toss-up" | "Lean R" | "Likely R" | "Safe R" | null;
 }
 
 export interface FilingsByState {

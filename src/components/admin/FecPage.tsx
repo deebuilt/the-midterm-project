@@ -21,6 +21,7 @@ import {
   Checkbox,
   Divider,
   Badge,
+  Dropdown,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -32,6 +33,8 @@ import {
   SyncOutlined,
   ThunderboltOutlined,
   InfoCircleOutlined,
+  MoreOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import {
@@ -214,6 +217,7 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
   const [activeCycleId, setActiveCycleId] = useState<number | null>(null);
 
   const [stateFilter, setStateFilter] = useState<number | null>(null);
+  const [bodyFilter, setBodyFilter] = useState<string>("all");
   const [partyFilter, setPartyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -228,6 +232,10 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
     raceStatus: "announced",
   });
   const [promoting, setPromoting] = useState(false);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [bulkPromoteOpen, setBulkPromoteOpen] = useState(false);
+  const [bulkPromoting, setBulkPromoting] = useState(false);
 
   useEffect(() => {
     fetchActiveCycle();
@@ -423,8 +431,180 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
     });
   };
 
+  const handleBulkPromote = async () => {
+    if (selectedRowKeys.length === 0) return;
+    setBulkPromoting(true);
+
+    const selectedFilings = filings.filter((f) => selectedRowKeys.includes(f.id));
+    let successCount = 0;
+    const errors: string[] = [];
+
+    for (const filing of selectedFilings) {
+      if (filing.promoted_to_candidate_id) {
+        errors.push(`${filing.first_name} ${filing.last_name} already promoted`);
+        continue;
+      }
+
+      try {
+        let slug = slugifyName(filing.first_name, filing.last_name);
+        const { data: existingCandidate } = await supabase
+          .from("candidates")
+          .select("id")
+          .eq("slug", slug)
+          .single();
+        if (existingCandidate) {
+          slug = `${slug}-${(filing.state?.abbr || "").toLowerCase()}`;
+        }
+
+        const { data: newCandidate, error: candidateError } = await supabase
+          .from("candidates")
+          .insert({
+            slug,
+            first_name: filing.first_name,
+            last_name: filing.last_name,
+            party: filing.party,
+            role_title: filing.office === "S" ? "U.S. Senator" : "U.S. Representative",
+            state_id: filing.state_id,
+            photo_url: null,
+            website: null,
+            twitter_handle: null,
+            bio: null,
+            fec_candidate_id: filing.fec_candidate_id,
+            funds_raised: filing.funds_raised,
+            funds_spent: filing.funds_spent,
+            cash_on_hand: filing.cash_on_hand,
+            fec_financials_updated_at: filing.last_synced_at,
+          })
+          .select()
+          .single();
+        if (candidateError) throw candidateError;
+
+        let districtId: number | null = null;
+        if (filing.office === "S") {
+          const { data: senateDistrict } = await supabase
+            .from("districts")
+            .select("id")
+            .eq("state_id", filing.state_id)
+            .eq("body", "senate")
+            .single();
+          if (senateDistrict) districtId = senateDistrict.id;
+        } else {
+          const { data: houseDistrict } = await supabase
+            .from("districts")
+            .select("id")
+            .eq("state_id", filing.state_id)
+            .eq("body", "house")
+            .eq("district_number", filing.district_number)
+            .single();
+          if (houseDistrict) districtId = houseDistrict.id;
+        }
+
+        if (!districtId) {
+          const { data: newDistrict, error: districtError } = await supabase
+            .from("districts")
+            .insert({
+              state_id: filing.state_id,
+              body: filing.office === "S" ? "senate" : "house",
+              district_number: filing.district_number,
+            })
+            .select()
+            .single();
+          if (districtError) throw districtError;
+          districtId = newDistrict.id;
+        }
+
+        let raceId: number | null = null;
+        const { data: existingRace } = await supabase
+          .from("races")
+          .select("id")
+          .eq("district_id", districtId)
+          .eq("cycle_id", activeCycleId)
+          .single();
+
+        if (existingRace) {
+          raceId = existingRace.id;
+        } else {
+          const { data: newRace, error: raceError } = await supabase
+            .from("races")
+            .insert({ district_id: districtId, cycle_id: activeCycleId, rating: null })
+            .select()
+            .single();
+          if (raceError) throw raceError;
+          raceId = newRace.id;
+        }
+
+        const { error: raceCandidateError } = await supabase
+          .from("race_candidates")
+          .insert({
+            race_id: raceId,
+            candidate_id: newCandidate.id,
+            status: "announced",
+            is_incumbent: filing.is_incumbent,
+          });
+        if (raceCandidateError) throw raceCandidateError;
+
+        const { error: updateError } = await supabase
+          .from("fec_filings")
+          .update({ promoted_to_candidate_id: newCandidate.id })
+          .eq("id", filing.id);
+        if (updateError) throw updateError;
+
+        successCount++;
+      } catch (err: any) {
+        errors.push(`${filing.first_name} ${filing.last_name}: ${err.message}`);
+      }
+    }
+
+    setBulkPromoting(false);
+    setBulkPromoteOpen(false);
+    setSelectedRowKeys([]);
+
+    if (successCount > 0) {
+      messageApi.success(`Promoted ${successCount} candidate${successCount !== 1 ? "s" : ""}`);
+    }
+    if (errors.length > 0) {
+      Modal.error({
+        title: "Some promotions failed",
+        content: (
+          <ul style={{ paddingLeft: 20, maxHeight: 300, overflow: "auto" }}>
+            {errors.map((e, i) => <li key={i} style={{ fontSize: 12 }}>{e}</li>)}
+          </ul>
+        ),
+      });
+    }
+
+    fetchFilings();
+  };
+
+  const handleBulkDelete = () => {
+    const ids = selectedRowKeys as number[];
+    Modal.confirm({
+      title: `Delete ${ids.length} filing${ids.length !== 1 ? "s" : ""}?`,
+      content: "This cannot be undone.",
+      okText: "Delete All",
+      okType: "danger",
+      onOk: async () => {
+        const { error } = await supabase
+          .from("fec_filings")
+          .delete()
+          .in("id", ids);
+        if (error) {
+          messageApi.error(error.message);
+        } else {
+          messageApi.success(`Deleted ${ids.length} filing${ids.length !== 1 ? "s" : ""}`);
+          setSelectedRowKeys([]);
+          fetchFilings();
+        }
+      },
+    });
+  };
+
   const filteredFilings = filings.filter((f) => {
     if (stateFilter !== null && f.state_id !== stateFilter) return false;
+    if (bodyFilter !== "all") {
+      if (bodyFilter === "senate" && f.office !== "S") return false;
+      if (bodyFilter === "house" && f.office !== "H") return false;
+    }
     if (partyFilter !== "all" && f.party !== partyFilter) return false;
     if (statusFilter === "promoted" && !f.promoted_to_candidate_id) return false;
     if (statusFilter === "not_promoted" && f.promoted_to_candidate_id) return false;
@@ -443,24 +623,74 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
     {
       title: "Name",
       key: "name",
+      width: 200,
       sorter: (a: DbFecFiling, b: DbFecFiling) => a.last_name.localeCompare(b.last_name),
-      render: (_: any, record: DbFecFiling) => (
-        <span>
-          <Text strong>{record.first_name} {record.last_name}</Text>
-          {record.is_incumbent && (
-            <Tag color="green" style={{ marginLeft: 6, fontSize: 10 }}>Inc</Tag>
-          )}
-        </span>
+      render: (_: any, record: DbFecFiling) => {
+        let partyIndicator = "";
+        let partyColor = "gray";
+        if (record.party === "Democrat") {
+          partyIndicator = "D";
+          partyColor = "blue";
+        } else if (record.party === "Republican") {
+          partyIndicator = "R";
+          partyColor = "red";
+        } else if (record.party === "Independent") {
+          partyIndicator = "I";
+          partyColor = "purple";
+        }
+
+        return (
+          <span>
+            {partyIndicator && (
+              <Tag color={partyColor} style={{ marginRight: 4, fontSize: 10, fontWeight: "bold" }}>
+                {partyIndicator}
+              </Tag>
+            )}
+            <Text strong>{record.first_name} {record.last_name}</Text>
+            {record.is_incumbent && (
+              <Tag color="green" style={{ marginLeft: 6, fontSize: 10 }}>Inc</Tag>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      title: "FEC ID",
+      dataIndex: "fec_candidate_id",
+      key: "fec_id",
+      width: 110,
+      render: (fecId: string) => (
+        <a
+          href={`https://www.fec.gov/data/candidate/${fecId}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontFamily: "monospace", fontSize: 12 }}
+        >
+          {fecId}
+        </a>
       ),
     },
     {
-      title: "Party",
-      dataIndex: "party",
-      key: "party",
+      title: "Body",
+      dataIndex: "office",
+      key: "body",
       width: 100,
-      render: (party: string) => {
-        const color = party === "Democrat" ? "blue" : party === "Republican" ? "red" : party === "Independent" ? "purple" : "default";
-        return <Tag color={color}>{party}</Tag>;
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.office.localeCompare(b.office),
+      render: (office: string) => {
+        const color = office === "S" ? "blue" : office === "H" ? "green" : "default";
+        const text = office === "S" ? "Senate" : office === "H" ? "House" : office;
+        return <Tag color={color}>{text}</Tag>;
+      },
+    },
+    {
+      title: "District",
+      key: "district",
+      width: 80,
+      render: (_: any, record: DbFecFiling) => {
+        if (record.office === "H" && record.district_number) {
+          return `${record.state?.abbr}-${String(record.district_number).padStart(2, "0")}`;
+        }
+        return "—";
       },
     },
     {
@@ -507,16 +737,31 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
     {
       title: "",
       key: "actions",
-      width: 130,
+      width: 48,
       render: (_: any, record: DbFecFiling) => (
-        <Space size="small">
-          {!record.promoted_to_candidate_id && (
-            <Button type="primary" size="small" icon={<SendOutlined />} onClick={() => handlePromoteClick(record)}>
-              Promote
-            </Button>
-          )}
-          <Button danger size="small" icon={<DeleteOutlined />} onClick={() => handleDelete(record)} />
-        </Space>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: "promote",
+                icon: <SendOutlined />,
+                label: "Promote",
+                disabled: !!record.promoted_to_candidate_id,
+                onClick: () => handlePromoteClick(record),
+              },
+              {
+                key: "delete",
+                icon: <DeleteOutlined />,
+                label: "Delete",
+                danger: true,
+                onClick: () => handleDelete(record),
+              },
+            ],
+          }}
+          trigger={["click"]}
+        >
+          <Button type="text" size="small" icon={<MoreOutlined />} />
+        </Dropdown>
       ),
     },
   ];
@@ -526,9 +771,53 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         <Text type="secondary" style={{ fontSize: 13 }}>
           View and manage FEC filings. Promote primary winners to the candidates table.
+          {" "}Select rows to bulk-promote or delete.
         </Text>
         <Tag style={{ marginLeft: "auto" }}>{filteredFilings.length} filings</Tag>
       </div>
+
+      {/* Bulk action toolbar */}
+      {selectedRowKeys.length > 0 && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: "8px 16px",
+            background: "#f0f5ff",
+            borderRadius: 8,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: "1px solid #d6e4ff",
+          }}
+        >
+          <Text strong style={{ fontSize: 13 }}>
+            {selectedRowKeys.length} selected
+          </Text>
+          <Button
+            size="small"
+            type="primary"
+            icon={<TeamOutlined />}
+            onClick={() => setBulkPromoteOpen(true)}
+          >
+            Bulk Promote
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleBulkDelete}
+          >
+            Delete
+          </Button>
+          <Button
+            size="small"
+            type="text"
+            onClick={() => setSelectedRowKeys([])}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <Select
@@ -547,6 +836,13 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
               {state.abbr} — {state.label}
             </Select.Option>
           ))}
+        </Select>
+
+        <Select placeholder="Body" style={{ width: 140 }} value={bodyFilter} onChange={setBodyFilter}>
+          <Select.Option value="all">All Bodies</Select.Option>
+          <Select.Option value="senate">Senate</Select.Option>
+          <Select.Option value="house">House</Select.Option>
+          <Select.Option value="governor">Governor</Select.Option>
         </Select>
 
         <Select placeholder="Party" style={{ width: 140 }} value={partyFilter} onChange={setPartyFilter}>
@@ -569,6 +865,11 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
         rowKey="id"
         loading={loading}
         size="small"
+        rowSelection={{
+          selectedRowKeys,
+          onChange: setSelectedRowKeys,
+          columnWidth: 40,
+        }}
         pagination={{
           pageSize: 50,
           showSizeChanger: true,
@@ -637,6 +938,37 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
               </Space>
             </div>
           </Space>
+        )}
+      </Modal>
+
+      {/* Bulk Promote Modal */}
+      <Modal
+        title={`Bulk Promote ${selectedRowKeys.length} Candidate${selectedRowKeys.length !== 1 ? "s" : ""}`}
+        open={bulkPromoteOpen}
+        onCancel={() => setBulkPromoteOpen(false)}
+        okText="Promote All"
+        okButtonProps={{ loading: bulkPromoting }}
+        onOk={handleBulkPromote}
+        width={600}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            This will promote the selected FEC filings to full candidates, create their race assignments,
+            and mark them as "Announced" status. Already-promoted candidates will be skipped.
+          </Text>
+        </div>
+
+        {selectedRowKeys.length > 0 && (
+          <Alert
+            type="info"
+            showIcon
+            style={{ fontSize: 13 }}
+            message={
+              <>
+                Promoting {selectedRowKeys.length} filing{selectedRowKeys.length !== 1 ? "s" : ""} to candidates
+              </>
+            }
+          />
         )}
       </Modal>
     </>

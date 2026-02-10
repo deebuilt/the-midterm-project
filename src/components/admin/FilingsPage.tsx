@@ -112,7 +112,7 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
 
   // Filters
   const [stateFilter, setStateFilter] = useState<number | null>(null);
-  const [partyFilter, setPartyFilter] = useState<string>("all");
+  const [bodyFilter, setBodyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Promote modal
@@ -395,7 +395,11 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
 
   const filteredFilings = filings.filter((f) => {
     if (stateFilter !== null && f.state_id !== stateFilter) return false;
-    if (partyFilter !== "all" && f.party !== partyFilter) return false;
+    if (bodyFilter !== "all") {
+      if (bodyFilter === "senate" && f.office !== "S") return false;
+      if (bodyFilter === "house" && f.office !== "H") return false;
+      // Governor filter - not yet implemented in data
+    }
     if (statusFilter === "promoted" && !f.promoted_to_candidate_id) return false;
     if (statusFilter === "not_promoted" && f.promoted_to_candidate_id) return false;
     return true;
@@ -415,28 +419,61 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "name",
       key: "name",
       sorter: (a: DbFecFiling, b: DbFecFiling) => a.name.localeCompare(b.name),
-    },
-    {
-      title: "Party",
-      dataIndex: "party",
-      key: "party",
-      width: 120,
-      render: (party: string) => {
-        let color = "default";
-        if (party === "Democrat") color = "blue";
-        else if (party === "Republican") color = "red";
-        else if (party === "Independent") color = "purple";
-        return <Tag color={color}>{party}</Tag>;
+      render: (_: string, record: DbFecFiling) => {
+        let partyIndicator = "";
+        let partyColor = "text-slate-600";
+        if (record.party === "Democrat") {
+          partyIndicator = "D";
+          partyColor = "text-blue-600";
+        } else if (record.party === "Republican") {
+          partyIndicator = "R";
+          partyColor = "text-red-600";
+        } else if (record.party === "Independent") {
+          partyIndicator = "I";
+          partyColor = "text-purple-600";
+        }
+
+        return (
+          <span>
+            {partyIndicator && (
+              <span className={`font-bold ${partyColor} mr-1.5`}>
+                {partyIndicator}
+              </span>
+            )}
+            {record.name}
+          </span>
+        );
       },
     },
     {
-      title: "Office",
+      title: "Body",
       dataIndex: "office",
-      key: "office",
-      width: 100,
-      render: (office: string, record: DbFecFiling) => {
-        if (office === "S") return "Senate";
-        return `House ${record.district_number}`;
+      key: "body",
+      width: 120,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.office.localeCompare(b.office),
+      render: (office: string) => {
+        let color = "default";
+        let text = "";
+        if (office === "S") {
+          color = "blue";
+          text = "Senate";
+        } else if (office === "H") {
+          color = "green";
+          text = "House";
+        }
+        return <Tag color={color}>{text}</Tag>;
+      },
+    },
+    {
+      title: "District",
+      dataIndex: "district_number",
+      key: "district",
+      width: 90,
+      render: (district: number | null, record: DbFecFiling) => {
+        if (record.office === "H" && district) {
+          return `${record.state?.abbr}-${String(district).padStart(2, "0")}`;
+        }
+        return "—";
       },
     },
     {
@@ -549,15 +586,15 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
             </Select>
 
             <Select
-              placeholder="Filter by party"
+              placeholder="Filter by body"
               style={{ width: 150 }}
-              value={partyFilter}
-              onChange={setPartyFilter}
+              value={bodyFilter}
+              onChange={setBodyFilter}
             >
-              <Select.Option value="all">All Parties</Select.Option>
-              <Select.Option value="Democrat">Democrat</Select.Option>
-              <Select.Option value="Republican">Republican</Select.Option>
-              <Select.Option value="Independent">Independent</Select.Option>
+              <Select.Option value="all">All Bodies</Select.Option>
+              <Select.Option value="senate">Senate</Select.Option>
+              <Select.Option value="house">House</Select.Option>
+              <Select.Option value="governor">Governor</Select.Option>
             </Select>
 
             <Select
