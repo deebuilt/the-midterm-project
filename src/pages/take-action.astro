@@ -1,6 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import ReadAloud from "../components/ui/ReadAloud";
+import ContactYourReps from "../components/ui/ContactYourReps";
+import { fetchCurrentSenators } from "../lib/congress-api";
+
+const senators = await fetchCurrentSenators();
 ---
 
 <Layout title="What You Can Do" description="Concrete things you can do right now to make a difference in the 2026 midterms — even from your couch.">
@@ -54,9 +58,41 @@ import ReadAloud from "../components/ui/ReadAloud";
         </div>
       </div>
 
-      <!-- 2. STAY INFORMED -->
+      <!-- 2. CONTACT YOUR REPS -->
       <div class="relative pl-8 border-l-4 border-navy">
         <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">2</div>
+        <h2 class="text-xl font-bold mb-3">Contact your senators</h2>
+        <p class="text-slate-700 leading-relaxed mb-4">
+          Your senators work for you. A phone call to their office takes two minutes and carries
+          more weight than you'd think &mdash; staffers tally every call, and when the numbers
+          spike on an issue, senators notice. You don't need a script. Just say your name, your
+          zip code, and what issue you're calling about.
+        </p>
+        <div class="mb-4">
+          <ContactYourReps client:load senators={senators} />
+        </div>
+        <div class="bg-slate-50 rounded-lg p-5 space-y-3">
+          <p class="text-sm font-semibold text-slate-800">Tips for calling:</p>
+          <ul class="text-sm text-slate-600 space-y-2">
+            <li class="flex items-start gap-2">
+              <span class="text-dem font-bold mt-0.5">&rarr;</span>
+              <span>Call the DC office during business hours (9am &ndash; 5pm ET). That's where policy staff sit.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-dem font-bold mt-0.5">&rarr;</span>
+              <span>If you get voicemail, leave a message. They still count it.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-dem font-bold mt-0.5">&rarr;</span>
+              <span>Be brief: &ldquo;Hi, I'm [name] from [city]. I'm calling to urge [senator] to [your ask]. Thank you.&rdquo;</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 3. STAY INFORMED -->
+      <div class="relative pl-8 border-l-4 border-navy">
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">3</div>
         <h2 class="text-xl font-bold mb-3">Stay informed &mdash; fight the algorithm</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           Social media is designed to keep you scrolling, not keep you informed in the way
@@ -88,9 +124,9 @@ import ReadAloud from "../components/ui/ReadAloud";
         </div>
       </div>
 
-      <!-- 3. PROTEST IN THE COMMENTS -->
+      <!-- 4. PROTEST IN THE COMMENTS -->
       <div class="relative pl-8 border-l-4 border-navy">
-        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">3</div>
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">4</div>
         <h2 class="text-xl font-bold mb-3">Protest from home &mdash; in the comments</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           You don't have to argue with trolls. In fact, don't. The goal isn't to change the
@@ -122,9 +158,9 @@ import ReadAloud from "../components/ui/ReadAloud";
         </div>
       </div>
 
-      <!-- 4. TALK ABOUT IT -->
+      <!-- 5. TALK ABOUT IT -->
       <div class="relative pl-8 border-l-4 border-navy">
-        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">4</div>
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">5</div>
         <h2 class="text-xl font-bold mb-3">Keep talking about it</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           Don't go quiet. Even if you can't stop what's happening, document it. Talk about it.
@@ -152,9 +188,9 @@ import ReadAloud from "../components/ui/ReadAloud";
         </div>
       </div>
 
-      <!-- 5. PROTEST -->
+      <!-- 6. PROTEST -->
       <div class="relative pl-8 border-l-4 border-navy">
-        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">5</div>
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">6</div>
         <h2 class="text-xl font-bold mb-3">Show up in the streets</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           Protesting has worked for decades &mdash; not always in the way people expect, but
@@ -169,9 +205,9 @@ import ReadAloud from "../components/ui/ReadAloud";
         </p>
       </div>
 
-      <!-- 6. VOLUNTEER LOCALLY -->
+      <!-- 7. VOLUNTEER LOCALLY -->
       <div class="relative pl-8 border-l-4 border-navy">
-        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">6</div>
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">7</div>
         <h2 class="text-xl font-bold mb-3">Volunteer locally</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           Look around your community. There are organizations at every level &mdash;
@@ -203,9 +239,9 @@ import ReadAloud from "../components/ui/ReadAloud";
         </div>
       </div>
 
-      <!-- 7. DONATE -->
+      <!-- 8. DONATE -->
       <div class="relative pl-8 border-l-4 border-navy">
-        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">7</div>
+        <div class="absolute -left-4 top-0 w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold">8</div>
         <h2 class="text-xl font-bold mb-3">Donate if you can</h2>
         <p class="text-slate-700 leading-relaxed mb-4">
           Midterm races run on much smaller budgets than presidential campaigns. That means

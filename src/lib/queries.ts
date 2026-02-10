@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState } from "../types";
+import type { StateInfo, SenateRace, HouseRace, GovernorRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState } from "../types";
 
 // ─── States ───
 
@@ -765,6 +765,231 @@ export async function fetchFecFilings(): Promise<FilingsByState[]> {
       });
   } catch {
     console.warn("FEC filings table may not exist yet");
+    return [];
+  }
+}
+
+// ─── House Races ───
+
+/**
+ * Fetch competitive House races for the active cycle.
+ * Mirrors fetchSenateRaces() but filters to us-house body.
+ */
+export async function fetchHouseRaces(): Promise<HouseRace[]> {
+  try {
+    const { data: cycle } = await supabase
+      .from("election_cycles")
+      .select("id")
+      .eq("is_active", true)
+      .single();
+
+    if (!cycle) return [];
+
+    const { data: races, error } = await supabase
+      .from("races")
+      .select(`
+        id,
+        rating,
+        is_special_election,
+        is_open_seat,
+        primary_date,
+        general_date,
+        why_competitive,
+        district:districts!inner(
+          state_id,
+          number,
+          name,
+          state:states!inner(name, abbr),
+          body:government_bodies!inner(slug)
+        ),
+        race_candidates(
+          is_incumbent,
+          candidate:candidates!inner(
+            slug,
+            first_name,
+            last_name,
+            party,
+            photo_url,
+            website,
+            twitter,
+            role_title,
+            is_incumbent,
+            bioguide_id,
+            fec_candidate_id,
+            candidate_positions(
+              summary,
+              stance,
+              topic:topics!inner(name, slug)
+            )
+          )
+        )
+      `)
+      .eq("cycle_id", cycle.id)
+      .not("rating", "is", null);
+
+    if (error) {
+      console.warn(`House races unavailable: ${error.message}`);
+      return [];
+    }
+
+    // Filter to house races only
+    const houseRaces = (races ?? []).filter((r) => {
+      const dist = r.district as any;
+      return dist.body?.slug === "us-house";
+    });
+
+    return houseRaces.map((race) => {
+      const dist = race.district as any;
+      const state = dist.state as any;
+      const rcs = (race.race_candidates ?? []) as any[];
+
+      const incumbentRc = rcs.find((rc) => rc.is_incumbent);
+      const incumbentCandidate = incumbentRc
+        ? dbCandidateToCandidate(incumbentRc.candidate)
+        : undefined;
+
+      const democrats: Candidate[] = [];
+      const republicans: Candidate[] = [];
+      const independents: Candidate[] = [];
+
+      for (const rc of rcs) {
+        const c = dbCandidateToCandidate(rc.candidate);
+        if (c.party === "Democrat") democrats.push(c);
+        else if (c.party === "Republican") republicans.push(c);
+        else independents.push(c);
+      }
+
+      return {
+        state: state.name,
+        stateAbbr: state.abbr,
+        district: dist.number ?? 0,
+        rating: race.rating as HouseRace["rating"],
+        isOpenSeat: race.is_open_seat,
+        incumbent: incumbentCandidate,
+        candidates: {
+          democrat: democrats,
+          republican: republicans,
+          ...(independents.length > 0 ? { independent: independents } : {}),
+        },
+        primaryDate: race.primary_date ?? "",
+        generalElectionDate: race.general_date ?? "2026-11-03",
+        whyCompetitive: race.why_competitive ?? undefined,
+      } satisfies HouseRace;
+    });
+  } catch {
+    console.warn("House races table may not be ready yet");
+    return [];
+  }
+}
+
+// ─── Governor Races ───
+
+/**
+ * Fetch governor races for the active cycle.
+ * Mirrors fetchSenateRaces() but filters to governor body.
+ */
+export async function fetchGovernorRaces(): Promise<GovernorRace[]> {
+  try {
+    const { data: cycle } = await supabase
+      .from("election_cycles")
+      .select("id")
+      .eq("is_active", true)
+      .single();
+
+    if (!cycle) return [];
+
+    const { data: races, error } = await supabase
+      .from("races")
+      .select(`
+        id,
+        rating,
+        is_special_election,
+        is_open_seat,
+        primary_date,
+        general_date,
+        why_competitive,
+        district:districts!inner(
+          state_id,
+          name,
+          state:states!inner(name, abbr),
+          body:government_bodies!inner(slug)
+        ),
+        race_candidates(
+          is_incumbent,
+          candidate:candidates!inner(
+            slug,
+            first_name,
+            last_name,
+            party,
+            photo_url,
+            website,
+            twitter,
+            role_title,
+            is_incumbent,
+            bioguide_id,
+            fec_candidate_id,
+            candidate_positions(
+              summary,
+              stance,
+              topic:topics!inner(name, slug)
+            )
+          )
+        )
+      `)
+      .eq("cycle_id", cycle.id)
+      .not("rating", "is", null);
+
+    if (error) {
+      console.warn(`Governor races unavailable: ${error.message}`);
+      return [];
+    }
+
+    // Filter to governor races only
+    const govRaces = (races ?? []).filter((r) => {
+      const dist = r.district as any;
+      return dist.body?.slug === "governor";
+    });
+
+    return govRaces.map((race) => {
+      const dist = race.district as any;
+      const state = dist.state as any;
+      const rcs = (race.race_candidates ?? []) as any[];
+
+      const incumbentRc = rcs.find((rc) => rc.is_incumbent);
+      const incumbentCandidate = incumbentRc
+        ? dbCandidateToCandidate(incumbentRc.candidate)
+        : undefined;
+
+      const democrats: Candidate[] = [];
+      const republicans: Candidate[] = [];
+      const independents: Candidate[] = [];
+
+      for (const rc of rcs) {
+        const c = dbCandidateToCandidate(rc.candidate);
+        if (c.party === "Democrat") democrats.push(c);
+        else if (c.party === "Republican") republicans.push(c);
+        else independents.push(c);
+      }
+
+      return {
+        state: state.name,
+        stateAbbr: state.abbr,
+        rating: race.rating as GovernorRace["rating"],
+        isOpenSeat: race.is_open_seat,
+        isTermLimited: race.is_open_seat, // open seats are typically due to term limits
+        incumbent: incumbentCandidate,
+        candidates: {
+          democrat: democrats,
+          republican: republicans,
+          ...(independents.length > 0 ? { independent: independents } : {}),
+        },
+        primaryDate: race.primary_date ?? "",
+        generalElectionDate: race.general_date ?? "2026-11-03",
+        whyCompetitive: race.why_competitive ?? undefined,
+      } satisfies GovernorRace;
+    });
+  } catch {
+    console.warn("Governor races table may not be ready yet");
     return [];
   }
 }

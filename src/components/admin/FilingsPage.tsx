@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, type ReactNode } from "react";
-import { Table, Card, Select, Tag, Button, Modal, Input, Typography, Space, message, Statistic, Badge, Tooltip } from "antd";
-import { CheckCircleOutlined, DeleteOutlined, SendOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Table, Card, Select, Tag, Button, Modal, Input, Typography, Space, message, Statistic, Badge, Tooltip, Alert } from "antd";
+import { CheckCircleOutlined, DeleteOutlined, SendOutlined, ExclamationCircleOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import { slugifyName } from "../../lib/openfec";
+import { getEnrichmentData } from "../../lib/congress-api";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -126,6 +127,8 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
     raceStatus: "announced",
   });
   const [promoting, setPromoting] = useState(false);
+  const [enriching, setEnriching] = useState(false);
+  const [enrichedFrom, setEnrichedFrom] = useState<string | null>(null);
 
   useEffect(() => {
     setHeaderActions(null);
@@ -178,17 +181,47 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
     }
   };
 
-  const handlePromoteClick = (filing: DbFecFiling) => {
+  const handlePromoteClick = async (filing: DbFecFiling) => {
     setSelectedFiling(filing);
-    setPromoteForm({
+    setEnrichedFrom(null);
+
+    const defaultForm: PromoteFormData = {
       photoUrl: "",
       website: "",
       twitter: "",
       bio: "",
       roleTitle: filing.office === "S" ? "U.S. Senator" : "U.S. Representative",
       raceStatus: "announced",
-    });
+    };
+
+    setPromoteForm(defaultForm);
     setPromoteModalVisible(true);
+
+    // Auto-enrich incumbents from congress-legislators data
+    if (filing.is_incumbent && filing.state?.abbr) {
+      setEnriching(true);
+      try {
+        const data = await getEnrichmentData(
+          filing.fec_candidate_id,
+          filing.first_name,
+          filing.last_name,
+          filing.state.abbr
+        );
+        if (data) {
+          setPromoteForm((prev) => ({
+            ...prev,
+            photoUrl: data.photoUrl || prev.photoUrl,
+            website: data.website || prev.website,
+            twitter: data.twitter || prev.twitter,
+          }));
+          setEnrichedFrom(data.bioguideId);
+        }
+      } catch (err) {
+        console.warn("Auto-enrichment failed (non-blocking):", err);
+      } finally {
+        setEnriching(false);
+      }
+    }
   };
 
   const handlePromote = async () => {
@@ -225,6 +258,7 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
           twitter_handle: promoteForm.twitter || null,
           bio: promoteForm.bio || null,
           fec_candidate_id: selectedFiling.fec_candidate_id,
+          bioguide_id: enrichedFrom || null,
           funds_raised: selectedFiling.funds_raised,
           funds_spent: selectedFiling.funds_spent,
           cash_on_hand: selectedFiling.cash_on_hand,
@@ -611,6 +645,24 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
 
             <div>
               <Text strong>Enrichment Fields (Optional)</Text>
+              {enriching && (
+                <Alert
+                  message="Looking up Congress data..."
+                  type="info"
+                  showIcon
+                  icon={<ThunderboltOutlined />}
+                  style={{ marginTop: 8 }}
+                />
+              )}
+              {enrichedFrom && !enriching && (
+                <Alert
+                  message={`Auto-enriched from Congress data (${enrichedFrom})`}
+                  type="success"
+                  showIcon
+                  icon={<ThunderboltOutlined />}
+                  style={{ marginTop: 8 }}
+                />
+              )}
               <Space direction="vertical" size="middle" style={{ width: "100%", marginTop: 12 }}>
                 <div>
                   <Text>Photo URL</Text>

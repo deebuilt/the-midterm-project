@@ -1,4 +1,4 @@
-const CACHE_NAME = "tmp-v7";
+const CACHE_NAME = "tmp-v8";
 
 const PRECACHE_URLS = [
   "/",
@@ -12,6 +12,8 @@ const PRECACHE_URLS = [
   "/about",
   "/admin",
   "/volunteer",
+  "/house",
+  "/governors",
   "/data/states-10m.json",
   "/learn/how-to-run",
 ];

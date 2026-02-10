@@ -316,7 +316,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
   }
 
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const edgeFunctionUrl = `${supabaseUrl}/functions/v1/fec-sync`;
+  const edgeFunctionUrl = `${supabaseUrl}/functions/v1/fec-sync${config.webhook_secret ? `?secret=${config.webhook_secret}` : ""}`;
 
   return (
     <div>
@@ -510,7 +510,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
               <p style={{ margin: "4px 0" }}>Configure a daily POST request at cronjob.org:</p>
               <div style={{ background: "#f5f5f5", padding: 8, borderRadius: 4, fontFamily: "monospace", fontSize: 12, marginBottom: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>URL: {edgeFunctionUrl}</span>
+                  <span style={{ wordBreak: "break-all" }}>URL: {edgeFunctionUrl}</span>
                   <Button
                     type="text"
                     size="small"
@@ -519,7 +519,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
                   />
                 </div>
                 <div>Method: POST</div>
-                <div>Header: Authorization: Bearer {config.webhook_secret ? "••••••" : "<set webhook secret above>"}</div>
+                {!config.webhook_secret && <div style={{ color: "#faad14" }}>⚠ Set webhook secret above to generate the full URL</div>}
               </div>
               <Text type="secondary" style={{ fontSize: 12 }}>
                 Recommended schedule: Daily at 6:00 AM UTC (after FEC nightly data refresh)

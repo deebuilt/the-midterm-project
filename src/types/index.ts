@@ -39,6 +39,7 @@ export interface SenateRace {
 
 export interface HouseRace {
   state: string;
+  stateAbbr: string;
   district: number;
   rating:
     | "Safe R"
@@ -53,7 +54,11 @@ export interface HouseRace {
   candidates: {
     democrat: Candidate[];
     republican: Candidate[];
+    independent?: Candidate[];
   };
+  primaryDate: string;
+  generalElectionDate: string;
+  whyCompetitive?: string;
   trumpMargin2024?: number;
 }
 
@@ -136,6 +141,54 @@ export interface FilingsByState {
   primaryDate: string | null;
   daysUntilPrimary: number | null;
   filings: FecFiling[];
+}
+
+export interface CongressMember {
+  bioguideId: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  party: "Democrat" | "Republican" | "Independent";
+  state: string;
+  chamber: "senate" | "house";
+  district?: number;
+  senateClass?: number;
+  stateRank?: "senior" | "junior";
+  phone?: string;
+  address?: string;
+  office?: string;
+  website?: string;
+  contactFormUrl?: string;
+  photoUrl: string;
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  fecIds?: string[];
+}
+
+export interface GovernorRace {
+  state: string;
+  stateAbbr: string;
+  rating:
+    | "Safe R"
+    | "Likely R"
+    | "Lean R"
+    | "Toss-up"
+    | "Lean D"
+    | "Likely D"
+    | "Safe D";
+  incumbent?: Candidate;
+  isOpenSeat: boolean;
+  isTermLimited: boolean;
+  candidates: {
+    democrat: Candidate[];
+    republican: Candidate[];
+    independent?: Candidate[];
+  };
+  primaryDate: string;
+  generalElectionDate: string;
+  whyCompetitive?: string;
 }
 
 export interface StateInfo {
