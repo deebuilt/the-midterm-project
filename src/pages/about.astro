@@ -1,13 +1,17 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import ReadAloud from "../components/ui/ReadAloud";
 ---
 
-<Layout title="About" description="Why The Midterm Project exists, what we believe, and how we approach the 2026 midterms.">
+<Layout title="About" description="Why The Midterm Project exists, what it really is, and what we're trying to do.">
   <section class="max-w-3xl mx-auto py-16 px-4">
     <h1 class="text-3xl md:text-4xl font-bold mb-2">About The Midterm Project</h1>
-    <p class="text-lg text-slate-500 mb-10">
-      What this is, why it exists, and where we stand.
+    <p class="text-lg text-slate-500 mb-4">
+      What this is, why it exists, and what we're actually trying to do.
     </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/about.mp3" />
+    </div>
 
     <div class="space-y-10">
       <!-- What This Is -->
@@ -15,31 +19,38 @@ import Layout from "../layouts/Layout.astro";
         <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">What this is</h2>
         <div class="prose prose-slate max-w-none">
           <p class="text-slate-700 leading-relaxed">
-            The Midterm Project is a free, open voter education site built for the 2026 U.S. midterm elections.
-            We present candidates, their voting records, their positions, and their own words &mdash; so you can
-            make informed decisions without having to wade through cable news spin or social media noise.
+            The Midterm Project is a free, open resource built to help people show up for the 2026
+            U.S. midterm elections &mdash; especially people who have never voted in a midterm or
+            primary before.
           </p>
           <p class="text-slate-700 leading-relaxed mt-4">
-            Every candidate page links directly to their official website and social media. Every voting record
-            is sourced from public congressional data. We want you to go beyond this site &mdash; look things up,
-            verify what we've written, and form your own conclusions.
+            The name has a double meaning. The midterms are coming, and they represent a real
+            chance to shift power in the second half of this administration. But it's also a
+            <em>group project</em> &mdash; the kind where it's pass/fail and everyone has a part to play.
+            If we all pull together and do our part, the whole group wins.
           </p>
         </div>
       </div>
 
-      <!-- How We Approach It -->
+      <!-- Why It Exists -->
       <div>
-        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">How we approach it</h2>
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Why it exists</h2>
         <div class="prose prose-slate max-w-none">
           <p class="text-slate-700 leading-relaxed">
-            Our content aims to be factual and nonpartisan. We cover every candidate &mdash; Democrat, Republican,
-            and Independent &mdash; with the same format: their record, their positions, and links to learn more.
-            We don't tell you who to vote for. We show you what they've done and let you decide.
+            If you're watching what's happening right now &mdash; on the news, on social media,
+            in your community &mdash; and you feel helpless, scared, or unsure what to do, this
+            is for you. You're not alone, and you're not powerless.
           </p>
           <p class="text-slate-700 leading-relaxed mt-4">
-            We believe that when people have real information, they make good choices. The problem isn't that
-            voters are uninformed &mdash; it's that accurate, accessible information is getting harder to find.
-            That's the gap we're trying to fill.
+            This project was started by someone who had only ever voted once every four years.
+            Presidential elections felt like the big ones, and everything else felt optional.
+            That was a mistake. The midterms are where we can actually make a difference &mdash;
+            where local decisions, House races, and Senate seats get decided by the people who
+            bother to show up.
+          </p>
+          <p class="text-slate-700 leading-relaxed mt-4">
+            The goal here is simple: make 2026 the year you voted more times than you ever have
+            in your life. Primaries, midterms, special elections, local races &mdash; all of it.
           </p>
         </div>
       </div>
@@ -49,65 +60,71 @@ import Layout from "../layouts/Layout.astro";
         <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Where we stand</h2>
         <div class="bg-slate-900 text-white rounded-xl p-8">
           <p class="text-lg leading-relaxed mb-4">
-            We present all candidates fairly. But we are not neutral about democracy itself.
+            Let's be honest about what this is.
           </p>
           <p class="text-slate-300 leading-relaxed mb-4">
-            Right now, American democracy is under pressure. The free press is being attacked.
+            American democracy is under serious pressure. The free press is being attacked.
             Judges and election officials are being threatened. Executive power is expanding
-            in ways that weaken the checks and balances our system depends on.
+            in ways that weaken the checks and balances our system depends on. People are
+            being targeted, rights are being rolled back, and a lot of us are scared.
           </p>
           <p class="text-slate-300 leading-relaxed mb-4">
-            These aren't partisan concerns. No matter who you vote for, you should be able to
-            vote freely, have your vote counted, and trust that the people you elect are
-            accountable to you &mdash; not the other way around.
+            The goal of this project right now is to flip the House. That's where we can
+            regain a check on this administration's power. Maybe someday this becomes a
+            broader, nonpartisan voter education platform &mdash; and we'd be proud of that.
+            But right now, we're focused on the most urgent thing: making sure the people
+            who are unhappy with what's happening actually show up and vote.
           </p>
           <p class="text-slate-300 leading-relaxed mb-4">
-            Congress is the branch closest to the people. It has the power to push back on overreach,
-            protect your rights, and hold anyone in government accountable. But only if we show up.
+            We present candidates, their records, and their positions so you can make informed
+            decisions. We link to official sources so you can verify everything yourself. But
+            we're not going to pretend this is a neutral academic exercise. This is about
+            using the power we have &mdash; our votes &mdash; while we still have it.
           </p>
           <p class="text-white font-semibold text-lg">
-            That's why this project exists. Not to tell you what to think &mdash; but to make sure
-            you have what you need to make your voice heard while you still can.
+            Congress is the branch closest to the people. If enough of us show up, we can
+            change the composition of the House, hold this administration accountable, and
+            start putting things right.
           </p>
         </div>
       </div>
 
-      <!-- Built With -->
+      <!-- Built By -->
       <div>
         <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Built by</h2>
         <div class="prose prose-slate max-w-none">
           <p class="text-slate-700 leading-relaxed">
-            The Midterm Project was created on February 5, 2026, by a concerned citizen who believes
-            that access to clear, factual political information shouldn't require a political science degree
-            or a cable news subscription.
+            The Midterm Project was started on February 5, 2026, by a concerned citizen who
+            decided that feeling helpless wasn't good enough anymore. It's a volunteer effort &mdash;
+            no PAC money, no campaign funding, no political organization behind it.
           </p>
           <p class="text-slate-700 leading-relaxed mt-4">
-            This is a volunteer effort. It's not funded by any campaign, PAC, or political organization.
-            If you find it useful, share it with someone who needs it.
+            If you find this useful, share it with someone who needs it. If you want to help
+            build it, <a href="/volunteer" class="text-dem hover:underline">volunteer with us</a>.
           </p>
         </div>
       </div>
 
       <!-- CTA -->
       <div class="bg-dem/5 border border-dem/20 rounded-xl p-8 text-center">
-        <h3 class="text-xl font-bold mb-3">The most important thing you can do</h3>
+        <h3 class="text-xl font-bold mb-3">Ready to do something?</h3>
         <p class="text-slate-600 mb-6">
-          Check your voter registration. Know your district. Know your candidates. And vote.
+          Check your voter registration. Learn who's on your ballot. And find out what else you can do right now.
         </p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a
+            href="/take-action"
+            class="inline-block bg-navy text-white font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
+          >
+            What you can do
+          </a>
           <a
             href="https://www.vote.org/am-i-registered-to-vote/"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-block bg-navy text-white font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
-          >
-            Check your registration
-          </a>
-          <a
-            href="/whos-running"
             class="inline-block border-2 border-navy text-navy font-semibold px-6 py-3 rounded-lg hover:bg-navy hover:text-white transition-colors"
           >
-            See who's running
+            Check your registration
           </a>
         </div>
       </div>
