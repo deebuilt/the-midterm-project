@@ -16,7 +16,7 @@ import {
   DatabaseOutlined,
   ArrowRightOutlined,
 } from "@ant-design/icons";
-import type { AdminRoute } from "./AdminApp";
+import type { AdminRoute } from "./AdminDashboard";
 
 const { Title, Paragraph, Text } = Typography;
 

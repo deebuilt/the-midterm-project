@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { ConfigProvider, Spin, Result, Button } from "antd";
 import type { User } from "@supabase/supabase-js";
 import { getSession, isAdmin, onAuthStateChange, signOut } from "../../lib/supabase";
-import LoginPage from "./LoginPage";
 import AdminLayout from "./AdminLayout";
 
 export type AdminRoute = "dashboard" | "volunteers" | "cycles" | "candidates" | "races" | "ballot-measures" | "fec" | "calendar-events" | "states" | "automation" | "setup-guide";
@@ -20,7 +19,7 @@ const theme = {
   },
 };
 
-export default function AdminApp() {
+export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [route, setRoute] = useState<AdminRoute>("dashboard");
@@ -30,12 +29,22 @@ export default function AdminApp() {
     getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // If not authenticated, redirect to login
+      if (!session?.user) {
+        window.location.href = "/login";
+      }
     });
 
     const {
       data: { subscription },
     } = onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+
+      // Redirect to login if signed out
+      if (!session?.user) {
+        window.location.href = "/login";
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -47,6 +56,10 @@ export default function AdminApp() {
       const hash = window.location.hash.replace("#", "") as AdminRoute;
       if (VALID_ROUTES.includes(hash)) {
         setRoute(hash);
+      } else {
+        // Default to dashboard if no valid hash
+        setRoute("dashboard");
+        window.location.hash = "dashboard";
       }
     }
 
@@ -74,7 +87,16 @@ export default function AdminApp() {
           <Spin size="large" />
         </div>
       ) : !user ? (
-        <LoginPage />
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Spin size="large" tip="Redirecting to login..." />
+        </div>
       ) : !isAdmin(user) ? (
         <Result
           status="403"

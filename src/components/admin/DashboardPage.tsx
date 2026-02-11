@@ -11,7 +11,7 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
-import type { AdminRoute } from "./AdminApp";
+import type { AdminRoute } from "./AdminDashboard";
 
 interface DashboardStats {
   volunteerTotal: number;

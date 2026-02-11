@@ -1,7 +1,7 @@
 ---
-// Admin panel — requires authentication, redirects to login if not authenticated
+// Login page — handles password login, magic links, and password reset
 // Uses client:only="react" — no SSR, browser APIs required
-import AdminDashboard from "../components/admin/AdminDashboard";
+import LoginFlow from "../components/auth/LoginFlow";
 ---
 
 <!doctype html>
@@ -11,9 +11,9 @@ import AdminDashboard from "../components/admin/AdminDashboard";
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Admin | The Midterm Project</title>
+    <title>Login | The Midterm Project</title>
   </head>
   <body>
-    <AdminDashboard client:only="react" />
+    <LoginFlow client:only="react" />
   </body>
 </html>

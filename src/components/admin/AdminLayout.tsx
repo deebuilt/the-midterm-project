@@ -15,7 +15,7 @@ import {
   RobotOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
-import type { AdminRoute } from "./AdminApp";
+import type { AdminRoute } from "./AdminDashboard";
 import { signOut } from "../../lib/supabase";
 import DashboardPage from "./DashboardPage";
 import VolunteersPage from "./VolunteersPage";
