@@ -17,6 +17,31 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const FEC_BASE = "https://api.open.fec.gov/v1";
 const CYCLE = 2026;
 
+// FEC rate limit: 120 calls/min. We target 110/min with a sliding window.
+const RATE_WINDOW_MS = 60_000;
+const RATE_LIMIT = 110;
+const callTimestamps: number[] = [];
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Wait just enough to stay under the per-minute rate limit */
+async function throttle(): Promise<void> {
+  const now = Date.now();
+  // Remove timestamps older than 1 minute
+  while (callTimestamps.length > 0 && callTimestamps[0] < now - RATE_WINDOW_MS) {
+    callTimestamps.shift();
+  }
+  // If we've hit the limit, wait until the oldest call falls out of the window
+  if (callTimestamps.length >= RATE_LIMIT) {
+    const waitUntil = callTimestamps[0] + RATE_WINDOW_MS;
+    const waitMs = waitUntil - now + 50; // +50ms safety margin
+    if (waitMs > 0) await delay(waitMs);
+  }
+  callTimestamps.push(Date.now());
+}
+
 // ─── FEC API helpers ───
 
 interface FecCandidate {
@@ -56,6 +81,7 @@ async function fecFetch<T>(
     url.searchParams.set(key, String(value));
   }
   apiRequestCount++;
+  await throttle();
   const res = await fetch(url.toString());
   if (!res.ok) {
     const text = await res.text();
@@ -175,21 +201,28 @@ function toDateString(date: Date): string {
 
 // ─── Main handler ───
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+/** Wrap Response.json with CORS headers */
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 Deno.serve(async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, x-webhook-secret, content-type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-    });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
 
   // Auth check — use query param because Supabase gateway strips custom headers
@@ -197,12 +230,12 @@ Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
   const providedSecret = url.searchParams.get("secret");
   if (!webhookSecret || providedSecret !== webhookSecret) {
-    return new Response("Unauthorized", { status: 401 });
+    return new Response("Unauthorized", { status: 401, headers: corsHeaders });
   }
 
   const fecApiKey = Deno.env.get("FEC_API_KEY");
   if (!fecApiKey) {
-    return Response.json({ error: "FEC_API_KEY not configured" }, { status: 500 });
+    return jsonResponse({ error: "FEC_API_KEY not configured" }, 500);
   }
 
   // Init Supabase with service role (full access)
@@ -221,7 +254,7 @@ Deno.serve(async (req: Request) => {
     .single();
 
   if (!config?.fec_sync_enabled) {
-    return Response.json({ message: "FEC sync is disabled" });
+    return jsonResponse({ message: "FEC sync is disabled" });
   }
 
   // Create sync log (running)
@@ -269,7 +302,7 @@ Deno.serve(async (req: Request) => {
           })
           .eq("id", syncLogId);
       }
-      return Response.json({
+      return jsonResponse({
         status: "success",
         message: "No states with primaries in the current window",
         window: { from: lookbackDate, to: lookaheadDate },
@@ -476,7 +509,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    return Response.json({
+    return jsonResponse({
       status,
       statesSynced,
       created: totalCreated,
@@ -499,6 +532,6 @@ Deno.serve(async (req: Request) => {
         })
         .eq("id", syncLogId);
     }
-    return Response.json({ status: "error", error: err.message }, { status: 500 });
+    return jsonResponse({ status: "error", error: err.message }, 500);
   }
 });

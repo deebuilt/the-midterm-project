@@ -659,6 +659,7 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       dataIndex: "fec_candidate_id",
       key: "fec_id",
       width: 110,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.fec_candidate_id.localeCompare(b.fec_candidate_id),
       render: (fecId: string) => (
         <a
           href={`https://www.fec.gov/data/candidate/${fecId}/`}
@@ -686,6 +687,8 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       title: "District",
       key: "district",
       width: 80,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        (a.district_number ?? 0) - (b.district_number ?? 0),
       render: (_: any, record: DbFecFiling) => {
         if (record.office === "H" && record.district_number) {
           return `${record.state?.abbr}-${String(record.district_number).padStart(2, "0")}`;
@@ -706,6 +709,7 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       dataIndex: "funds_spent",
       key: "funds_spent",
       width: 90,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.funds_spent - b.funds_spent,
       render: (n: number) => <Text style={{ fontFamily: "monospace", fontSize: 12 }}>{formatMoney(n)}</Text>,
     },
     {
@@ -713,6 +717,7 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       dataIndex: "cash_on_hand",
       key: "cash_on_hand",
       width: 90,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.cash_on_hand - b.cash_on_hand,
       render: (n: number) => <Text style={{ fontFamily: "monospace", fontSize: 12 }}>{formatMoney(n)}</Text>,
     },
     {
@@ -720,6 +725,8 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       dataIndex: "last_synced_at",
       key: "last_synced_at",
       width: 100,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        new Date(a.last_synced_at).getTime() - new Date(b.last_synced_at).getTime(),
       render: (date: string) => <Text type="secondary" style={{ fontSize: 12 }}>{new Date(date).toLocaleDateString()}</Text>,
     },
     {
@@ -727,6 +734,8 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
       dataIndex: "promoted_to_candidate_id",
       key: "status",
       width: 100,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        Number(!!a.promoted_to_candidate_id) - Number(!!b.promoted_to_candidate_id),
       render: (promotedId: number | null) =>
         promotedId ? (
           <Tag color="green" icon={<CheckCircleOutlined />}>Promoted</Tag>

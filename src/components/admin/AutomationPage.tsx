@@ -276,11 +276,10 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
     setSyncResult(null);
     try {
       const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-      const url = `${supabaseUrl}/functions/v1/fec-sync`;
+      const url = `${supabaseUrl}/functions/v1/fec-sync?secret=${encodeURIComponent(config.webhook_secret)}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${config.webhook_secret}`,
           "Content-Type": "application/json",
         },
       });

@@ -469,6 +469,8 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "district_number",
       key: "district",
       width: 90,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        (a.district_number ?? 0) - (b.district_number ?? 0),
       render: (district: number | null, record: DbFecFiling) => {
         if (record.office === "H" && district) {
           return `${record.state?.abbr}-${String(district).padStart(2, "0")}`;
@@ -481,6 +483,8 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "is_incumbent",
       key: "is_incumbent",
       width: 100,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        Number(a.is_incumbent) - Number(b.is_incumbent),
       render: (isIncumbent: boolean) =>
         isIncumbent ? <Tag color="green">Incumbent</Tag> : null,
     },
@@ -497,6 +501,7 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "funds_spent",
       key: "funds_spent",
       width: 100,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.funds_spent - b.funds_spent,
       render: (n: number) => formatMoney(n),
     },
     {
@@ -504,6 +509,7 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "cash_on_hand",
       key: "cash_on_hand",
       width: 100,
+      sorter: (a: DbFecFiling, b: DbFecFiling) => a.cash_on_hand - b.cash_on_hand,
       render: (n: number) => formatMoney(n),
     },
     {
@@ -511,6 +517,8 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "last_synced_at",
       key: "last_synced_at",
       width: 120,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        new Date(a.last_synced_at).getTime() - new Date(b.last_synced_at).getTime(),
       render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
@@ -518,6 +526,8 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
       dataIndex: "promoted_to_candidate_id",
       key: "status",
       width: 120,
+      sorter: (a: DbFecFiling, b: DbFecFiling) =>
+        Number(!!a.promoted_to_candidate_id) - Number(!!b.promoted_to_candidate_id),
       render: (promotedId: number | null) =>
         promotedId ? (
           <Tag color="green" icon={<CheckCircleOutlined />}>
