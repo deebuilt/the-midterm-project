@@ -232,16 +232,16 @@ export default function FindYourBallot({ states, primaryDates }: FindYourBallotP
               {/* Senate */}
               <BallotItem
                 office="U.S. Senate"
-                active={!!state.senateClass2Senator || state.hasCompetitiveRace}
+                active={state.hasSenateRace}
                 description={
                   state.senateClass2Senator
                     ? `${state.senateClass2Senator} (${state.senateClass2Party === "Democrat" ? "D" : state.senateClass2Party === "Republican" ? "R" : "I"}) holds this seat. Senators serve 6-year terms.`
-                    : state.hasCompetitiveRace
+                    : state.hasSenateRace
                       ? "This seat is up for election. Senators serve 6-year terms."
                       : "No Senate seat up in your state this year. Senate terms are 6 years, so not every state votes for Senator every election."
                 }
                 links={
-                  (state.senateClass2Senator || state.hasCompetitiveRace)
+                  state.hasSenateRace
                     ? [{
                       label: "Research Senate candidates",
                       url: `https://ballotpedia.org/United_States_Senate_election_in_${state.name.replace(/ /g, "_")},_2026`,

@@ -197,6 +197,7 @@ export interface StateInfo {
   abbr: string;
   fips: string;
   houseDistricts: number;
+  hasSenateRace: boolean;
   senateClass2Senator?: string;
   senateClass2Party?: "Democrat" | "Republican" | "Independent";
   otherSenator?: string;

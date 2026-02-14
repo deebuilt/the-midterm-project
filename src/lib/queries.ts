@@ -134,6 +134,7 @@ export async function fetchStates(): Promise<StateInfo[]> {
       abbr: s.abbr,
       fips: s.fips,
       houseDistricts: s.house_districts,
+      hasSenateRace: !!senateRace,
       senateClass2Senator,
       senateClass2Party,
       otherSenator: s.other_senator ?? undefined,

@@ -347,7 +347,7 @@ function BallotPanel({
     );
   }
 
-  const hasSenateRace = !!senateRace || !!stateInfo.senateClass2Senator;
+  const hasSenateRace = !!senateRace || stateInfo.hasSenateRace;
 
   return (
     <div
