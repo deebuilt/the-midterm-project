@@ -1,0 +1,362 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Open vs. Closed Primaries"
+  description="What open and closed primaries are, how they affect your right to vote, and which type your state uses."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Open vs. Closed Primaries</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Open vs. Closed Primaries</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      Your party registration might decide whether you get to vote before Election Day. Here's how.
+    </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/open-closed-primaries.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        Before the general election in November, most states hold <strong>primary elections</strong>. Primaries are how each political party picks its candidates&mdash;the people whose names will actually appear on the ballot in November. But here's the thing a lot of people don't realize: <strong>not every state lets every voter participate in every primary.</strong>
+      </p>
+      <p class="text-slate-600">
+        The rules about who can vote in a primary vary from state to state. Some states let anyone vote in any party's primary. Others say you can only vote in the primary of the party you're registered with. And if you're registered with a third party&mdash;or not registered with any party at all&mdash;you might be shut out of both.
+      </p>
+
+      <!-- WHY PRIMARIES MATTER -->
+      <h2 class="text-2xl font-bold">Why Does This Matter?</h2>
+      <p class="text-slate-600">
+        Primaries decide who ends up on the November ballot. In many districts, the primary is actually <em>more</em> important than the general election. If a district is heavily Democratic or heavily Republican, whoever wins that party's primary is almost guaranteed to win in November. So if you can't vote in the primary, you're missing the election that actually matters most.
+      </p>
+      <div class="not-prose bg-tossup/10 border border-tossup/30 rounded-lg p-5">
+        <p class="text-sm font-medium text-tossup">
+          In the 2022 midterms, only about 20% of eligible voters participated in primary elections nationwide. In many races, a small fraction of voters chose the candidates the rest of us had to pick between.
+        </p>
+      </div>
+
+      <!-- TYPES -->
+      <h2 class="text-2xl font-bold">The Main Types of Primaries</h2>
+      <p class="text-slate-600">
+        There are several types, but they all answer the same question: <strong>Who is allowed to vote in each party's primary?</strong>
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-dem-light rounded-xl p-5 border border-dem/20">
+          <h3 class="font-bold text-dem-dark mb-2">Open Primary</h3>
+          <p class="text-sm text-slate-600">
+            Any registered voter can choose which party's primary to vote in, regardless of their own party registration. You pick a party's ballot at the polls. You can only pick one party per election. Many open-primary states don't even have party registration at all.
+          </p>
+        </div>
+        <div class="bg-gop-light rounded-xl p-5 border border-gop/20">
+          <h3 class="font-bold text-gop-dark mb-2">Closed Primary</h3>
+          <p class="text-sm text-slate-600">
+            Only voters who are registered with a party can vote in that party's primary. If you're a registered Democrat, you get a Democratic ballot. If you're a registered Republican, you get a Republican one. If you're not registered with either party, you don't get to vote in either primary.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Semi-Open Primary</h3>
+          <p class="text-sm text-slate-600">
+            Unaffiliated or independent voters can choose which party's primary to vote in, but if you <em>are</em> registered with a party, you have to vote in your own party's primary. It's a middle ground.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Semi-Closed Primary</h3>
+          <p class="text-sm text-slate-600">
+            Each party gets to decide before the election whether to let unaffiliated voters participate. One party might say yes while the other says no. The rules can change from cycle to cycle.
+          </p>
+        </div>
+      </div>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="bg-ind/10 rounded-xl p-5 border border-ind/20">
+          <h3 class="font-bold text-ind mb-2">Top-Two Primary</h3>
+          <p class="text-sm text-slate-600">
+            All candidates from all parties appear on one ballot, and every voter gets the same ballot. The top two vote-getters advance to the general election&mdash;even if they're from the same party. Used in <strong>California</strong> and <strong>Washington</strong>.
+          </p>
+        </div>
+        <div class="bg-ind/10 rounded-xl p-5 border border-ind/20">
+          <h3 class="font-bold text-ind mb-2">Top-Four Primary</h3>
+          <p class="text-sm text-slate-600">
+            Like top-two, but the top four candidates advance. The general election then uses ranked-choice voting. Currently used in <strong>Alaska</strong>, though a repeal initiative is on the 2026 ballot.
+          </p>
+        </div>
+      </div>
+
+      <!-- WHAT ABOUT THIRD PARTIES -->
+      <h2 class="text-2xl font-bold">What If You're Registered with a Third Party?</h2>
+      <p class="text-slate-600">
+        This is where it gets frustrating for a lot of voters. If you're registered as Libertarian, Green, Constitution Party, or any other third party in a <strong>closed primary</strong> state, here's what happens:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>
+          <strong>You cannot vote in the Democratic or Republican primary.</strong> You're locked out of both major-party nomination contests.
+        </li>
+        <li>
+          <strong>In semi-closed states, you might still be shut out.</strong> Some states only let <em>unaffiliated</em> voters into major-party primaries&mdash;not voters registered with a different party. Being registered Libertarian isn't the same as being unaffiliated.
+        </li>
+        <li>
+          <strong>Your party might hold its own primary, convention, or caucus.</strong> If it does, you can participate. But many smaller parties don't hold traditional primaries.
+        </li>
+        <li>
+          <strong>You can still vote on nonpartisan items</strong> that appear on the primary ballot&mdash;ballot measures, school board races, judicial races, and anything else that isn't tied to a party.
+        </li>
+        <li>
+          <strong>To vote in a major-party primary, you'd have to switch.</strong> You would need to change your party registration before the deadline, which means giving up your current affiliation.
+        </li>
+      </ul>
+
+      <div class="not-prose border-l-4 border-tossup pl-4 py-2">
+        <p class="font-bold text-navy">The Florida example</p>
+        <p class="text-sm text-slate-600 mt-1">
+          Florida is a closed primary state. If you're registered as a Libertarian in Florida, you can't vote in the Democratic or Republican primary. You'd only see nonpartisan races and ballot measures on your primary ballot. If you want to vote in a major-party primary, you need to change your registration at least 29 days before the election. Florida's 2026 primary is <strong>August 18, 2026</strong>.
+        </p>
+      </div>
+
+      <!-- DOES THIS APPLY TO GENERAL ELECTIONS -->
+      <h2 class="text-2xl font-bold">Does This Apply to General Elections?</h2>
+      <p class="text-slate-600">
+        <strong>No.</strong> The open/closed distinction only applies to primary elections. In the general election (November), every registered voter can vote for any candidate from any party. The question isn't "who can vote"&mdash;it's "who gets to help decide which candidates make it to November in the first place."
+      </p>
+      <p class="text-slate-600">
+        That's an important distinction. Your right to vote in the general election is never restricted by party. But your ability to shape <em>who</em> appears on that ballot? That depends on where you live and how you're registered.
+      </p>
+
+      <!-- STATE BY STATE -->
+      <h2 class="text-2xl font-bold">State-by-State Breakdown</h2>
+      <p class="text-slate-600">
+        Below is every state (plus D.C.) grouped by primary type. Keep in mind: rules can change, and some states have different rules for different offices. Always check your state's Secretary of State website for the most current information.
+      </p>
+
+      <!-- OPEN -->
+      <h3 class="text-xl font-bold">Open Primaries</h3>
+      <p class="text-sm text-slate-500 mb-2">Any voter can choose which party's primary to vote in. Many of these states have no party registration.</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          {["Alabama", "Arkansas", "Georgia", "Hawaii", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "North Dakota", "South Carolina", "Texas", "Vermont", "Virginia", "Wisconsin"].map(state => (
+            <span class="text-xs font-medium bg-dem-light text-dem-dark px-3 py-1.5 rounded-full">{state}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- CLOSED -->
+      <h3 class="text-xl font-bold">Closed Primaries</h3>
+      <p class="text-sm text-slate-500 mb-2">You must be a registered party member to vote in that party's primary.</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          {["Delaware", "Florida", "Kentucky", "New Jersey", "New York", "Pennsylvania", "Tennessee", "Wyoming", "Washington, D.C."].map(state => (
+            <span class="text-xs font-medium bg-gop-light text-gop-dark px-3 py-1.5 rounded-full">{state}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- SEMI-OPEN -->
+      <h3 class="text-xl font-bold">Semi-Open (Open to Unaffiliated Voters)</h3>
+      <p class="text-sm text-slate-500 mb-2">Unaffiliated voters can pick a party primary; registered party members vote in their own.</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          {["Arizona", "Colorado", "Illinois", "Indiana", "Iowa", "Maine", "Massachusetts", "Nevada", "New Hampshire", "New Mexico", "North Carolina", "Ohio", "Rhode Island"].map(state => (
+            <span class="text-xs font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full">{state}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- SEMI-CLOSED -->
+      <h3 class="text-xl font-bold">Semi-Closed (Party Decides)</h3>
+      <p class="text-sm text-slate-500 mb-2">Each party can choose whether to allow unaffiliated voters into its primary.</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          {["Connecticut", "Idaho", "Kansas", "Maryland", "Oklahoma", "Oregon", "South Dakota", "Utah", "West Virginia"].map(state => (
+            <span class="text-xs font-medium bg-tossup/20 text-tossup px-3 py-1.5 rounded-full font-semibold">{state}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- TOP-TWO / TOP-FOUR -->
+      <h3 class="text-xl font-bold">Top-Two &amp; Top-Four Primaries</h3>
+      <p class="text-sm text-slate-500 mb-2">All candidates on one ballot, top finishers advance regardless of party.</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          {["Alaska (Top-Four)", "California (Top-Two)", "Nebraska (Top-Two, state legislature only)", "Washington (Top-Two)"].map(state => (
+            <span class="text-xs font-medium bg-ind/20 text-ind px-3 py-1.5 rounded-full font-semibold">{state}</span>
+          ))}
+        </div>
+      </div>
+
+      <!-- LOUISIANA -->
+      <h3 class="text-xl font-bold">Louisiana</h3>
+      <p class="text-sm text-slate-500 mb-2">Switched to semi-closed partisan primaries for congressional races in 2026. Other races still use a "jungle primary" (all candidates, top two advance to runoff).</p>
+      <div class="not-prose">
+        <div class="flex flex-wrap gap-2">
+          <span class="text-xs font-medium bg-tossup/20 text-tossup px-3 py-1.5 rounded-full font-semibold">Louisiana (Hybrid &mdash; new for 2026)</span>
+        </div>
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <h2 class="text-2xl font-bold">Side-by-Side Comparison</h2>
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Feature</th>
+              <th class="px-4 py-3 font-semibold">Open</th>
+              <th class="px-4 py-3 font-semibold">Closed</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 font-medium text-slate-700">Who can vote?</td>
+              <td class="px-4 py-3 text-slate-600">Any registered voter</td>
+              <td class="px-4 py-3 text-slate-600">Only registered party members</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 font-medium text-slate-700">Party registration needed?</td>
+              <td class="px-4 py-3 text-slate-600">Often not required at all</td>
+              <td class="px-4 py-3 text-slate-600">Yes, and must match the party</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 font-medium text-slate-700">Independents can vote?</td>
+              <td class="px-4 py-3 text-slate-600">Yes</td>
+              <td class="px-4 py-3 text-slate-600">No (in most cases)</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 font-medium text-slate-700">Third-party voters?</td>
+              <td class="px-4 py-3 text-slate-600">Can participate in any primary</td>
+              <td class="px-4 py-3 text-slate-600">Locked out of major-party primaries</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 font-medium text-slate-700">Applies to general election?</td>
+              <td class="px-4 py-3 text-slate-600">No &mdash; general is always open</td>
+              <td class="px-4 py-3 text-slate-600">No &mdash; general is always open</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 font-medium text-slate-700">Main argument for</td>
+              <td class="px-4 py-3 text-slate-600">More voters = more representative results</td>
+              <td class="px-4 py-3 text-slate-600">Party members should pick party candidates</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 font-medium text-slate-700">Main argument against</td>
+              <td class="px-4 py-3 text-slate-600">"Crossover" voters could sabotage a party's choice</td>
+              <td class="px-4 py-3 text-slate-600">Shuts out independents &amp; third-party voters</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RECENT CHANGES -->
+      <h2 class="text-2xl font-bold">What's Changing?</h2>
+      <p class="text-slate-600">
+        Primary rules are not set in stone. States change their systems, and voters sometimes get a direct say through ballot measures. Here are some recent changes worth knowing about:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Louisiana</h4>
+            <span class="text-xs bg-tossup/20 text-tossup px-2 py-1 rounded-full font-medium">2026</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Switched from its historic "jungle primary" (all candidates on one ballot, top two advance) to semi-closed partisan primaries for congressional races. The first closed-primary congressional elections will be held <strong>May 16, 2026</strong>.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Alaska</h4>
+            <span class="text-xs bg-tossup/20 text-tossup px-2 py-1 rounded-full font-medium">2026 ballot</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Adopted top-four primaries with ranked-choice general elections in 2020. A repeal effort narrowly failed in 2024. Another repeal initiative is on the <strong>November 2026</strong> ballot&mdash;so Alaskans will vote on whether to keep this system yet again.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Rhode Island</h4>
+            <span class="text-xs bg-dem-light text-dem-dark px-2 py-1 rounded-full font-medium">2024</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Passed legislation to allow unaffiliated voters to participate in party primaries without formally affiliating&mdash;moving from closed to semi-open.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Wyoming</h4>
+            <span class="text-xs bg-gop-light text-gop-dark px-2 py-1 rounded-full font-medium">2023</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Moved to closed primaries, requiring voters to register with a party by a deadline in order to vote in that party's primary.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        The long-term national trend has been modestly toward opening primaries. But the movement isn't one-directional&mdash;some states have opened up while others have closed down. In 2024 alone, 18 states considered legislation to change their primary rules.
+      </p>
+
+      <!-- WHAT CAN YOU DO -->
+      <h2 class="text-2xl font-bold">What Can You Do?</h2>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>
+          <strong>Check your registration.</strong> Make sure you know what party (if any) you're registered with. You can check at
+          <a href="https://www.vote.org/am-i-registered-to-vote/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Vote.org</a>.
+        </li>
+        <li>
+          <strong>Know your state's rules.</strong> Look up whether your state has open, closed, or semi-open primaries. Your state's Secretary of State website will have the current rules.
+        </li>
+        <li>
+          <strong>Know the deadlines.</strong> If you need to change your party registration to vote in a primary, there's usually a deadline weeks or months before the election. Don't wait until primary day.
+        </li>
+        <li>
+          <strong>Vote in the primary.</strong> Most people skip primaries entirely. Showing up gives you a say in who ends up on the November ballot.
+        </li>
+      </ul>
+
+      <!-- BOTTOM LINE -->
+      <h2 class="text-2xl font-bold">The Bottom Line</h2>
+      <p class="text-slate-600">
+        Primary elections decide which candidates make it to the general election&mdash;and depending on where you live, your party registration decides whether you get a voice in that process. In closed-primary states, voters registered with third parties or as independents are shut out of the contests that often matter most. In open-primary states, everyone gets to participate.
+      </p>
+      <p class="text-slate-600">
+        Either way, the most important thing is to know the rules in your state and make sure you're registered in a way that lets you vote in the elections you care about. Don't find out on primary day that you're locked out.
+      </p>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns/state-primary-election-types" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Conference of State Legislatures, "State Primary Election Types"</a>
+        </li>
+        <li>
+          <a href="https://ballotpedia.org/Primary_election_types_by_state" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Ballotpedia, "Primary Election Types by State"</a>
+        </li>
+        <li>
+          <a href="https://www.eac.gov/voters/primary-election-types" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Election Assistance Commission, "Primary Election Types"</a>
+        </li>
+        <li>
+          <a href="https://openprimaries.org/rules-in-your-state/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Open Primaries, "Rules in Your State"</a>
+        </li>
+        <li>
+          <a href="https://dos.fl.gov/elections/for-voters/election-dates/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Florida Division of Elections</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Ready to check what's on your ballot? Use our
+          <a href="/find-your-ballot" class="underline">Find Your Ballot</a> tool,
+          preview your picks on the
+          <a href="/map" class="underline">interactive map</a>, or learn about
+          <a href="/learn/reading-your-ballot" class="underline">how to read your ballot</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -60,6 +60,72 @@ const SOS_URLS: Record<string, string> = {
   DC: "https://www.dcboe.org/",
 };
 
+type PrimaryType = "Open" | "Closed" | "Semi-Open" | "Semi-Closed" | "Top-Two" | "Top-Four" | "Hybrid";
+
+const PRIMARY_TYPES: Record<string, { type: PrimaryType; note?: string }> = {
+  AL: { type: "Open" },
+  AK: { type: "Top-Four", note: "Top-four primary with ranked-choice general election. A repeal initiative is on the November 2026 ballot." },
+  AZ: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  AR: { type: "Open" },
+  CA: { type: "Top-Two", note: "All candidates appear on one ballot; top two advance regardless of party." },
+  CO: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  CT: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  DE: { type: "Closed" },
+  FL: { type: "Closed" },
+  GA: { type: "Open" },
+  HI: { type: "Open" },
+  ID: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  IL: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  IN: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  IA: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  KS: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  KY: { type: "Closed" },
+  LA: { type: "Hybrid", note: "Semi-closed partisan primaries for congressional races (new in 2026); other races use a 'jungle primary' where all candidates appear on one ballot." },
+  ME: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  MD: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  MA: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  MI: { type: "Open" },
+  MN: { type: "Open" },
+  MS: { type: "Open" },
+  MO: { type: "Open" },
+  MT: { type: "Open" },
+  NE: { type: "Top-Two", note: "Top-two for state legislature (nonpartisan); open primary for other offices." },
+  NV: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  NH: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  NJ: { type: "Closed" },
+  NM: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  NY: { type: "Closed" },
+  NC: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  ND: { type: "Open" },
+  OH: { type: "Semi-Open", note: "Unaffiliated voters may choose a party primary." },
+  OK: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  OR: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  PA: { type: "Closed" },
+  RI: { type: "Semi-Open", note: "Unaffiliated voters may participate without formally affiliating." },
+  SC: { type: "Open" },
+  SD: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  TN: { type: "Closed" },
+  TX: { type: "Open" },
+  UT: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  VT: { type: "Open" },
+  VA: { type: "Open" },
+  WA: { type: "Top-Two", note: "All candidates appear on one ballot; top two advance regardless of party." },
+  WV: { type: "Semi-Closed", note: "Parties decide whether to allow unaffiliated voters." },
+  WI: { type: "Open" },
+  WY: { type: "Closed" },
+  DC: { type: "Closed" },
+};
+
+const PRIMARY_TYPE_STYLES: Record<PrimaryType, { bg: string; text: string }> = {
+  Open: { bg: "bg-blue-100", text: "text-blue-800" },
+  Closed: { bg: "bg-red-100", text: "text-red-800" },
+  "Semi-Open": { bg: "bg-sky-100", text: "text-sky-800" },
+  "Semi-Closed": { bg: "bg-amber-100", text: "text-amber-800" },
+  "Top-Two": { bg: "bg-purple-100", text: "text-purple-800" },
+  "Top-Four": { bg: "bg-purple-100", text: "text-purple-800" },
+  Hybrid: { bg: "bg-amber-100", text: "text-amber-800" },
+};
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -79,6 +145,7 @@ export default function FindYourBallot({ states, primaryDates }: FindYourBallotP
   const state = sortedStates.find((s) => s.abbr === selectedAbbr);
   const primaryDate = selectedAbbr ? primaryDates[selectedAbbr] : undefined;
   const sosUrl = selectedAbbr ? SOS_URLS[selectedAbbr] : undefined;
+  const primaryTypeInfo = selectedAbbr ? PRIMARY_TYPES[selectedAbbr] : undefined;
 
   return (
     <div>
@@ -123,6 +190,32 @@ export default function FindYourBallot({ states, primaryDates }: FindYourBallotP
                     <p className="text-sm text-slate-600 mt-0.5">
                       This primary has already passed. The general election is November 3, 2026.
                     </p>
+                  )}
+                  {primaryTypeInfo && (
+                    <div className="mt-2 flex items-start gap-2">
+                      <span
+                        className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mt-0.5 whitespace-nowrap ${PRIMARY_TYPE_STYLES[primaryTypeInfo.type].bg} ${PRIMARY_TYPE_STYLES[primaryTypeInfo.type].text}`}
+                      >
+                        {primaryTypeInfo.type} Primary
+                      </span>
+                      <p className="text-sm text-slate-600">
+                        {primaryTypeInfo.note
+                          ? primaryTypeInfo.note
+                          : primaryTypeInfo.type === "Open"
+                            ? "Any registered voter can choose which party's primary to vote in."
+                            : primaryTypeInfo.type === "Closed"
+                              ? "Only registered party members can vote in their party's primary."
+                              : ""
+                        }
+                        {" "}
+                        <a
+                          href="/learn/open-closed-primaries"
+                          className="text-navy font-medium underline underline-offset-2 hover:decoration-2"
+                        >
+                          Learn more →
+                        </a>
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
