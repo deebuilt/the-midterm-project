@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Tooltip from "../../components/ui/Tooltip.astro";
 import SenateGuide from "../../components/ui/SenateGuide";
+import SenateClassExplorer from "../../components/ui/SenateClassExplorer";
 import { fetchSenateOverview, fetchAllClass2Seats } from "../../lib/queries";
 
 const { senateOverview } = await fetchSenateOverview();
@@ -93,23 +94,7 @@ function ratingColor(rating: string) {
         <p class="text-slate-600">
           To avoid replacing the entire Senate at once, senators are divided into three groups called "classes":
         </p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="border border-slate-200 rounded-lg p-4">
-            <h4 class="font-bold text-sm text-slate-400">Class I</h4>
-            <p class="text-lg font-semibold">33 senators</p>
-            <p class="text-sm text-slate-500">Last elected in 2024. Next election: 2030</p>
-          </div>
-          <div class="border-2 border-tossup rounded-lg p-4 bg-tossup/5">
-            <h4 class="font-bold text-sm text-tossup">Class II</h4>
-            <p class="text-lg font-semibold">33 senators</p>
-            <p class="text-sm text-slate-700 font-medium">Up for election in 2026!</p>
-          </div>
-          <div class="border border-slate-200 rounded-lg p-4">
-            <h4 class="font-bold text-sm text-slate-400">Class III</h4>
-            <p class="text-lg font-semibold">34 senators</p>
-            <p class="text-sm text-slate-500">Last elected in 2022. Next election: 2028</p>
-          </div>
-        </div>
+        <SenateClassExplorer client:visible />
 
         <h3 class="text-2xl font-bold">Special Elections</h3>
         <p class="text-slate-600">
