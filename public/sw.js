@@ -1,10 +1,10 @@
-const CACHE_NAME = "tmp-v10";
+const CACHE_NAME = "tmp-v11";
 
 const PRECACHE_URLS = [
   "/",
   "/map",
   "/calendar",
-  "/whos-running",
+  "/find-your-ballot",
   "/take-action",
   "/lsb",
   "/news",

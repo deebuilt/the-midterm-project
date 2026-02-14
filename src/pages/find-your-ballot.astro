@@ -1,0 +1,34 @@
+---
+import Layout from "../layouts/Layout.astro";
+import FindYourBallot from "../components/ui/FindYourBallot";
+import { fetchStates, fetchCalendarEvents } from "../lib/queries";
+
+const states = await fetchStates();
+const calendarEvents = await fetchCalendarEvents();
+
+// Build primary date map: stateAbbr -> earliest primary date
+const primaryDates: Record<string, string> = {};
+for (const ev of calendarEvents) {
+  if (ev.eventType === "primary" && !primaryDates[ev.stateAbbr]) {
+    primaryDates[ev.stateAbbr] = ev.eventDate;
+  }
+}
+---
+
+<Layout
+  title="Find Your Ballot — 2026 Midterms | The Midterm Project"
+  description="Select your state to see what's on your 2026 midterm ballot and find links to research your candidates."
+>
+  <section class="max-w-5xl mx-auto py-12 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Find Your Ballot</h1>
+    <p class="text-lg text-slate-500 mb-8">
+      Select your state to see what you'll be voting on in 2026 and where to research your candidates.
+    </p>
+
+    <FindYourBallot
+      client:load
+      states={states}
+      primaryDates={primaryDates}
+    />
+  </section>
+</Layout>

@@ -405,7 +405,8 @@ function BallotPanel({
 
       <div className="px-4 py-3">
         <p className="text-xs text-slate-500 mb-3 italic">
-          Tap a candidate to mark your pick. Your selections are saved on this device only.
+          Plan your vote — tap a party to mark your pick, then research candidates using the links below.
+          Selections are saved on this device only.
         </p>
 
         {/* ── FEDERAL OFFICES ── */}
@@ -417,8 +418,10 @@ function BallotPanel({
           status={hasSenateRace ? "on-ballot" : "not-this-year"}
         >
           {senateRace ? (
-            <CompetitiveRaceCard
+            <SenatePreviewCard
               race={senateRace}
+              stateAbbr={stateInfo.abbr}
+              stateName={stateInfo.name}
               selectedId={selections["senate"]}
               onSelect={(candidateId) => onSelect("senate", candidateId)}
             />
@@ -427,17 +430,23 @@ function BallotPanel({
               <BallotBubble
                 name={stateInfo.senateClass2Senator}
                 party={stateInfo.senateClass2Party ?? "Republican"}
-                detail="Incumbent — running for re-election"
+                detail="Incumbent"
                 candidateId={`incumbent-${stateInfo.abbr}-senate`}
                 isSelected={selections["senate"] === `incumbent-${stateInfo.abbr}-senate`}
                 onSelect={(id) => onSelect("senate", id)}
               />
-              <EmptyBallotBubble
+              <PartyBubble
                 party={stateInfo.senateClass2Party === "Democrat" ? "Republican" : "Democrat"}
+                candidateId={`party-${stateInfo.abbr}-senate-challenger`}
+                isSelected={selections["senate"] === `party-${stateInfo.abbr}-senate-challenger`}
+                onSelect={(id) => onSelect("senate", id)}
               />
               <p className="text-[11px] text-slate-400 mt-2 pl-7">
                 This race isn't expected to be close, but you'll still see it on your ballot.
               </p>
+              <ResearchLinks
+                ballotpediaUrl={`https://ballotpedia.org/United_States_Senate_election_in_${stateInfo.name.replace(/ /g, "_")},_2026`}
+              />
             </div>
           ) : (
             <p className="text-xs text-slate-400 px-3 py-2">
@@ -450,24 +459,36 @@ function BallotPanel({
         <BallotRow office="United States Representative" status="on-ballot">
           <div className="px-3 py-2 text-xs text-slate-600">
             {stateInfo.houseDistricts === 1 ? (
-              <p>
-                {stateInfo.name} has <span className="font-semibold">1 at-large seat</span> —
-                {" "}one representative for the whole state. You'll vote for this seat.
-              </p>
+              <>
+                <p>
+                  {stateInfo.name} has <span className="font-semibold">1 at-large seat</span> —
+                  {" "}one representative for the whole state. You'll vote for this seat.
+                </p>
+                <div className="mt-2 space-y-0.5">
+                  <PartyBubble
+                    party="Democrat"
+                    candidateId={`party-${stateInfo.abbr}-house-dem`}
+                    isSelected={selections["house"] === `party-${stateInfo.abbr}-house-dem`}
+                    onSelect={(id) => onSelect("house", id)}
+                  />
+                  <PartyBubble
+                    party="Republican"
+                    candidateId={`party-${stateInfo.abbr}-house-rep`}
+                    isSelected={selections["house"] === `party-${stateInfo.abbr}-house-rep`}
+                    onSelect={(id) => onSelect("house", id)}
+                  />
+                </div>
+              </>
             ) : (
               <p>
                 {stateInfo.name} has <span className="font-semibold">{stateInfo.houseDistricts} congressional districts</span>.
-                {" "}You vote only in your district — find yours at{" "}
-                <a
-                  href="https://www.house.gov/representatives/find-your-representative"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-dem"
-                >
-                  house.gov
-                </a>.
+                {" "}You vote only in your district.
               </p>
             )}
+            <ResearchLinks
+              findDistrictUrl={stateInfo.houseDistricts > 1 ? "https://www.house.gov/representatives/find-your-representative" : undefined}
+              ballotpediaUrl={`https://ballotpedia.org/United_States_House_of_Representatives_elections_in_${stateInfo.name.replace(/ /g, "_")},_2026`}
+            />
           </div>
         </BallotRow>
 
@@ -481,34 +502,80 @@ function BallotPanel({
         >
           {stateInfo.governorUpIn2026 ? (
             <div className="px-3 py-2">
-              {stateInfo.currentGovernor && (() => {
-                // Check if current governor is running for Senate instead
-                const govRunningForSenate = senateRace?.candidates.democrat.some(
-                  c => c.name === stateInfo.currentGovernor
-                ) || senateRace?.candidates.republican.some(
-                  c => c.name === stateInfo.currentGovernor
+              {(() => {
+                const govRunningForSenate = stateInfo.currentGovernor && (
+                  senateRace?.candidates.democrat.some(c => c.name === stateInfo.currentGovernor) ||
+                  senateRace?.candidates.republican.some(c => c.name === stateInfo.currentGovernor)
                 );
-                const govId = `gov-${stateInfo.abbr}`;
-                return govRunningForSenate ? (
-                  <p className="text-[11px] text-slate-500 mb-1">
-                    Gov. {stateInfo.currentGovernor} is running for U.S. Senate, so this seat will be open.
-                  </p>
-                ) : (
-                  <BallotBubble
-                    name={`Gov. ${stateInfo.currentGovernor}`}
-                    party={stateInfo.currentGovernorParty ?? "Republican"}
-                    detail="Current governor"
-                    candidateId={govId}
-                    isSelected={selections["governor"] === govId}
-                    onSelect={(id) => onSelect("governor", id)}
-                  />
+                const govParty = stateInfo.currentGovernorParty ?? "Republican";
+                const oppositionParty = govParty === "Democrat" ? "Republican" : "Democrat";
+
+                if (govRunningForSenate) {
+                  // Governor left — open seat, show both party bubbles
+                  return (
+                    <>
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        Gov. {stateInfo.currentGovernor} is running for U.S. Senate, so this seat will be open.
+                      </p>
+                      <PartyBubble
+                        party="Democrat"
+                        candidateId={`party-${stateInfo.abbr}-gov-dem`}
+                        isSelected={selections["governor"] === `party-${stateInfo.abbr}-gov-dem`}
+                        onSelect={(id) => onSelect("governor", id)}
+                      />
+                      <PartyBubble
+                        party="Republican"
+                        candidateId={`party-${stateInfo.abbr}-gov-rep`}
+                        isSelected={selections["governor"] === `party-${stateInfo.abbr}-gov-rep`}
+                        onSelect={(id) => onSelect("governor", id)}
+                      />
+                    </>
+                  );
+                }
+
+                if (stateInfo.currentGovernor) {
+                  // Show incumbent by name + opposition as party bubble
+                  return (
+                    <>
+                      <BallotBubble
+                        name={`Gov. ${stateInfo.currentGovernor}`}
+                        party={govParty}
+                        detail="Incumbent"
+                        candidateId={`gov-${stateInfo.abbr}`}
+                        isSelected={selections["governor"] === `gov-${stateInfo.abbr}`}
+                        onSelect={(id) => onSelect("governor", id)}
+                      />
+                      <PartyBubble
+                        party={oppositionParty}
+                        candidateId={`party-${stateInfo.abbr}-gov-${oppositionParty.toLowerCase().slice(0, 3)}`}
+                        isSelected={selections["governor"] === `party-${stateInfo.abbr}-gov-${oppositionParty.toLowerCase().slice(0, 3)}`}
+                        onSelect={(id) => onSelect("governor", id)}
+                      />
+                    </>
+                  );
+                }
+
+                // No governor data — show both party bubbles
+                return (
+                  <>
+                    <PartyBubble
+                      party="Democrat"
+                      candidateId={`party-${stateInfo.abbr}-gov-dem`}
+                      isSelected={selections["governor"] === `party-${stateInfo.abbr}-gov-dem`}
+                      onSelect={(id) => onSelect("governor", id)}
+                    />
+                    <PartyBubble
+                      party="Republican"
+                      candidateId={`party-${stateInfo.abbr}-gov-rep`}
+                      isSelected={selections["governor"] === `party-${stateInfo.abbr}-gov-rep`}
+                      onSelect={(id) => onSelect("governor", id)}
+                    />
+                  </>
                 );
               })()}
-              <EmptyBallotBubble party="Democrat" />
-              <EmptyBallotBubble party="Republican" />
-              <p className="text-[11px] text-tossup mt-2 pl-7">
-                Candidate details coming soon
-              </p>
+              <ResearchLinks
+                ballotpediaUrl={`https://ballotpedia.org/${stateInfo.name.replace(/ /g, "_")}_gubernatorial_election,_2026`}
+              />
             </div>
           ) : (
             <p className="text-xs text-slate-400 px-3 py-2">
@@ -543,11 +610,14 @@ function BallotPanel({
           </BallotRow>
         )}
 
+        {/* ── FIND YOUR OFFICIAL BALLOT ── */}
+        <FindYourBallotCard stateName={stateInfo.name} stateAbbr={stateInfo.abbr} />
+
         {/* Footer */}
         <div className="border-t-2 border-black mt-4 pt-3">
           <p className="text-[10px] text-slate-400 text-center leading-relaxed">
             For educational purposes only. Not an official ballot.
-            Race ratings from nonpartisan analysts (Cook Political Report, Sabato's Crystal Ball).
+            Research your candidates before election day.
           </p>
         </div>
       </div>
@@ -831,24 +901,214 @@ function EmptyBallotBubble({ party }: { party: string }) {
   );
 }
 
-// --- Competitive Race Card ---
+// --- Party Bubble — select by party without specific candidate name ---
 
-function CompetitiveRaceCard({
+function PartyBubble({
+  party,
+  candidateId,
+  isSelected,
+  onSelect,
+}: {
+  party: string;
+  candidateId: string;
+  isSelected?: boolean;
+  onSelect?: (candidateId: string) => void;
+}) {
+  const partyLabel =
+    party === "Democrat" ? "Democrat" : party === "Republican" ? "Republican" : "Independent";
+  const partyAbbr =
+    party === "Democrat" ? "DEM" : party === "Republican" ? "REP" : "IND";
+  const partyBorderColor =
+    party === "Democrat" ? "border-dem" : party === "Republican" ? "border-gop" : "border-ind";
+  const partyFillColor =
+    party === "Democrat" ? "bg-dem" : party === "Republican" ? "bg-gop" : "bg-ind";
+
+  return (
+    <div
+      className="flex items-start gap-2 py-1 cursor-pointer group/bubble"
+      onClick={() => onSelect?.(candidateId)}
+      role="radio"
+      aria-checked={isSelected}
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect?.(candidateId); } }}
+    >
+      <span
+        className={`mt-0.5 w-4 h-3 rounded-[50%] border-2 ${partyBorderColor} flex-shrink-0 transition-all duration-150 ${
+          isSelected ? `${partyFillColor} scale-110 shadow-sm` : "group-hover/bubble:scale-105"
+        }`}
+      />
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className={`text-sm font-semibold ${isSelected ? "text-slate-900" : "text-slate-700"}`}>{partyLabel}</span>
+          <span className="text-[10px] text-slate-400 font-medium">{partyAbbr}</span>
+          {isSelected && (
+            <span className="text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold tracking-wide">
+              YOUR PICK
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Research links for a race ---
+
+function ResearchLinks({
+  ballotpediaUrl,
+  findDistrictUrl,
+}: {
+  ballotpediaUrl?: string;
+  findDistrictUrl?: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 pl-7">
+      {findDistrictUrl && (
+        <a
+          href={findDistrictUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-dem underline underline-offset-2 hover:decoration-2"
+        >
+          Find your district
+        </a>
+      )}
+      {ballotpediaUrl && (
+        <a
+          href={ballotpediaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-dem underline underline-offset-2 hover:decoration-2"
+        >
+          Research candidates on Ballotpedia →
+        </a>
+      )}
+    </div>
+  );
+}
+
+// --- Find Your Official Ballot card ---
+
+const SOS_URLS: Record<string, string> = {
+  AL: "https://www.sos.alabama.gov/alabama-votes",
+  AK: "https://www.elections.alaska.gov/",
+  AZ: "https://azsos.gov/elections",
+  AR: "https://www.sos.arkansas.gov/elections",
+  CA: "https://www.sos.ca.gov/elections",
+  CO: "https://www.sos.state.co.us/pubs/elections/",
+  CT: "https://portal.ct.gov/sots/election-services",
+  DE: "https://elections.delaware.gov/",
+  FL: "https://dos.fl.gov/elections/",
+  GA: "https://sos.ga.gov/elections-division",
+  HI: "https://elections.hawaii.gov/",
+  ID: "https://sos.idaho.gov/elect/",
+  IL: "https://www.elections.il.gov/",
+  IN: "https://www.in.gov/sos/elections/",
+  IA: "https://sos.iowa.gov/elections/",
+  KS: "https://sos.ks.gov/elections/",
+  KY: "https://elect.ky.gov/",
+  LA: "https://www.sos.la.gov/ElectionsAndVoting/",
+  ME: "https://www.maine.gov/sos/cec/elec/",
+  MD: "https://elections.maryland.gov/",
+  MA: "https://www.sec.state.ma.us/divisions/elections/",
+  MI: "https://mvic.sos.state.mi.us/",
+  MN: "https://www.sos.mn.gov/elections-voting/",
+  MS: "https://www.sos.ms.gov/elections-voting",
+  MO: "https://www.sos.mo.gov/elections",
+  MT: "https://sosmt.gov/elections/",
+  NE: "https://sos.nebraska.gov/elections",
+  NV: "https://www.nvsos.gov/sos/elections",
+  NH: "https://www.sos.nh.gov/elections",
+  NJ: "https://nj.gov/state/elections/",
+  NM: "https://www.sos.nm.gov/voting-and-elections/",
+  NY: "https://www.elections.ny.gov/",
+  NC: "https://www.ncsbe.gov/",
+  ND: "https://vip.sos.nd.gov/",
+  OH: "https://www.ohiosos.gov/elections/",
+  OK: "https://oklahoma.gov/elections.html",
+  OR: "https://sos.oregon.gov/voting/Pages/default.aspx",
+  PA: "https://www.vote.pa.gov/",
+  RI: "https://vote.ri.gov/",
+  SC: "https://www.scvotes.gov/",
+  SD: "https://sdsos.gov/elections-voting/",
+  TN: "https://sos.tn.gov/elections",
+  TX: "https://www.sos.texas.gov/elections/",
+  UT: "https://voteinfo.utah.gov/",
+  VT: "https://sos.vermont.gov/elections/",
+  VA: "https://www.elections.virginia.gov/",
+  WA: "https://www.sos.wa.gov/elections/",
+  WV: "https://sos.wv.gov/elections/",
+  WI: "https://elections.wi.gov/",
+  WY: "https://sos.wyo.gov/Elections/",
+  DC: "https://www.dcboe.org/",
+};
+
+function FindYourBallotCard({ stateName, stateAbbr }: { stateName: string; stateAbbr: string }) {
+  const sosUrl = SOS_URLS[stateAbbr];
+
+  return (
+    <div className="mt-4 bg-navy/5 border border-navy/20 rounded-lg p-3">
+      <h3 className="text-xs font-bold text-navy uppercase tracking-wide mb-2">
+        Find Your Official Ballot
+      </h3>
+      <p className="text-[11px] text-slate-600 mb-2.5 leading-relaxed">
+        Look up the actual candidates running in {stateName} using these trusted, nonpartisan resources:
+      </p>
+      <div className="space-y-1.5">
+        <a
+          href="https://www.vote411.org/ballot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-xs text-navy font-medium hover:underline"
+        >
+          <span className="w-1.5 h-1.5 bg-navy rounded-full flex-shrink-0" />
+          Vote411 — Personalized ballot lookup
+        </a>
+        {sosUrl && (
+          <a
+            href={sosUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-navy font-medium hover:underline"
+          >
+            <span className="w-1.5 h-1.5 bg-navy rounded-full flex-shrink-0" />
+            {stateName} Secretary of State
+          </a>
+        )}
+        <a
+          href="https://ballotpedia.org/Sample_Ballot_Lookup"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-xs text-navy font-medium hover:underline"
+        >
+          <span className="w-1.5 h-1.5 bg-navy rounded-full flex-shrink-0" />
+          Ballotpedia — Sample ballot lookup
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// --- Senate Preview Card (competitive races — party bubbles with rating) ---
+
+function SenatePreviewCard({
   race,
+  stateAbbr,
+  stateName,
   selectedId,
   onSelect,
 }: {
   race: SenateRace;
+  stateAbbr: string;
+  stateName: string;
   selectedId?: string;
   onSelect?: (candidateId: string) => void;
 }) {
   const ratingColor = RATING_COLORS[race.rating] ?? NEUTRAL_COLOR;
 
-  const allCandidates = [
-    ...race.candidates.democrat.map((c) => ({ ...c, party: "Democrat" as const })),
-    ...race.candidates.republican.map((c) => ({ ...c, party: "Republican" as const })),
-    ...(race.candidates.independent ?? []).map((c) => ({ ...c, party: "Independent" as const })),
-  ];
+  // Show incumbent by name if available, otherwise party bubble
+  const incumbent = race.incumbent;
+  const hasIncumbent = !!incumbent && !race.isOpenSeat;
 
   return (
     <div className="px-3 py-2">
@@ -872,26 +1132,41 @@ function CompetitiveRaceCard({
         )}
       </div>
 
-      {/* Candidate bubbles */}
-      <div className="space-y-0.5" role="radiogroup" aria-label="Select a candidate">
-        {allCandidates.map((candidate) => (
-          <BallotBubble
-            key={candidate.id}
-            name={candidate.name}
-            party={candidate.party}
-            detail={candidate.currentRole}
-            isIncumbent={candidate.isIncumbent}
-            website={candidate.website}
-            candidateId={candidate.id}
-            isSelected={selectedId === candidate.id}
-            onSelect={onSelect}
-          />
-        ))}
-        {race.candidates.democrat.length === 0 && (
-          <EmptyBallotBubble party="Democrat" />
-        )}
-        {race.candidates.republican.length === 0 && (
-          <EmptyBallotBubble party="Republican" />
+      {/* Incumbent by name + challenger as party bubble */}
+      <div className="space-y-0.5" role="radiogroup" aria-label="Select a party">
+        {hasIncumbent ? (
+          <>
+            <BallotBubble
+              name={incumbent.name}
+              party={incumbent.party}
+              detail="Incumbent"
+              isIncumbent
+              candidateId={incumbent.id}
+              isSelected={selectedId === incumbent.id}
+              onSelect={onSelect}
+            />
+            <PartyBubble
+              party={incumbent.party === "Democrat" ? "Republican" : "Democrat"}
+              candidateId={`party-${stateAbbr}-senate-challenger`}
+              isSelected={selectedId === `party-${stateAbbr}-senate-challenger`}
+              onSelect={onSelect}
+            />
+          </>
+        ) : (
+          <>
+            <PartyBubble
+              party="Democrat"
+              candidateId={`party-${stateAbbr}-senate-dem`}
+              isSelected={selectedId === `party-${stateAbbr}-senate-dem`}
+              onSelect={onSelect}
+            />
+            <PartyBubble
+              party="Republican"
+              candidateId={`party-${stateAbbr}-senate-rep`}
+              isSelected={selectedId === `party-${stateAbbr}-senate-rep`}
+              onSelect={onSelect}
+            />
+          </>
         )}
       </div>
 
@@ -901,6 +1176,10 @@ function CompetitiveRaceCard({
           {race.whyCompetitive}
         </p>
       )}
+
+      <ResearchLinks
+        ballotpediaUrl={`https://ballotpedia.org/United_States_Senate_election_in_${stateName.replace(/ /g, "_")},_2026`}
+      />
     </div>
   );
 }
