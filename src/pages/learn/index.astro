@@ -1,0 +1,71 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Learn" description="Plain-English guides to how U.S. government works, what's on your ballot, and why it matters.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Learn</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      Plain-English guides to how U.S. government works, what's on your ballot, and why it matters. No spin&mdash;just the facts.
+    </p>
+
+    <!-- THE BASICS -->
+    <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">The Basics</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <a href="/learn/what-are-midterms" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">What Are Midterm Elections?</h3>
+        <p class="text-sm text-slate-500">What midterm elections are, why they matter, and what's on the ballot.</p>
+      </a>
+      <a href="/learn/how-congress-works" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">How Congress Works</h3>
+        <p class="text-sm text-slate-500">The Senate, the House, and how a bill becomes a law.</p>
+      </a>
+    </div>
+
+    <!-- THE BODIES -->
+    <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">The Bodies</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <a href="/senate" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">The Senate</h3>
+        <p class="text-sm text-slate-500">100 members, 6-year terms, and the 2026 races.</p>
+      </a>
+      <a href="/house" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">The House</h3>
+        <p class="text-sm text-slate-500">435 members, 2-year terms, and the battleground districts.</p>
+      </a>
+      <a href="/governors" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Governors</h3>
+        <p class="text-sm text-slate-500">What governors do and which seats are up in 2026.</p>
+      </a>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">How It Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <a href="/learn/congressional-hearings" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Congressional Hearings</h3>
+        <p class="text-sm text-slate-500">What they are, how they work, and whether they actually lead to anything.</p>
+      </a>
+      <a href="/learn/executive-orders" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+        <h3 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Executive Orders</h3>
+        <p class="text-sm text-slate-500">What they are, how they compare to laws, and what Congress can do about them.</p>
+      </a>
+    </div>
+
+    <!-- GET INVOLVED -->
+    <div class="bg-navy rounded-xl p-6 md:p-8 mb-10">
+      <h2 class="text-xs font-mono tracking-widest text-white/40 uppercase mb-4">Get Involved</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="/learn/how-to-run" class="group block bg-white/10 rounded-lg p-5 border border-white/10 hover:bg-white/15 transition-all">
+          <h3 class="font-bold text-white group-hover:text-tossup transition-colors mb-1">How to Run for Congress</h3>
+          <p class="text-sm text-white/60">Eligibility, filing, primaries, fundraising, and getting on the ballot.</p>
+        </a>
+        <a href="/take-action" class="group block bg-white/10 rounded-lg p-5 border border-white/10 hover:bg-white/15 transition-all">
+          <h3 class="font-bold text-white group-hover:text-tossup transition-colors mb-1">Take Action</h3>
+          <p class="text-sm text-white/60">Register to vote, find your reps, and get involved in your community.</p>
+        </a>
+      </div>
+    </div>
+
+  </section>
+</Layout>

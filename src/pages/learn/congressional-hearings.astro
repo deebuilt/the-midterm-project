@@ -1,0 +1,506 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Congressional Hearings"
+  description="What congressional hearings are, how they work, what powers Congress has to force people to testify, and whether hearings actually lead to anything."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Congressional Hearings</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Congressional Hearings</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      What they are, how they work, and whether they actually lead to anything.
+    </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/congressional-hearings.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        You've probably seen clips of a congressional hearing on the news or social media: someone sitting at a table with a microphone, a row of senators or representatives asking questions, and maybe a lot of dodging and non-answers. But what actually <em>is</em> a congressional hearing? What's the point? And does anything ever come of it?
+      </p>
+
+      <!-- WHAT ARE THEY -->
+      <h2 class="text-2xl font-bold">What Is a Congressional Hearing?</h2>
+      <p class="text-slate-600">
+        A congressional hearing is when a committee of the Senate or House of Representatives calls people in to answer questions about a specific topic. Think of it like a fact-finding meeting. The people who are called in are called <strong>witnesses</strong>&mdash;they might be government officials, company executives, experts, or everyday citizens.
+      </p>
+      <p class="text-slate-600">
+        The
+        <a href="https://www.congress.gov/crs-product/98-317" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Research Service</a>
+        (a nonpartisan research arm of Congress) says the purpose of every hearing is the same: <strong>to gather information</strong>. That information can be used to write new laws, check whether existing laws are being followed, or look into possible wrongdoing.
+      </p>
+      <p class="text-slate-600">
+        The power to hold hearings comes from the
+        <a href="https://constitution.congress.gov/browse/article-1/section-5/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Constitution</a>,
+        which gives Congress the authority to set its own rules. Both the Senate and House have given their committees broad power to hold hearings and force people to show up.
+      </p>
+
+      <!-- TYPES -->
+      <h2 class="text-2xl font-bold">Types of Hearings</h2>
+      <p class="text-slate-600">
+        Not all hearings are the same. The
+        <a href="https://crsreports.congress.gov/product/pdf/RS/98-317/19" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS breaks them into four main types</a>.
+        In practice, they overlap&mdash;for example, an investigation into wrongdoing might also lead to a new law.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Legislative Hearings</h3>
+          <p class="text-sm text-slate-600">
+            These help Congress learn about a topic before writing a law. For example, if Congress is considering a bill on social media and kids, they might call in tech CEOs, parents, and child psychologists to hear different perspectives.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Oversight Hearings</h3>
+          <p class="text-sm text-slate-600">
+            These check up on the executive branch (the president's side of government). Congress passes laws, but federal agencies carry them out. Oversight hearings ask: "Are you actually doing what we told you to do?"
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Investigative Hearings</h3>
+          <p class="text-sm text-slate-600">
+            These dig into suspected wrongdoing&mdash;things like corruption, fraud, or abuse of power. These are usually the ones you see on TV because they tend to be the most dramatic.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Confirmation Hearings</h3>
+          <p class="text-sm text-slate-600">
+            When the president picks someone for a big job (like a Supreme Court justice or a Cabinet secretary), the Senate gets to question that person before voting on whether to approve them
+            (<a href="https://www.senate.gov/about/powers-procedures/nominations.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Senate.gov</a>).
+          </p>
+        </div>
+      </div>
+      <p class="text-sm text-slate-500 mt-2">
+        There are also <strong>field hearings</strong>, which happen outside Washington, D.C.&mdash;usually so Congress can hear directly from people affected by a policy
+        (<a href="https://www.congress.gov/crs-product/RS20928" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS Report</a>).
+      </p>
+
+      <!-- HOW THEY WORK -->
+      <h2 class="text-2xl font-bold">How a Hearing Works</h2>
+      <ol class="list-decimal list-inside space-y-3 text-slate-600">
+        <li>
+          <strong>The committee chair picks the topic and schedules it.</strong> The chair is a member of whichever party has the majority (more seats) in that chamber. The other party (the minority) can ask for hearings, but they can't schedule one on their own.
+        </li>
+        <li>
+          <strong>Witnesses are invited&mdash;or forced to come.</strong> If someone won't come voluntarily, the committee can issue a
+          <a href="https://www.congress.gov/crs-product/R45653" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">subpoena</a>&mdash;a legal order that says "you must show up and/or hand over documents." Ignoring a subpoena can have legal consequences.
+        </li>
+        <li>
+          <strong>Witnesses are sworn in</strong> (they raise their right hand and promise to tell the truth) and give a short opening statement, usually around five minutes.
+        </li>
+        <li>
+          <strong>Members of Congress ask questions</strong> in rounds. Each member usually gets five minutes, and they alternate between parties. Sometimes a committee will bring in a lawyer to do longer, more detailed questioning.
+        </li>
+        <li>
+          <strong>Everything is recorded</strong> and becomes part of the official public record. Anyone can look it up.
+        </li>
+      </ol>
+
+      <!-- SUBPOENA AND CONTEMPT -->
+      <h2 class="text-2xl font-bold">What If a Witness Refuses to Answer?</h2>
+      <p class="text-slate-600">
+        This happens more than you'd think. When a witness ignores a subpoena or refuses to answer questions without a good legal reason, Congress can hold them in
+        <a href="https://www.law.cornell.edu/wex/contempt_of_congress" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">contempt of Congress</a>.
+        There are three ways Congress can try to enforce this:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="border-l-4 border-dem pl-4">
+          <h3 class="font-bold text-navy">Criminal Contempt</h3>
+          <p class="text-sm text-slate-600">
+            Congress votes to send the case to the Department of Justice (DOJ), which can prosecute the witness. If convicted, the penalty is a fine of up to $100,000 and up to one year in jail
+            (<a href="https://www.congress.gov/crs-product/LSB10974" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS</a>).
+            The catch? The DOJ is part of the president's branch of government, so it doesn't always follow through&mdash;especially if the witness works for the president.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">Civil Enforcement</h3>
+          <p class="text-sm text-slate-600">
+            Instead of asking the DOJ, Congress sues the witness in court and asks a judge to order them to comply. This avoids the conflict of interest that comes with asking the president's own DOJ to go after the president's own people.
+          </p>
+        </div>
+        <div class="border-l-4 border-gop pl-4">
+          <h3 class="font-bold text-navy">Inherent Contempt</h3>
+          <p class="text-sm text-slate-600">
+            This is the oldest and most dramatic option: Congress sends its Sergeant-at-Arms (basically Congress's own security officer) to physically detain the witness. This
+            <a href="https://constitutioncenter.org/blog/the-houses-contempt-powers-explained" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">used to happen</a>
+            in the 1800s but is almost never used today.
+          </p>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-bold mt-6">What About "Pleading the Fifth"?</h3>
+      <p class="text-slate-600">
+        You've probably heard this phrase. The
+        <a href="https://federal-lawyer.com/subpoenas/congressional-subpoena/invoking-fifth-amendment/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Fifth Amendment</a>
+        to the Constitution says you can't be forced to say something that could be used against you in a criminal case. So if answering a question honestly might get a witness in legal trouble, they can refuse to answer that specific question. Congress has to accept it.
+      </p>
+      <p class="text-slate-600">
+        But here's a twist: Congress can offer <strong>immunity</strong>, which means "we promise your testimony won't be used to prosecute you." In exchange, the witness has to answer. If they still refuse after getting immunity, they can be held in contempt.
+      </p>
+
+      <!-- HEARINGS VS TRIALS -->
+      <h2 class="text-2xl font-bold">Hearings Are Not Trials</h2>
+      <p class="text-slate-600">
+        This is probably the biggest misunderstanding people have. A hearing looks like a trial on TV, but it's fundamentally different.
+      </p>
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Congressional Hearing</th>
+              <th class="px-4 py-3 font-semibold">Criminal Trial</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Goal is to gather facts and information</td>
+              <td class="px-4 py-3 text-slate-600">Goal is to decide if someone is guilty</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Congress can't punish or jail anyone</td>
+              <td class="px-4 py-3 text-slate-600">A court can fine, imprison, etc.</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">No judge, no jury</td>
+              <td class="px-4 py-3 text-slate-600">A judge presides, a jury decides the facts</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Formal rules of evidence don't apply</td>
+              <td class="px-4 py-3 text-slate-600">Strict rules about what evidence is allowed</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Can send findings to law enforcement</td>
+              <td class="px-4 py-3 text-slate-600">Law enforcement brings the case to court</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-slate-600 mt-4">
+        So when you see a hearing on TV and a witness dodges every question, Congress can't just lock them up. What Congress <em>can</em> do is put their answers (or non-answers) on the public record, use what they learn to write laws, and send evidence to the DOJ if they think crimes were committed.
+      </p>
+
+      <!-- SO DO THEY ACTUALLY DO ANYTHING -->
+      <h2 class="text-2xl font-bold">Do Hearings Actually Lead to Anything?</h2>
+      <p class="text-slate-600">
+        This is the big question. The honest answer: <strong>sometimes yes, sometimes no.</strong> Some hearings have led to new laws, criminal convictions, and massive reforms. Others ended without much to show for it. Here are real examples of both.
+      </p>
+
+      <h3 class="text-xl font-bold text-green-800">Hearings That Led to Real Results</h3>
+
+      <div class="not-prose space-y-4">
+        <!-- Teapot Dome -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Teapot Dome Investigation</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1924</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            A Senate committee found that the Secretary of the Interior had secretly leased government oil reserves to private companies in exchange for bribes.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>He became the first Cabinet member sent to prison for crimes committed while in office.</li>
+            <li>Congress passed a law giving itself the power to access anyone's tax returns without needing the president's permission.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://levin-center.org/senator-walsh-and-the-teapot-dome-investigation/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Levin Center</a>,
+            <a href="https://www.britannica.com/event/Teapot-Dome-Scandal" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Britannica</a>
+          </p>
+        </div>
+
+        <!-- Pecora Commission -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Pecora Commission (Banking Investigation)</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1933&ndash;1934</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            After the 1929 stock market crash, the Senate investigated what went wrong at the big banks. The hearings were so damning that the president of National City Bank resigned on the spot.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>The <strong>Glass-Steagall Act</strong> (which separated regular banking from risky investment banking)</li>
+            <li>The <strong>Securities Act of 1933</strong></li>
+            <li>The <strong>Securities Exchange Act of 1934</strong>, which created the SEC&mdash;the agency that still regulates Wall Street today.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.archives.gov/legislative/resources/education/pecora" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives</a>,
+            <a href="https://en.wikipedia.org/wiki/Pecora_Commission" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Wikipedia (Pecora Commission)</a>
+          </p>
+        </div>
+
+        <!-- Army-McCarthy -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Army-McCarthy Hearings</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1954</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            Senator Joseph McCarthy had been accusing people of being communists for years, ruining careers with little evidence. When the hearings were broadcast on live TV, the public saw his bullying firsthand.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>His approval ratings collapsed.</li>
+            <li>Within months the Senate voted 67&ndash;22 to formally censure (publicly condemn) him.</li>
+            <li>His political career was effectively over.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.senate.gov/about/powers-procedures/investigations/mccarthy-and-army-mccarthy-hearings.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Senate.gov</a>,
+            <a href="https://www.senate.gov/artandhistory/history/common/censure_cases/133Joseph_McCarthy.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Senate.gov (Censure)</a>
+          </p>
+        </div>
+
+        <!-- Watergate -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Watergate Hearings</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1973&ndash;1974</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            A Senate committee investigated a break-in at the Democratic Party's headquarters and the White House's attempts to cover it up. The hearings revealed that President Nixon had been secretly recording conversations in the Oval Office.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>Forty administration officials were charged with crimes.</li>
+            <li>Nixon resigned before he could be impeached.</li>
+            <li>Congress later passed laws reforming campaign finance and government ethics.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.senate.gov/about/powers-procedures/investigations/watergate.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Senate.gov</a>,
+            <a href="https://levin-center.org/the-watergate-hearings/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Levin Center</a>
+          </p>
+        </div>
+
+        <!-- Church Committee -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Church Committee (Spy Agency Abuses)</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1975&ndash;1976</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            A Senate committee led by Senator Frank Church found that the CIA, FBI, and NSA had been spying on American citizens and plotting to assassinate foreign leaders&mdash;all without proper oversight.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>Congress passed the <strong>Foreign Intelligence Surveillance Act (FISA)</strong>.</li>
+            <li>Created permanent committees to oversee intelligence agencies.</li>
+            <li>The president signed an executive order banning government-ordered assassinations.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.senate.gov/about/powers-procedures/investigations/church-committee.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Senate.gov</a>,
+            <a href="https://constitutioncenter.org/blog/looking-back-at-the-church-committee" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Constitution Center</a>
+          </p>
+        </div>
+
+        <!-- Tobacco -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Tobacco Industry Hearings</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1994</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            Seven tobacco company CEOs stood up, swore to tell the truth, and then told Congress that nicotine is not addictive. They were lying, and the public knew it. No law was passed right away, but the hearings lit a fire.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>Every state in the country sued the tobacco industry.</li>
+            <li>The <strong>Master Settlement Agreement of 1998</strong> ($206 billion).</li>
+            <li>The <strong>Family Smoking Prevention and Tobacco Control Act of 2009</strong>, which gave the FDA power to regulate tobacco.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://levin-center.org/what-is-oversight/portraits/henry-waxman-and-big-tobacco/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Levin Center</a>,
+            <a href="https://www.pbs.org/wgbh/pages/frontline/shows/settlement/timelines/april94.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS Frontline</a>
+          </p>
+        </div>
+
+        <!-- 9/11 Commission -->
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">9/11 Commission</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">2003&ndash;2004</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            A bipartisan (both-parties) commission investigated the September 11 attacks and found that U.S. intelligence agencies had pieces of the puzzle but nobody put them together in time.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-green-800">The result:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>The <strong>Intelligence Reform and Terrorism Prevention Act of 2004</strong>.</li>
+            <li>Created the Director of National Intelligence and the National Counterterrorism Center.</li>
+            <li>The bill passed the Senate 96&ndash;2.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.congress.gov/bill/108th-congress/senate-bill/2845" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov</a>,
+            <a href="https://www.dni.gov/index.php/ic-legal-reference-book/intelligence-reform-and-terrorism-prevention-act-of-2004" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Office of the DNI</a>
+          </p>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-bold text-slate-500 mt-8">Hearings Where the Outcome Is Less Clear</h3>
+
+      <div class="not-prose space-y-4">
+        <!-- Benghazi -->
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Benghazi Hearings</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2014&ndash;2016</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            A House committee spent two years investigating the 2012 attack on a U.S. diplomatic compound in Libya.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-500">The outcome:</span>
+            A final report was issued, but no criminal charges or major laws resulted. People disagreed about whether the investigation was genuinely useful or mostly political.
+          </p>
+        </div>
+
+        <!-- January 6 -->
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">January 6th Committee</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2021&ndash;2022</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-700">The issue:</span>
+            The House investigated the January 6, 2021, attack on the U.S. Capitol. Over 17 months, the committee interviewed more than 1,200 witnesses and held nationally televised hearings.
+          </p>
+          <p class="text-sm text-slate-600 mt-2">
+            <span class="font-semibold text-slate-500">The outcome:</span>
+          </p>
+          <ul class="text-sm text-slate-600 mt-1 ml-4 space-y-1 list-disc list-outside">
+            <li>It made criminal referrals to the DOJ, including against a former president&mdash;a first in U.S. history.</li>
+            <li>But congressional criminal referrals are
+              <a href="https://www.pbs.org/newshour/politics/the-key-findings-and-criminal-referrals-from-the-jan-6-committee-report-summary" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">not binding</a>.
+              They're essentially a formal recommendation. The DOJ decides on its own whether to prosecute.</li>
+          </ul>
+          <p class="text-xs text-slate-400 mt-3">
+            Sources:
+            <a href="https://www.npr.org/2022/12/23/1145323026/the-jan-6-committees-final-report-details-criminal-referrals-against-trump" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NPR</a>,
+            <a href="https://www.pbs.org/newshour/politics/the-key-findings-and-criminal-referrals-from-the-jan-6-committee-report-summary" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS NewsHour</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- WHY NOTHING SEEMS TO HAPPEN -->
+      <h2 class="text-2xl font-bold mt-8">Why It Sometimes Feels Like "Nothing Happens"</h2>
+      <p class="text-slate-600">
+        If you've watched a hearing and thought, "Great questions, but will anything come of this?"&mdash;you're not alone. There are real structural reasons for that feeling:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>
+          <strong>Hearings are fact-finding, not prosecutions.</strong> Congress can investigate, but it can't charge, convict, or sentence anyone. Only the Department of Justice can bring criminal charges.
+        </li>
+        <li>
+          <strong>Enforcement has a built-in conflict of interest.</strong> When Congress wants to punish someone for ignoring a subpoena, it usually has to ask the DOJ to prosecute. But the DOJ works for the president. If the person ignoring the subpoena also works for the president, you can see the problem.
+        </li>
+        <li>
+          <strong>Laws take time.</strong> Some of the most important hearings in history (like the tobacco hearings) took years to turn into actual laws. The hearing creates the public record and the public pressure. The legislation comes later.
+        </li>
+        <li>
+          <strong>Politics play a role.</strong> Whether a hearing leads to action depends on which party controls the committee, the chamber, and the White House. When government is divided, follow-up action can stall.
+        </li>
+        <li>
+          <strong>Sometimes the point is public awareness.</strong> Some hearings are designed to inform the public, not produce a legal verdict. The Army-McCarthy hearings didn't result in a criminal case, but once Americans saw McCarthy's behavior on live TV, the Senate censured him and his career was over. Public opinion was the enforcement mechanism.
+        </li>
+      </ul>
+
+      <!-- BOTTOM LINE -->
+      <h2 class="text-2xl font-bold">The Bottom Line</h2>
+      <p class="text-slate-600">
+        Congressional hearings are one of the few ways the public can force powerful people to sit down, swear an oath, and answer questions on the record. They're not perfect. Enforcement is messy, results aren't guaranteed, and politics are always part of the picture. But the history is clear: at their best, hearings have exposed corruption, led to landmark laws, and changed how the country understands critical issues.
+      </p>
+      <p class="text-slate-600">
+        The key is knowing what a hearing <em>is</em> and what it <em>isn't</em>. It's not a trial. It's a tool for accountability. And like any tool, what matters is how it's used&mdash;and what happens next.
+      </p>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.congress.gov/crs-product/98-317" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Research Service, "Types of Committee Hearings" (CRS Report 98-317)</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/crs-product/R45653" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS, "Congressional Subpoenas: Enforcing Executive Branch Compliance" (R45653)</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/crs-product/LSB10974" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS, "Criminal Contempt of Congress: Frequently Asked Questions" (LSB10974)</a>
+        </li>
+        <li>
+          <a href="https://www.law.cornell.edu/wex/contempt_of_congress" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Cornell Law Institute, "Contempt of Congress"</a>
+        </li>
+        <li>
+          <a href="https://constitutioncenter.org/blog/the-houses-contempt-powers-explained" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Constitution Center, "The House's Contempt Powers Explained"</a>
+        </li>
+        <li>
+          <a href="https://www.senate.gov/about/powers-procedures/investigations/watergate.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Senate, "Select Committee on Presidential Campaign Activities" (Watergate)</a>
+        </li>
+        <li>
+          <a href="https://www.senate.gov/about/powers-procedures/investigations/church-committee.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Senate, "Senate Select Committee to Study Governmental Operations" (Church Committee)</a>
+        </li>
+        <li>
+          <a href="https://www.senate.gov/about/powers-procedures/investigations/mccarthy-and-army-mccarthy-hearings.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Senate, "McCarthy and Army-McCarthy Hearings"</a>
+        </li>
+        <li>
+          <a href="https://www.archives.gov/legislative/resources/education/pecora" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives, "Congress Investigates: The Pecora Investigation"</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/bill/108th-congress/senate-bill/2845" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov, Intelligence Reform and Terrorism Prevention Act of 2004 (S.2845)</a>
+        </li>
+        <li>
+          <a href="https://www.npr.org/2022/12/23/1145323026/the-jan-6-committees-final-report-details-criminal-referrals-against-trump" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NPR, "The Jan. 6 Committee's Final Report Details Criminal Referrals" (Dec. 2022)</a>
+        </li>
+        <li>
+          <a href="https://www.pbs.org/newshour/politics/the-key-findings-and-criminal-referrals-from-the-jan-6-committee-report-summary" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS NewsHour, "Key Findings and Criminal Referrals from the Jan. 6 Committee" (Dec. 2022)</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Want to understand more about how Congress works? Read
+          <a href="/learn/how-congress-works" class="underline">How Congress Works</a>,
+          learn about <a href="/learn/executive-orders" class="underline">executive orders</a>,
+          explore <a href="/senate" class="underline">the Senate</a> and
+          <a href="/house" class="underline">the House</a>, or find out
+          <a href="/learn/what-are-midterms" class="underline">what midterm elections are</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

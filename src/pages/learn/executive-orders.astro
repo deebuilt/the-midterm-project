@@ -1,0 +1,465 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Executive Orders"
+  description="What executive orders are, how they compare to laws passed by Congress, what Congress can do about them, and why they've been in the news lately."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Executive Orders</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Executive Orders</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      What they are, how they compare to laws, and what Congress can do about them.
+    </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/executive-orders.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        If you've been paying attention to the news lately, you've probably heard the phrase "executive order" more than usual. In early 2025, executive orders started flying at a pace the country hadn't seen in nearly a century. But what actually <em>is</em> an executive order? How is it different from a law? And if Congress doesn't like one, can they do anything about it?
+      </p>
+
+      <!-- WHAT ARE THEY -->
+      <h2 class="text-2xl font-bold">What Is an Executive Order?</h2>
+      <p class="text-slate-600">
+        An executive order is a written directive signed by the president that tells federal agencies how to do their jobs. Think of it this way: Congress writes the laws, and the president is in charge of carrying them out. Executive orders are one of the main tools a president uses to say, "Here's <em>how</em> I want these laws carried out."
+      </p>
+      <p class="text-slate-600">
+        Executive orders have the force of law within the executive branch&mdash;meaning federal agencies <em>must</em> follow them. But they are <strong>not</strong> laws in the way that legislation passed by Congress is. A president can sign one without a single vote from anyone.
+      </p>
+      <p class="text-slate-600">
+        The legal authority comes from
+        <a href="https://constitution.congress.gov/browse/essay/artII-1/ALDE_00000243/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Article II of the Constitution</a>,
+        which says "the executive Power shall be vested in a President" and that the president "shall take Care that the Laws be faithfully executed." That's it. The Constitution never actually uses the words "executive order"&mdash;presidents have been filling in the blanks since George Washington.
+      </p>
+      <p class="text-slate-600">
+        Every executive order is numbered, published in the
+        <a href="https://www.federalregister.gov/presidential-documents/executive-orders" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Register</a>
+        (the government's official daily journal), and becomes part of the public record. The numbering system was introduced in 1907 and retroactively applied back to an order issued by Abraham Lincoln in 1862.
+      </p>
+
+      <!-- HOW THEY COMPARE TO LAWS -->
+      <h2 class="text-2xl font-bold">Executive Orders vs. Laws: What's the Difference?</h2>
+      <p class="text-slate-600">
+        This is the most important distinction to understand. Here's a side-by-side comparison:
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Executive Order</th>
+              <th class="px-4 py-3 font-semibold">Law (Legislation)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Signed by the president alone</td>
+              <td class="px-4 py-3 text-slate-600">Must pass the House, the Senate, and be signed by the president</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Takes effect immediately</td>
+              <td class="px-4 py-3 text-slate-600">Can take months or years to negotiate and pass</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Primarily directs federal agencies</td>
+              <td class="px-4 py-3 text-slate-600">Can apply to all Americans, businesses, and institutions</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">The next president can revoke it with a stroke of a pen</td>
+              <td class="px-4 py-3 text-slate-600">Requires new legislation to repeal or amend</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Cannot spend money (only Congress controls the budget)</td>
+              <td class="px-4 py-3 text-slate-600">Can authorize and appropriate spending</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Cannot contradict existing law or the Constitution</td>
+              <td class="px-4 py-3 text-slate-600">Must be constitutional (subject to judicial review)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-slate-600">
+        The bottom line: executive orders are <strong>fast but fragile</strong>. A president can act quickly and unilaterally, but the next president can undo everything just as fast. Laws are slow but durable&mdash;they require consensus but they stick.
+      </p>
+
+      <!-- THE YOUNGSTOWN FRAMEWORK -->
+      <h2 class="text-2xl font-bold">When Can a President Use Executive Orders?</h2>
+      <p class="text-slate-600">
+        The Supreme Court set the ground rules in a landmark 1952 case called
+        <a href="https://supreme.justia.com/cases/federal/us/343/579/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline"><em>Youngstown Sheet & Tube Co. v. Sawyer</em></a>.
+        President Truman had tried to seize private steel mills during the Korean War, claiming it was necessary for national defense. The Court said: no.
+      </p>
+      <p class="text-slate-600">
+        Justice Robert Jackson's opinion in that case laid out three "zones" of presidential power that courts still use today:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+          <h3 class="font-bold text-navy mb-2">Zone 1: Strongest</h3>
+          <p class="text-sm text-slate-600">
+            The president acts <em>with</em> Congress's authorization. This is where presidential power is at its maximum&mdash;both branches agree.
+          </p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-5 border border-amber-200">
+          <h3 class="font-bold text-navy mb-2">Zone 2: Uncertain</h3>
+          <p class="text-sm text-slate-600">
+            Congress hasn't spoken on the issue. The president may or may not have authority, depending on the circumstances.
+          </p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-5 border border-red-200">
+          <h3 class="font-bold text-navy mb-2">Zone 3: Weakest</h3>
+          <p class="text-sm text-slate-600">
+            The president acts <em>against</em> Congress's will. This is where executive power is at its lowest ebb and most likely to be struck down by courts.
+          </p>
+        </div>
+      </div>
+
+      <!-- WHAT CONGRESS CAN DO -->
+      <h2 class="text-2xl font-bold">What Can Congress Do About Executive Orders?</h2>
+      <p class="text-slate-600">
+        If you're thinking "wait, can a president just do whatever they want?"&mdash;the answer is no. The system of
+        <a href="/learn/how-congress-works" class="text-dem hover:underline">checks and balances</a>
+        gives Congress and the courts several ways to push back.
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="border-l-4 border-dem pl-4">
+          <h3 class="font-bold text-navy">Pass a Law to Override It</h3>
+          <p class="text-sm text-slate-600">
+            Congress can pass a law that supersedes or blocks an executive order. If the president vetoes that law, Congress can override the veto with a two-thirds vote in both chambers. This is the most powerful check&mdash;but also the hardest, because it requires enough votes to overcome a veto.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">Cut Off the Money</h3>
+          <p class="text-sm text-slate-600">
+            This is sometimes called "cutting off the EO at its knees." Only Congress can appropriate federal funds. If Congress refuses to fund the implementation of an executive order, the order may exist on paper but can't actually be carried out. The
+            <a href="https://constitution.congress.gov/browse/article-1/section-9/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">power of the purse</a>
+            is one of Congress's most potent tools.
+          </p>
+        </div>
+        <div class="border-l-4 border-gop pl-4">
+          <h3 class="font-bold text-navy">Use the Congressional Review Act</h3>
+          <p class="text-sm text-slate-600">
+            The
+            <a href="https://www.congress.gov/crs-product/R43992" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Review Act (CRA)</a>,
+            passed in 1996, gives Congress a fast-track way to overturn executive branch regulations. Key features: CRA resolutions can pass the Senate with a <strong>simple majority</strong> (51 votes) instead of the usual 60 needed to break a filibuster. And if a CRA resolution becomes law, the agency is <strong>permanently barred</strong> from issuing a "substantially similar" rule.
+          </p>
+        </div>
+        <div class="border-l-4 border-slate-400 pl-4">
+          <h3 class="font-bold text-navy">Let the Courts Handle It</h3>
+          <p class="text-sm text-slate-600">
+            Federal courts can block or strike down executive orders that exceed presidential authority, violate the Constitution, or contradict existing law. This has happened throughout history&mdash;and it happened <a href="#recent" class="text-dem hover:underline">multiple times in 2025</a>. Lawsuits challenging executive orders can come from states, advocacy groups, or even individual citizens. If a court issues an injunction, the order is frozen until the legal challenge is resolved.
+          </p>
+        </div>
+      </div>
+
+      <!-- HISTORICAL EXAMPLES -->
+      <h2 class="text-2xl font-bold">Executive Orders That Changed History</h2>
+      <p class="text-slate-600">
+        For better or worse, some of the most consequential moments in American history came through executive orders&mdash;not legislation.
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">The Emancipation Proclamation</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">1863</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            President Lincoln used his war powers to declare that all enslaved people in Confederate states "are, and henceforward shall be free." This wasn't a law&mdash;it was an executive action. About 200,000 Black soldiers subsequently enlisted in the Union Army and Navy. Permanent abolition required the
+            <a href="https://constitution.congress.gov/browse/amendment-13/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">13th Amendment</a>,
+            ratified in 1865.
+          </p>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-5 border border-red-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Executive Order 9066: Japanese American Internment</h4>
+            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">1942</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            President Roosevelt authorized the forced removal of approximately 122,000 Japanese Americans from the West Coast to internment camps. This is one of the darkest examples of executive power being used without meaningful checks. In 1988, President Reagan signed legislation issuing a
+            <a href="https://www.archives.gov/milestone-documents/executive-order-9066" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">formal public apology</a>
+            and authorizing reparations for surviving internees.
+          </p>
+        </div>
+
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Executive Order 9981: Desegregation of the Military</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1948</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            President Truman ordered equality of treatment and opportunity in the armed forces "without regard to race, color, religion or national origin." This desegregated the U.S. military years before the broader civil rights movement. It didn't require a single vote in Congress.
+          </p>
+        </div>
+
+        <div class="bg-green-50 rounded-lg p-5 border border-green-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Enforcing School Desegregation at Little Rock</h4>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">1957</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            When the governor of Arkansas used the state National Guard to block nine Black students from entering Central High School, President Eisenhower signed
+            <a href="https://www.archives.gov/milestone-documents/executive-order-10730" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Executive Order 10730</a>,
+            federalizing the Guard and sending the 101st Airborne Division to escort the "Little Rock Nine" into school.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Affirmative Action in Federal Employment</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">1961</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            President Kennedy signed Executive Order 10925, which prohibited federal government contractors from discriminating on the basis of race and first used the term "affirmative action." This order was later expanded by President Johnson's
+            <a href="https://www.dol.gov/agencies/ofccp/about/executive-order-11246" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Executive Order 11246</a>
+            in 1965&mdash;the same order that was revoked in early 2025.
+          </p>
+        </div>
+      </div>
+
+      <!-- BY THE NUMBERS -->
+      <h2 class="text-2xl font-bold">Executive Orders by the Numbers</h2>
+      <p class="text-slate-600">
+        Presidents have been issuing executive orders since George Washington (who signed 8 of them). Usage surged in the early 20th century as the federal government expanded, peaked under FDR, and has generally declined since.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">President</th>
+              <th class="px-4 py-3 font-semibold text-right">Total EOs</th>
+              <th class="px-4 py-3 font-semibold text-right">Per Year</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-2 text-slate-600">Franklin D. Roosevelt</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">3,721</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~307</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-2 text-slate-600">Harry Truman</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">907</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~117</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-2 text-slate-600">Dwight Eisenhower</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">484</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~60</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-2 text-slate-600">Ronald Reagan</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">381</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~47</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-2 text-slate-600">Bill Clinton</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">364</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~45</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-2 text-slate-600">George W. Bush</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">291</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~36</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-2 text-slate-600">Barack Obama</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">277</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~34</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-2 text-slate-600">Donald Trump (1st term)</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">220</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~55</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-2 text-slate-600">Joe Biden</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">162</td>
+              <td class="px-4 py-2 text-slate-600 text-right font-mono">~40</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-400 mt-2">
+        Source:
+        <a href="https://www.presidency.ucsb.edu/statistics/data/executive-orders" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">American Presidency Project, UC Santa Barbara</a>
+      </p>
+
+      <!-- THE 2025 SURGE -->
+      <h2 class="text-2xl font-bold" id="recent">Why Executive Orders Are in the News Right Now</h2>
+      <p class="text-slate-600">
+        If executive orders have suddenly been on your radar, there's a reason. The administration that took office on January 20, 2025 broke multiple historical records:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">26</div>
+          <p class="text-sm text-slate-600 mt-1">executive orders signed on <strong>day one</strong> alone&mdash;nearly triple the previous first-day record of 9</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">~143</div>
+          <p class="text-sm text-slate-600 mt-1">executive orders in the <strong>first 100 days</strong>&mdash;recent predecessors averaged roughly 15&ndash;25</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">225</div>
+          <p class="text-sm text-slate-600 mt-1">executive orders in <strong>calendar year 2025</strong>&mdash;the highest since FDR's 568 in 1933</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">7.2x</div>
+          <p class="text-sm text-slate-600 mt-1">the <strong>historical average</strong> rate of executive orders per year</p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        For context, the same president signed 220 executive orders across the <em>entire</em> previous four-year term (2017&ndash;2021). That total was surpassed in under 12 months of the current term.
+      </p>
+
+      <!-- KEY TOPICS -->
+      <h2 class="text-2xl font-bold">What Are the Recent Executive Orders About?</h2>
+      <p class="text-slate-600">
+        Here are the major policy areas addressed by executive orders in 2025, described by topic rather than political framing:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Border Security & Immigration</h3>
+          <p class="text-sm text-slate-600">
+            Declaration of a national emergency at the southern border, expanded military deployment authority, and an order to restrict birthright citizenship for children of undocumented immigrants&mdash;which was
+            <a href="https://www.fjc.gov/history/administration/judicial-review-executive-orders" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">blocked by multiple federal judges</a>
+            as likely violating the 14th Amendment.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">DEI & Affirmative Action</h3>
+          <p class="text-sm text-slate-600">
+            Directed federal agencies to end diversity, equity, and inclusion programs. Revoked Executive Order 11246 (the 1965 order requiring affirmative action by federal contractors). Extended anti-DEI directives to contractors and grant recipients. Hundreds of legal challenges have been filed.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Federal Workforce & Government Restructuring</h3>
+          <p class="text-sm text-slate-600">
+            Reinstated Schedule F (reclassifying certain career federal employees to make them easier to hire and fire). Created the Department of Government Efficiency (DOGE) via executive order to cut government spending and reduce agency programs.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Trade & Tariffs</h3>
+          <p class="text-sm text-slate-600">
+            Imposed tariffs via emergency powers: 25% on goods from Canada and Mexico, 20% on goods from China. Established reciprocal tariff rates for over 60 countries. Expanded tariffs on steel, aluminum, and automobiles under national security authority.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Energy Policy</h3>
+          <p class="text-sm text-slate-600">
+            Established a National Energy Dominance Council. Directed elimination of renewable energy subsidies and related tax credits. Issued orders promoting nuclear energy development.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Many of these orders have been challenged in court. Some have been temporarily blocked by federal judges. Others are moving through the legal system. This is the checks-and-balances framework in action: the president acts, and the courts and Congress decide whether those actions exceed presidential authority.
+      </p>
+
+      <!-- WHY THIS MATTERS FOR MIDTERMS -->
+      <h2 class="text-2xl font-bold">Why This Matters for the 2026 Midterms</h2>
+      <p class="text-slate-600">
+        Here's the thing about executive orders: they're powerful, but they're not permanent. The next president can reverse them. Courts can block them. And <strong>Congress can override them by passing laws</strong>.
+      </p>
+      <p class="text-slate-600">
+        That's where
+        <a href="/learn/what-are-midterms" class="text-dem hover:underline">midterm elections</a>
+        come in. The members of Congress elected in 2026 will decide:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>Whether to codify executive orders into permanent law (making them survive future administrations)</li>
+        <li>Whether to pass legislation blocking executive orders they disagree with</li>
+        <li>Whether to fund or defund the agencies carrying out those orders</li>
+        <li>Whether to use
+          <a href="/learn/congressional-hearings" class="text-dem hover:underline">oversight hearings</a>
+          to investigate how orders are being implemented</li>
+        <li>Whether to use the Congressional Review Act to fast-track reversals of agency rules</li>
+      </ul>
+      <p class="text-slate-600">
+        In short: executive orders set the direction, but <strong>Congress holds the steering wheel</strong>. Who you send to Congress in 2026 determines what happens next.
+      </p>
+
+      <!-- BOTTOM LINE -->
+      <h2 class="text-2xl font-bold">The Bottom Line</h2>
+      <p class="text-slate-600">
+        Executive orders are a legitimate and long-used presidential tool, dating back to the founding of the republic. At their best, they've desegregated the military and enforced civil rights. At their worst, they've been used to intern American citizens. They're fast but fragile&mdash;powerful in the short term, but always subject to being reversed by the next president, overridden by Congress, or struck down by the courts.
+      </p>
+      <p class="text-slate-600">
+        Understanding what executive orders are&mdash;and what they <em>aren't</em>&mdash;is part of understanding how power works in the United States. They're not laws. They're not permanent. And the people you elect to Congress have real power to check them.
+      </p>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://constitution.congress.gov/browse/essay/artII-1/ALDE_00000243/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov, Article II of the Constitution</a>
+        </li>
+        <li>
+          <a href="https://crsreports.congress.gov/product/pdf/R/R46738" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Research Service, "Executive Orders: An Introduction" (R46738)</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/crs-product/RS20846" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS, "Executive Orders: Issuance, Modification, and Revocation" (RS20846)</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/crs-product/R43992" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CRS, "The Congressional Review Act: Frequently Asked Questions" (R43992)</a>
+        </li>
+        <li>
+          <a href="https://www.federalregister.gov/presidential-documents/executive-orders" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Register, Executive Orders</a>
+        </li>
+        <li>
+          <a href="https://www.archives.gov/federal-register/executive-orders/disposition" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives, Executive Orders Disposition Tables</a>
+        </li>
+        <li>
+          <a href="https://constitutioncenter.org/the-constitution/articles/article-ii" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Constitution Center, Article II (Interactive Constitution)</a>
+        </li>
+        <li>
+          <a href="https://www.americanbar.org/groups/public_education/resources/teacher_portal/educational_resources/executive_orders/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">American Bar Association, "Executive Orders" (Educational Resource)</a>
+        </li>
+        <li>
+          <a href="https://www.presidency.ucsb.edu/statistics/data/executive-orders" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">American Presidency Project, UC Santa Barbara, Executive Orders Data</a>
+        </li>
+        <li>
+          <a href="https://www.archives.gov/milestone-documents/executive-order-9066" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives, Executive Order 9066 (Japanese Internment)</a>
+        </li>
+        <li>
+          <a href="https://www.archives.gov/milestone-documents/executive-order-10730" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives, Executive Order 10730 (Little Rock)</a>
+        </li>
+        <li>
+          <a href="https://supreme.justia.com/cases/federal/us/343/579/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Justia, <em>Youngstown Sheet & Tube Co. v. Sawyer</em> (1952)</a>
+        </li>
+        <li>
+          <a href="https://usafacts.org/articles/how-many-executive-orders-has-each-president-signed/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">USAFacts, "How Many Executive Orders Has Each President Signed?"</a>
+        </li>
+        <li>
+          <a href="https://www.pewresearch.org/short-reads/2025/12/16/trump-has-already-issued-more-executive-orders-in-his-second-term-than-in-his-first/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center, Executive Orders Comparison (Dec. 2025)</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Want to understand more about how the government works? Read
+          <a href="/learn/how-congress-works" class="underline">How Congress Works</a>, learn about
+          <a href="/learn/congressional-hearings" class="underline">congressional hearings</a>, or explore
+          <a href="/learn/what-are-midterms" class="underline">what midterm elections are</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
