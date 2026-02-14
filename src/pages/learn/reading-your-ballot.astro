@@ -1,0 +1,609 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Reading Your Ballot"
+  description="A visual walkthrough of a typical U.S. ballot — what each section means, what you'll see, and how to fill it out."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Reading Your Ballot</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Reading Your Ballot</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      A visual walkthrough of what you'll see when you vote&mdash;section by section, top to bottom.
+    </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/reading-your-ballot.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        If you've never voted before&mdash;or if it's been a while&mdash;a ballot can look a little overwhelming. It's a wall of names, offices, and questions. But it follows a predictable structure, and once you know what you're looking at, it's straightforward.
+      </p>
+      <p class="text-slate-600">
+        This guide walks you through a typical U.S. ballot from top to bottom. We'll show you each section the way it actually looks, then explain what it means. Every ballot is a little different depending on your state, county, and district&mdash;but the overall structure is remarkably consistent.
+      </p>
+
+      <!-- THE BIG PICTURE -->
+      <h2 class="text-2xl font-bold">The Big Picture</h2>
+      <p class="text-slate-600">
+        A ballot is organized like a hierarchy. It starts with the biggest races at the top and works its way down to the most local ones, with ballot measures at the end:
+      </p>
+
+      <div class="not-prose space-y-2">
+        <div class="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold uppercase tracking-wider text-white bg-navy px-2 py-1 rounded flex-shrink-0">1</span>
+          <div>
+            <span class="font-bold text-navy">Federal Offices</span>
+            <span class="text-sm text-slate-500 block">President, U.S. Senate, U.S. House</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold uppercase tracking-wider text-white bg-navy px-2 py-1 rounded flex-shrink-0">2</span>
+          <div>
+            <span class="font-bold text-navy">State Offices</span>
+            <span class="text-sm text-slate-500 block">Governor, state legislature, attorney general, and more</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold uppercase tracking-wider text-white bg-navy px-2 py-1 rounded flex-shrink-0">3</span>
+          <div>
+            <span class="font-bold text-navy">Local Offices</span>
+            <span class="text-sm text-slate-500 block">County executive, city council, school board, judges</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold uppercase tracking-wider text-white bg-navy px-2 py-1 rounded flex-shrink-0">4</span>
+          <div>
+            <span class="font-bold text-navy">Ballot Measures</span>
+            <span class="text-sm text-slate-500 block">Propositions, bond measures, constitutional amendments</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Not every section appears on every ballot. In a <a href="/learn/what-are-midterms" class="text-dem hover:underline">midterm year</a> like 2026, there's no presidential race&mdash;but there's still plenty to vote on. Let's walk through it.
+      </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- BALLOT HEADER -->
+    <!-- ============================================================ -->
+    <div class="not-prose mt-12 mx-auto max-w-sm rounded-t-lg overflow-hidden shadow-lg border border-slate-300" style="background: #FFFEF8;">
+      <div class="bg-navy text-white px-4 py-3 text-center">
+        <div class="text-[10px] uppercase tracking-widest text-white/60 mb-1">Official Sample Ballot</div>
+        <div class="font-bold text-lg">General Election &mdash; Nov 3, 2026</div>
+        <div class="text-xs text-white/70 mt-1">Sample County, Your State</div>
+      </div>
+      <div class="px-3 py-2 bg-tossup/10 border-b border-tossup/30 text-center">
+        <p class="text-[10px] text-tossup font-medium">
+          To vote, fill in the oval next to your choice. Vote for the number of candidates indicated.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1: FEDERAL OFFICES -->
+    <!-- ============================================================ -->
+    <div class="not-prose mx-auto max-w-sm overflow-hidden border-x border-slate-300 shadow-lg" style="background: #FFFEF8;">
+      <div class="bg-black text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5">
+        Federal Offices
+      </div>
+
+      <!-- US Senate -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">United States Senator</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for one</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dem flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Jane Smith</span><span class="text-[10px] text-slate-400 font-medium">DEM</span><span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-medium">Incumbent</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-gop flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">John Doe</span><span class="text-[10px] text-slate-400 font-medium">REP</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-ind flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Alex Rivera</span><span class="text-[10px] text-slate-400 font-medium">IND</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-slate-300 border-dashed flex-shrink-0"></span>
+            <div>
+              <span class="text-sm text-slate-400 italic">Write-in: ________________</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- US House -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">U.S. Representative &mdash; District 5</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for one</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-gop flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Robert Chen</span><span class="text-[10px] text-slate-400 font-medium">REP</span><span class="text-[9px] bg-slate-200 text-slate-500 px-1 py-0.5 rounded font-medium">Incumbent</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dem flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Maria Johnson</span><span class="text-[10px] text-slate-400 font-medium">DEM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEDERAL EXPLANATION -->
+    <div class="prose prose-slate max-w-none space-y-6 mt-8">
+      <h2 class="text-2xl font-bold">Federal Offices</h2>
+      <p class="text-slate-600">
+        These are the races for the U.S. Congress&mdash;the people who represent you in Washington, D.C. In a midterm year like 2026, this section includes:
+      </p>
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">U.S. Senate</h4>
+          <p class="text-sm text-slate-600">
+            Senators serve <strong>6-year terms</strong>. About a third of the 100 seats are up each cycle. In 2026, <strong>Class II</strong> (33 seats last elected in 2020) is on the ballot, plus any special elections for vacancies.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            Your state has two senators. You may or may not be voting for one this year.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">U.S. House of Representatives</h4>
+          <p class="text-sm text-slate-600">
+            All <strong>435 seats</strong> are on the ballot every two years. Each representative serves a specific <a href="https://www.census.gov/programs-surveys/decennial-census/about/rdo.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">congressional district</a>. You'll only see the candidates running in <em>your</em> district.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            Six states have only one at-large representative for the whole state.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 not-prose">
+        <h4 class="font-bold text-navy mb-2">Things to notice on the ballot</h4>
+        <ul class="text-sm text-slate-600 space-y-1.5">
+          <li><strong>Party abbreviation</strong> (DEM, REP, IND) appears next to each name.</li>
+          <li><strong>Incumbent</strong> badge marks the person currently holding the seat.</li>
+          <li><strong>Write-in line</strong> lets you vote for someone not listed&mdash;rules vary by state.</li>
+          <li><strong>"Vote for one"</strong> tells you how many selections to make.</li>
+        </ul>
+      </div>
+
+      <p class="text-slate-600">
+        In presidential election years (2024, 2028), you'd also see the President and Vice President race at the very top. That's not on the ballot in a midterm.
+      </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2: STATE OFFICES -->
+    <!-- ============================================================ -->
+    <div class="not-prose mx-auto max-w-sm overflow-hidden border-x border-slate-300 shadow-lg mt-12" style="background: #FFFEF8;">
+      <div class="bg-black text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5">
+        State Offices
+      </div>
+
+      <!-- Governor -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">Governor</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for one</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dem flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Patricia Williams</span><span class="text-[10px] text-slate-400 font-medium">DEM</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-gop flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Thomas Baker</span><span class="text-[10px] text-slate-400 font-medium">REP</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- State Senator -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">State Senator &mdash; District 12</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex-shrink-0">Not this year</span>
+        </div>
+      </div>
+
+      <!-- State Representative -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">State Representative &mdash; District 24</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for one</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-gop flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">David Park</span><span class="text-[10px] text-slate-400 font-medium">REP</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dem flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Sarah Okafor</span><span class="text-[10px] text-slate-400 font-medium">DEM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATE EXPLANATION -->
+    <div class="prose prose-slate max-w-none space-y-6 mt-8">
+      <h2 class="text-2xl font-bold">State Offices</h2>
+      <p class="text-slate-600">
+        These races decide who leads your state government. The specific offices vary by state, but here are the ones you'll most commonly see:
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Office</th>
+              <th class="px-4 py-3 font-semibold">What They Do</th>
+              <th class="px-4 py-3 font-semibold">2026?</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Governor</td>
+              <td class="px-4 py-3 text-slate-600">Chief executive of the state&mdash;signs or vetoes state laws, manages the budget</td>
+              <td class="px-4 py-3 text-slate-600">36 races</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Attorney General</td>
+              <td class="px-4 py-3 text-slate-600">Chief legal officer&mdash;brings lawsuits on behalf of the state, enforces consumer protection</td>
+              <td class="px-4 py-3 text-slate-600">Varies</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Secretary of State</td>
+              <td class="px-4 py-3 text-slate-600">Oversees elections, voter registration, and business filings</td>
+              <td class="px-4 py-3 text-slate-600">Varies</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">State Legislature</td>
+              <td class="px-4 py-3 text-slate-600">State senators and representatives who write state laws and set the state budget</td>
+              <td class="px-4 py-3 text-slate-600">Most states</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-slate-600">
+        You might also see races for State Treasurer, State Auditor, Superintendent of Public Instruction, or Lieutenant Governor. Notice that the State Senator race above says <strong>"Not this year"</strong>&mdash;state senate terms are usually 4 years, so your district's seat may not be up in every cycle.
+      </p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3: LOCAL OFFICES -->
+    <!-- ============================================================ -->
+    <div class="not-prose mx-auto max-w-sm overflow-hidden border-x border-slate-300 shadow-lg mt-12" style="background: #FFFEF8;">
+      <div class="bg-black text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5">
+        Local Offices
+      </div>
+
+      <!-- County Executive -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">County Executive</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for one</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-dem flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Linda Hayes</span><span class="text-[10px] text-slate-400 font-medium">DEM</span></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-gop flex-shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-1.5"><span class="text-sm font-semibold text-slate-800">Mark Turner</span><span class="text-[10px] text-slate-400 font-medium">REP</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- School Board -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">School Board &mdash; At Large</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Vote for up to 3</span>
+        </div>
+        <div class="px-3 py-1.5">
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-slate-500 flex-shrink-0"></span>
+            <div><span class="text-sm font-semibold text-slate-800">Karen Mitchell</span></div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-slate-500 flex-shrink-0"></span>
+            <div><span class="text-sm font-semibold text-slate-800">James Reyes</span></div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-slate-500 flex-shrink-0"></span>
+            <div><span class="text-sm font-semibold text-slate-800">Priya Sharma</span></div>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-slate-500 flex-shrink-0"></span>
+            <div><span class="text-sm font-semibold text-slate-800">Tony Nguyen</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Judicial Retention -->
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">Judicial Retention &mdash; Circuit Court</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Yes or No</span>
+        </div>
+        <div class="px-3 py-2">
+          <p class="text-[11px] text-slate-500 mb-1.5">Shall Judge Carol A. Whitfield be retained in office?</p>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-green-600 flex-shrink-0"></span>
+            <span class="text-sm font-semibold text-slate-800">Yes</span>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-red-600 flex-shrink-0"></span>
+            <span class="text-sm font-semibold text-slate-800">No</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCAL EXPLANATION -->
+    <div class="prose prose-slate max-w-none space-y-6 mt-8">
+      <h2 class="text-2xl font-bold">Local Offices</h2>
+      <p class="text-slate-600">
+        This section varies the most from ballot to ballot. Local races are the ones closest to your daily life&mdash;the people who manage your schools, roads, police, and courts. Notice a few things that are different from the federal section:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="border-l-4 border-dem pl-4">
+          <h4 class="font-bold text-navy">County Offices</h4>
+          <p class="text-sm text-slate-600">County executive, sheriff, district attorney, county clerk, assessor. These officials manage county-level services like courts, jails, and property records.</p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h4 class="font-bold text-navy">Nonpartisan Races</h4>
+          <p class="text-sm text-slate-600">See how the school board candidates above don't have party labels? Many local and judicial races are <strong>nonpartisan</strong>&mdash;you'll need to research these candidates on your own. The instruction also says <strong>"Vote for up to 3"</strong>&mdash;you can pick fewer than three, but not more.</p>
+        </div>
+        <div class="border-l-4 border-gop pl-4">
+          <h4 class="font-bold text-navy">Judicial Retention</h4>
+          <p class="text-sm text-slate-600">Instead of choosing between candidates, retention elections ask a simple question: should this judge keep their job? A <strong>Yes</strong> vote keeps them; a <strong>No</strong> removes them and the governor appoints a replacement.</p>
+        </div>
+        <div class="border-l-4 border-slate-400 pl-4">
+          <h4 class="font-bold text-navy">Other Local Races</h4>
+          <p class="text-sm text-slate-600">Depending on where you live, you might also see mayor, city council, water district, fire district, or transit authority races. These are almost always nonpartisan.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4: BALLOT MEASURES -->
+    <!-- ============================================================ -->
+    <div class="not-prose mx-auto max-w-sm overflow-hidden border-x border-slate-300 shadow-lg mt-12" style="background: #FFFEF8;">
+      <div class="bg-black text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5">
+        Ballot Measures
+      </div>
+
+      <div class="border-b border-slate-300">
+        <div class="flex items-start justify-between gap-2 px-3 py-1.5 bg-slate-100 border-b border-slate-200">
+          <span class="text-xs font-bold text-slate-700">Proposition 4 &mdash; School Funding Bond</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider bg-black text-white px-1.5 py-0.5 flex-shrink-0">Yes or No</span>
+        </div>
+        <div class="px-3 py-2">
+          <p class="text-[11px] text-slate-500 mb-1.5 leading-relaxed">Shall the county issue $50 million in bonds to fund school construction and renovation? This would result in an estimated property tax increase of $0.12 per $100 assessed value.</p>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-green-600 flex-shrink-0"></span>
+            <span class="text-sm font-semibold text-slate-800">Yes</span>
+          </div>
+          <div class="flex items-start gap-2 py-1">
+            <span class="mt-0.5 w-4 h-3 rounded-[50%] border-2 border-red-600 flex-shrink-0"></span>
+            <span class="text-sm font-semibold text-slate-800">No</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- END OF BALLOT -->
+    <div class="not-prose mx-auto max-w-sm overflow-hidden rounded-b-lg border-x border-b border-slate-300 shadow-lg" style="background: #FFFEF8;">
+      <div class="bg-navy text-white/60 text-[10px] text-center py-2 uppercase tracking-widest font-medium">
+        End of Ballot
+      </div>
+    </div>
+
+    <!-- BALLOT MEASURES EXPLANATION -->
+    <div class="prose prose-slate max-w-none space-y-6 mt-8">
+      <h2 class="text-2xl font-bold">Ballot Measures</h2>
+      <p class="text-slate-600">
+        Ballot measures let you vote directly on laws and policies instead of choosing a person. You'll see them listed as "Proposition," "Measure," "Amendment," or "Question" depending on your state. You simply vote <strong>Yes</strong> or <strong>No</strong>.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Type</th>
+              <th class="px-4 py-3 font-semibold">What It Is</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Citizen Initiative</td>
+              <td class="px-4 py-3 text-slate-600">Placed on the ballot by collecting voter signatures. Available in 26 states.</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Legislative Referral</td>
+              <td class="px-4 py-3 text-slate-600">Placed by the state legislature for voter approval. Available in all 50 states.</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Constitutional Amendment</td>
+              <td class="px-4 py-3 text-slate-600">Proposes a change to the state constitution. Initiated by citizens or the legislature.</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Bond Measure</td>
+              <td class="px-4 py-3 text-slate-600">Authorizes the government to borrow money for specific projects&mdash;schools, roads, parks.</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Veto Referendum</td>
+              <td class="px-4 py-3 text-slate-600">Allows voters to approve or reject a law already passed by the legislature.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 not-prose">
+        <h4 class="font-bold text-navy mb-2">Heads up: ballot measure language can be confusing</h4>
+        <p class="text-sm text-slate-600">
+          Propositions are sometimes written in dense legal language. A "Yes" vote might mean <em>keeping</em> an existing law or <em>removing</em> one&mdash;read carefully. Most states mail voter guides with plain-language explanations, arguments for and against, and fiscal impact statements. Read them before election day.
+        </p>
+      </div>
+
+      <!-- WHAT TO KNOW BEFORE YOU VOTE -->
+      <h2 class="text-2xl font-bold">Things to Know Before You Vote</h2>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">You don't have to vote in every race</h4>
+          <p class="text-sm text-slate-600">
+            <strong>Undervoting</strong>&mdash;leaving a race blank&mdash;is completely legal. Your other selections still count normally. It's better to skip a race you don't know than to pick randomly.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Don't overvote</h4>
+          <p class="text-sm text-slate-600">
+            <strong>Overvoting</strong>&mdash;marking too many candidates in one race&mdash;means that race won't be counted. Your other selections are still valid. Modern scanners will usually warn you before it's final.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Get a sample ballot early</h4>
+          <p class="text-sm text-slate-600">
+            Most counties mail sample ballots or post them online. Organizations like <a href="https://www.vote411.org" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Vote411</a> and <a href="https://ballotpedia.org/Sample_Ballot_Lookup" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Ballotpedia</a> also let you preview your ballot. Reviewing it beforehand helps you move through voting day faster.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Provisional ballots exist</h4>
+          <p class="text-sm text-slate-600">
+            If there's a problem at check-in (name not on the rolls, ID issue), you have the right to a <strong>provisional ballot</strong> under federal law. It's set aside and counted after officials verify your eligibility.
+          </p>
+        </div>
+      </div>
+
+      <!-- HOW BALLOTS VARY -->
+      <h2 class="text-2xl font-bold">How Ballots Vary by State</h2>
+      <p class="text-slate-600">
+        While the overall structure is consistent, your ballot experience depends on where you live:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Paper vs. Electronic</h4>
+          <p class="text-sm text-slate-600">
+            Most Americans vote on <strong>hand-marked paper ballots</strong> fed through an optical scanner. Some jurisdictions use touchscreen ballot-marking devices that print a paper record. A small number still use direct-recording electronic machines.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Mail-In Voting</h4>
+          <p class="text-sm text-slate-600">
+            Oregon, Washington, Colorado, Utah, and Hawaii conduct elections almost entirely by mail. All states allow some form of absentee or mail voting, though the rules for who qualifies vary.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Candidate Order</h4>
+          <p class="text-sm text-slate-600">
+            States handle candidate listing differently. Some list the party that won the last governor's race first. Others rotate order by precinct to reduce "ballot order effect." Some list alphabetically.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Ranked Choice Voting</h4>
+          <p class="text-sm text-slate-600">
+            Alaska and Maine use <strong>ranked choice voting</strong> for federal races&mdash;you rank candidates in order of preference instead of picking one. A growing number of cities use this system for local races too.
+          </p>
+        </div>
+      </div>
+
+      <!-- PREVIEW YOUR BALLOT -->
+      <h2 class="text-2xl font-bold">Preview Your Actual Ballot</h2>
+      <p class="text-slate-600">
+        Don't wait until election day to see what's on your ballot. These free tools let you look up exactly what you'll be voting on:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="https://www.vote411.org" target="_blank" rel="noopener noreferrer" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Vote411</h4>
+          <p class="text-sm text-slate-500">Personalized ballot lookup from the League of Women Voters. Enter your address to see every race and measure.</p>
+        </a>
+        <a href="https://ballotpedia.org/Sample_Ballot_Lookup" target="_blank" rel="noopener noreferrer" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Ballotpedia</h4>
+          <p class="text-sm text-slate-500">Look up sample ballots and candidate information for every race in every state.</p>
+        </a>
+        <a href="/find-your-ballot" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Find Your Ballot</h4>
+          <p class="text-sm text-slate-500">Use our tool to see what's on your ballot by state&mdash;with links to your Secretary of State.</p>
+        </a>
+      </div>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://ballotpedia.org/Ballotpedia:About" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Ballotpedia &mdash; Comprehensive encyclopedia of U.S. politics and elections</a>
+        </li>
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Conference of State Legislatures &mdash; State election laws and ballot measure processes</a>
+        </li>
+        <li>
+          <a href="https://www.eac.gov/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Election Assistance Commission &mdash; Ballot design standards and voting system guidelines</a>
+        </li>
+        <li>
+          <a href="https://electionlab.mit.edu/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">MIT Election Data + Science Lab &mdash; Research on ballot design and voter experience</a>
+        </li>
+        <li>
+          <a href="https://www.nass.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Association of Secretaries of State &mdash; Official state election information</a>
+        </li>
+        <li>
+          <a href="https://www.fairvote.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FairVote &mdash; Information on ranked choice voting</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/bill/107th-congress/house-bill/3295" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Help America Vote Act of 2002 &mdash; Federal provisional ballot rights</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Ready to explore your options? Try our
+          <a href="/map" class="underline">interactive ballot map</a>, use
+          <a href="/find-your-ballot" class="underline">Find Your Ballot</a> to see what's on your ballot by state, or learn
+          <a href="/learn/what-are-midterms" class="underline">what midterm elections are</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
