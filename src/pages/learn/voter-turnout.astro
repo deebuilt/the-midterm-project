@@ -1,0 +1,448 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Voter Turnout in America"
+  description="How many Americans actually vote, why turnout varies so much by election type and state, and what it means for who represents you."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Voter Turnout</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Voter Turnout in America</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      How many Americans actually vote&mdash;and why it matters who shows up.
+    </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/voter-turnout.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        In the 2024 presidential election, about 65% of eligible Americans voted. That sounds like a decent number until you consider the flip side: roughly <strong>80 million adults</strong> who could have voted simply didn't. In midterm elections, it's worse&mdash;barely half show up. And in primaries, the elections that decide who makes it onto the ballot in the first place, turnout drops to around 20%.
+      </p>
+      <p class="text-slate-600">
+        Voter turnout isn't just a statistic. It's the single biggest factor in determining who represents you, what policies get passed, and whose voices are heard. When turnout is low, elections are decided by a smaller, less representative slice of the population. When it's high, the government looks more like the country it serves.
+      </p>
+
+      <!-- THE NUMBERS -->
+      <h2 class="text-2xl font-bold">The Numbers: How Many Americans Vote?</h2>
+      <p class="text-slate-600">
+        The <a href="https://statesunited.org/resources/voter-turnout-since-2000/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">States United Democracy Center</a> tracks voter turnout across every U.S. election since 2000. Their data tells a clear story: general election turnout has fluctuated between <strong>56% and 68%</strong>, while primary turnout has ranged between just <strong>18% and 29%</strong>. Average turnout for general elections is more than twice as high as primary turnout.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Election Type</th>
+              <th class="px-4 py-3 font-semibold">Typical Turnout</th>
+              <th class="px-4 py-3 font-semibold">What's at Stake</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Presidential General</td>
+              <td class="px-4 py-3 text-slate-600">60&ndash;66%</td>
+              <td class="px-4 py-3 text-slate-600">President, all 435 House seats, ~33 Senate seats, governors, state races</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Midterm General</td>
+              <td class="px-4 py-3 text-slate-600">40&ndash;49%</td>
+              <td class="px-4 py-3 text-slate-600">All 435 House seats, ~33 Senate seats, governors, state races</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Presidential Primary</td>
+              <td class="px-4 py-3 text-slate-600">20&ndash;29%</td>
+              <td class="px-4 py-3 text-slate-600">Which candidates appear on the general election ballot</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Midterm Primary</td>
+              <td class="px-4 py-3 text-slate-600">18&ndash;25%</td>
+              <td class="px-4 py-3 text-slate-600">Which candidates appear on the general election ballot</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-400">
+        Source: <a href="https://statesunited.org/resources/voter-turnout-since-2000/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">States United Democracy Center</a>, <a href="https://www.electproject.org/national-1789-present" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Elections Project</a>
+      </p>
+
+      <p class="text-slate-600">
+        The gap between presidential and midterm years is striking: turnout typically drops <strong>15 to 20 percentage points</strong> when the presidency isn't on the ballot. In 2014, midterm turnout hit just <strong>34.4%</strong>&mdash;the lowest since 1942. That means two out of three eligible voters sat out an election that decided every seat in the House and a third of the Senate.
+      </p>
+
+      <!-- THE TRENDS -->
+      <h2 class="text-2xl font-bold">The Trend: Are We Getting Better?</h2>
+      <p class="text-slate-600">
+        There's actually good news here. After decades of declining turnout from the 1960s through the 1990s, Americans have been voting in larger numbers.
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+          <h4 class="font-bold text-navy mb-2">Record-setting years</h4>
+          <ul class="text-sm text-slate-600 space-y-1.5">
+            <li><strong>2018:</strong> Highest midterm turnout since 1914 (~49%)</li>
+            <li><strong>2020:</strong> Highest presidential turnout since 1900 (~66%)</li>
+            <li><strong>2022:</strong> Second-highest midterm turnout in modern era (~46%)</li>
+            <li><strong>2024:</strong> Second-highest presidential turnout in modern era (~65%), tied with 1960</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        States United also found that <strong>ballot roll-off</strong>&mdash;voters who fill out the top of the ticket but leave lower races blank&mdash;dropped dramatically. From 2000 to 2012, about 4% of voters skipped down-ballot contests. By 2024, that number fell to <strong>less than 1%</strong>. Voters are engaging with the full ballot more than ever.
+      </p>
+
+      <!-- PRIMARY PROBLEM -->
+      <h2 class="text-2xl font-bold">The Primary Problem</h2>
+      <p class="text-slate-600">
+        If general election turnout has been improving, primary elections remain the weak point. According to the
+        <a href="https://bipartisanpolicy.org/report/2022-primary-turnout/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Bipartisan Policy Center</a>,
+        nearly <strong>80% of eligible voters don't participate in primaries</strong>. In 2024, only about 34 million out of roughly 149 million eligible voters cast a primary ballot&mdash;a turnout of about 23%.
+      </p>
+      <p class="text-slate-600">
+        This matters because primaries determine who appears on the general election ballot. In many districts where one party dominates, the primary winner is virtually guaranteed to win the general election. That means a tiny fraction of voters&mdash;sometimes just 10 to 15%&mdash;effectively chooses the representative for everyone.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Highest Primary Turnout</h4>
+          <ul class="text-sm text-slate-600 space-y-1">
+            <li>New Hampshire: <strong>~50%</strong></li>
+            <li>California (all-mail): <strong>~35%</strong></li>
+            <li>North Carolina: <strong>~24%</strong></li>
+          </ul>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Lowest Primary Turnout</h4>
+          <ul class="text-sm text-slate-600 space-y-1">
+            <li>Texas: <strong>~18%</strong></li>
+            <li>New York: <strong>~8%</strong></li>
+            <li>Connecticut, Rhode Island: <strong>~5&ndash;10%</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Want to know what type of primary your state uses? Check out our guide on <a href="/learn/open-closed-primaries" class="text-dem hover:underline">open vs. closed primaries</a>.
+      </p>
+
+      <!-- WHERE TURNOUT IS LOWEST -->
+      <h2 class="text-2xl font-bold">Where Turnout Is Lowest&mdash;and Why</h2>
+      <p class="text-slate-600">
+        Turnout varies enormously from state to state. In the 2024 presidential election, the gap between the highest-turnout and lowest-turnout states was over <strong>25 percentage points</strong>.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+          <h4 class="font-bold text-navy mb-2">Highest Turnout (2024)</h4>
+          <ul class="text-sm text-slate-600 space-y-1.5">
+            <li>Minnesota: <strong>76.4%</strong></li>
+            <li>Wisconsin: <strong>76.4%</strong></li>
+            <li>Michigan: <strong>74.7%</strong></li>
+            <li>New Hampshire: <strong>74.4%</strong></li>
+            <li>Colorado: <strong>73.1%</strong></li>
+          </ul>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Lowest Turnout (2024)</h4>
+          <ul class="text-sm text-slate-600 space-y-1.5">
+            <li>Hawaii: <strong>50.3%</strong></li>
+            <li>Oklahoma: <strong>53.3%</strong></li>
+            <li>Arkansas: <strong>53.5%</strong></li>
+            <li>West Virginia: <strong>55.5%</strong></li>
+            <li>Texas: <strong>56.6%</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        These patterns are consistent across multiple election cycles. The reasons fall into a few categories:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="border-l-4 border-dem pl-4">
+          <h4 class="font-bold text-navy">Voting access policies</h4>
+          <p class="text-sm text-slate-600">
+            States with same-day voter registration (Minnesota, Wisconsin, New Hampshire), automatic registration (Colorado, Oregon), and all-mail voting consistently rank at the top. States with strict voter ID laws, no online registration, or limited early voting tend to rank at the bottom. None of the 11 Southern states automatically send ballots or applications to all registered voters.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h4 class="font-bold text-navy">Competitiveness</h4>
+          <p class="text-sm text-slate-600">
+            People are more likely to vote when they feel their vote matters. Swing states like Wisconsin and Michigan consistently see higher turnout than states where the outcome feels predetermined. Research shows that concurrent competitive races increase turnout by about <strong>7.9%</strong>.
+          </p>
+        </div>
+        <div class="border-l-4 border-gop pl-4">
+          <h4 class="font-bold text-navy">Socioeconomic factors</h4>
+          <p class="text-sm text-slate-600">
+            States with lower median incomes, lower educational attainment, and geographic isolation tend to have lower turnout. West Virginia and Arkansas, for example, face both fewer voting access policies and higher poverty rates.
+          </p>
+        </div>
+      </div>
+
+      <!-- WHO VOTES -->
+      <h2 class="text-2xl font-bold">Who Votes&mdash;and Who Doesn't</h2>
+      <p class="text-slate-600">
+        Voter turnout isn't just a question of how many people vote. It's a question of <em>which</em> people vote. When turnout is low, the electorate doesn't look like America.
+      </p>
+
+      <h3 class="text-xl font-bold">Education</h3>
+      <p class="text-slate-600">
+        Education is the single strongest predictor of whether someone will vote. According to the
+        <a href="https://www.census.gov/newsroom/press-releases/2025/2024-presidential-election-voting-registration-tables.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Census Bureau</a>,
+        the gap is stark:
+      </p>
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Education Level</th>
+              <th class="px-4 py-3 font-semibold">Turnout Rate</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Advanced degree</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">82.5%</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Bachelor's degree</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">77.2%</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Some college</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">~68%</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">High school diploma only</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">52.5%</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">No high school diploma</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">~36%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-slate-600">
+        Among young adults (18&ndash;24), the gap is even wider: 60% of bachelor's degree holders voted in 2016, compared to just 20% of those who never finished high school.
+      </p>
+
+      <h3 class="text-xl font-bold">Age</h3>
+      <p class="text-slate-600">
+        Older Americans consistently vote at much higher rates than younger ones. In 2020, adults aged 65&ndash;74 turned out at about <strong>76%</strong>, while 18&ndash;24-year-olds turned out at <strong>51.4%</strong>. In midterms, youth turnout drops even further&mdash;to about <strong>28%</strong> in 2022. Adults under 50 make up 64% of non-voters but only 36% of voters.
+      </p>
+
+      <h3 class="text-xl font-bold">Race and Ethnicity</h3>
+      <p class="text-slate-600">
+        The
+        <a href="https://www.brennancenter.org/our-work/research-reports/growing-racial-disparities-voter-turnout-2008-2022" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Brennan Center for Justice</a>
+        found that the turnout gap between white and nonwhite Americans grew from nearly equal in 2012 to <strong>12 percentage points</strong> by 2022. White Americans voted at higher rates than nonwhite Americans in every single state except Hawaii. This gap persists across all income and education levels, which suggests it can't be explained by socioeconomic factors alone.
+      </p>
+      <p class="text-slate-600">
+        Research from <a href="https://circle.tufts.edu/latest-research/25-things-we-learned-about-young-voters-2025" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CIRCLE at Tufts University</a> found especially wide gaps among young voters in 2024: young white voters turned out at 55%, while young Black voter turnout was 34% and young Latino voter turnout was 32%.
+      </p>
+
+      <h3 class="text-xl font-bold">Income</h3>
+      <p class="text-slate-600">
+        Income tracks closely with turnout. According to <a href="https://www.pewresearch.org/politics/2023/07/12/voter-turnout-2018-2022/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center</a>, households earning over $100,000 voted at about <strong>81%</strong> in 2020, while those earning under $20,000 voted at just <strong>33%</strong> in the 2022 midterms. Homeowners vote at <strong>58%</strong> in midterms versus just <strong>37%</strong> for renters. Among young non-voters, 62% say they sometimes or often find it difficult to make ends meet&mdash;financial hardship is a real barrier.
+      </p>
+
+      <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 not-prose">
+        <h4 class="font-bold text-navy mb-2">What this means</h4>
+        <p class="text-sm text-slate-600">
+          The turnout gap is a representation gap. When younger, lower-income, and nonwhite Americans vote at lower rates, elected officials disproportionately represent older, wealthier, white homeowners. Every policy decision&mdash;from healthcare to housing to education funding&mdash;reflects who showed up.
+        </p>
+      </div>
+
+      <!-- TRUST AND TURNOUT -->
+      <h2 class="text-2xl font-bold">Trust Matters: The Confidence-Turnout Connection</h2>
+      <p class="text-slate-600">
+        States United conducted a
+        <a href="https://statesunited.org/resources/when-americans-trust-elections/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">first-of-its-kind study</a>
+        matching pre-election survey responses from over 1,110 Americans to their verified voting records. What they found was striking: when Americans have low confidence in elections, they're less likely to vote.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">The cost of distrust</h4>
+          <p class="text-sm text-slate-600">
+            If voter confidence had been higher in 2024, turnout could have increased by <strong>3.0&ndash;3.7 percentage points</strong>&mdash;representing up to <strong>5.7 million additional votes</strong>.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Across the spectrum</h4>
+          <p class="text-sm text-slate-600">
+            This pattern held across Democrats, Republicans, and independents. The number of people who stayed home because they didn't trust the process was bigger than the margin of victory in many close races.
+          </p>
+        </div>
+      </div>
+
+      <!-- HOW THE US COMPARES -->
+      <h2 class="text-2xl font-bold">How the U.S. Compares Internationally</h2>
+      <p class="text-slate-600">
+        Even at its best, U.S. turnout trails most similar democracies around the world. According to
+        <a href="https://www.pewresearch.org/short-reads/2022/11/01/turnout-in-u-s-has-soared-in-recent-elections-but-by-some-measures-still-trails-that-of-many-other-countries/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center</a>,
+        the U.S. ranked <strong>31st out of 50 countries</strong> in voter turnout. Countries like Uruguay (95%), Sweden (82%), and Belgium (78%) routinely outperform the U.S.
+      </p>
+      <p class="text-slate-600">
+        Here's the thing, though: among people who are actually <em>registered</em> to vote, U.S. turnout is about <strong>85%</strong>&mdash;one of the highest in the world. The real gap is that the U.S. makes you register yourself, while most other countries register their citizens automatically. If you're not registered, you can't vote&mdash;and that one extra step keeps millions of people out.
+      </p>
+
+      <!-- WHAT DRIVES TURNOUT UP -->
+      <h2 class="text-2xl font-bold">What Drives Turnout Up?</h2>
+      <p class="text-slate-600">
+        Research consistently shows that both policy and events can dramatically affect who votes.
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Policies that boost participation</h4>
+          <ul class="text-sm text-slate-600 space-y-1.5">
+            <li><strong>Automatic voter registration</strong> (Oregon, Colorado) &mdash; removes the biggest barrier</li>
+            <li><strong>Same-day registration</strong> (Minnesota, Wisconsin, New Hampshire) &mdash; lets you register and vote on election day</li>
+            <li><strong>All-mail voting</strong> (Oregon, Colorado, Washington) &mdash; eliminates the need to go to a polling place</li>
+            <li><strong>Ranked-choice voting</strong> &mdash; increased turnout by <strong>9.6 percentage points</strong> in mayoral elections, according to <a href="https://fairvote.org/ranked-choice-voting-and-voter-turnout/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FairVote</a></li>
+          </ul>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Events that mobilize voters</h4>
+          <ul class="text-sm text-slate-600 space-y-1.5">
+            <li><strong>Competitive races</strong> &mdash; when the outcome is uncertain, more people show up</li>
+            <li><strong>Ballot measures on hot-button issues</strong> &mdash; abortion ballot measures in 2022&ndash;2024 drove significant turnout, particularly among first-time voters and women under 50</li>
+            <li><strong>Moments of national crisis</strong> &mdash; periods of political turbulence, controversy over executive power, and high-profile congressional hearings tend to increase civic attention</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SPECIAL ELECTIONS -->
+      <h2 class="text-2xl font-bold">The Elections Nobody Tells You About</h2>
+      <p class="text-slate-600">
+        There's one more type of election that almost never makes the news: <strong>special elections</strong>. When a seat becomes vacant before the officeholder's term is up&mdash;because someone resigned, died, was appointed to another position, or was removed&mdash;the governor (or another authority, depending on the state) calls a special election to fill it.
+      </p>
+      <p class="text-slate-600">
+        You've probably heard of the high-profile ones. When JD Vance left his Ohio Senate seat to become Vice President and Marco Rubio left his Florida Senate seat to become Secretary of State, both triggered special elections. But special elections happen at every level&mdash;state house, state senate, county seats&mdash;and the smaller ones get almost zero media coverage.
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30">
+          <h4 class="font-bold text-navy mb-2">Why this matters for turnout</h4>
+          <p class="text-sm text-slate-600 mb-2">
+            Special elections happen on their own schedule&mdash;random dates outside the normal election calendar. There are no big campaign ads, no national coverage, and often no awareness that the election is even happening. The result? Turnout can drop into the <strong>single digits</strong>.
+          </p>
+          <p class="text-sm text-slate-600">
+            That means a handful of voters&mdash;the ones who happened to be paying attention&mdash;end up choosing a representative for an entire district. Those voters may not be representative of the community at all. They're just the ones who knew the election existed.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Right now, in early 2026, there are special elections happening across the country that most people don't know about. Florida alone has special elections for
+        <a href="https://www.votepalmbeach.gov/282/State-Representative-District-87" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">House District 87</a>
+        and Senate District 4, with registration deadlines that have already passed or are coming up fast. Louisiana, New Jersey, and other states have their own.
+      </p>
+      <p class="text-slate-600">
+        The only reliable way to find out about special elections in your area is to check your <strong>county supervisor of elections website</strong> or your <a href="/find-your-ballot" class="text-dem hover:underline">state's Secretary of State page</a>. That's it. Nobody is going to knock on your door and tell you. Want to understand how special elections work in more detail? We wrote a <a href="/learn/special-elections" class="text-dem hover:underline">short guide on special elections</a>.
+      </p>
+
+      <!-- LOOKING AHEAD TO 2026 -->
+      <h2 class="text-2xl font-bold">Looking Ahead: 2026 and the Power of Showing Up</h2>
+      <p class="text-slate-600">
+        Here's what's different right now.
+      </p>
+      <p class="text-slate-600">
+        Over the past year, Americans have been paying unusually close attention to how government works&mdash;not as an abstract concept, but as something that directly affects their lives. People who may have never thought twice about <a href="/learn/executive-orders" class="text-dem hover:underline">executive orders</a> are now watching them get signed and challenged in court. People who may have skipped over news about <a href="/learn/congressional-hearings" class="text-dem hover:underline">congressional hearings</a> are now tuning in to see officials questioned under oath. Terms like <em>filibuster</em>, <em>due process</em>, and <em>separation of powers</em> have gone from textbook vocabulary to dinner table conversation.
+      </p>
+      <p class="text-slate-600">
+        The numbers reflect this. According to <a href="https://civicscience.com/media-consumption-outlook-for-the-year-ahead-local-news-gains-trust-and-political-attention-rises-as-midterms-approach/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CivicScience</a>, over a third of Americans say they're paying more attention to political news than usual, with 41% of likely midterm voters reporting increased attention. Polls show <strong>76% of voters</strong> are extremely or very motivated to vote in November 2026&mdash;on par with the enthusiasm that produced the historic turnout of 2018 and 2022. And <strong>66% of all voting-age adults</strong> plan to vote in the midterms.
+      </p>
+      <p class="text-slate-600">
+        A growing number of Americans&mdash;now <strong>32% of registered voters</strong>&mdash;aren't registered with either major party, up from 23% in 2000. Among young people, only 16% say "democracy is working for them," yet 20% have engaged in issue advocacy and 18% have attended protests or demonstrations. People are frustrated, but they're not tuning out. They're looking for ways to be heard.
+      </p>
+
+      <div class="bg-navy rounded-xl p-6 not-prose">
+        <h4 class="font-bold text-white mb-3">The case for showing up</h4>
+        <p class="text-sm text-white/80 mb-3">
+          Every issue you've been watching&mdash;executive power, judicial independence, government spending, healthcare, immigration&mdash;will be shaped by who wins in November 2026. Every seat in the House, a third of the Senate, and 36 governorships are on the ballot. These are the people who write the laws, approve the budgets, confirm the judges, and hold the hearings.
+        </p>
+        <p class="text-sm text-white/80 mb-3">
+          In 2014, when only 34% of eligible voters showed up, the entire direction of Congress was set by roughly one in three Americans. The other two let someone else decide for them.
+        </p>
+        <p class="text-sm text-white/80">
+          If the past few years have taught us anything, it's that government decisions have real consequences&mdash;on your rights, your community, and your daily life. The single most direct way to shape those decisions is to vote. Not just in November. In your primary, too. That's where the choices begin.
+        </p>
+      </div>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <a href="/find-your-ballot" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Find Your Ballot</h4>
+          <p class="text-sm text-slate-500">See what's on your ballot by state&mdash;with primary dates, research links, and Secretary of State info.</p>
+        </a>
+        <a href="/calendar" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Election Calendar</h4>
+          <p class="text-sm text-slate-500">Find your state's primary date and add it to your calendar so you don't miss it.</p>
+        </a>
+        <a href="/map" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Interactive Map</h4>
+          <p class="text-sm text-slate-500">Preview your ballot, mark your picks, and research candidates using our interactive Senate map.</p>
+        </a>
+      </div>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://statesunited.org/resources/voter-turnout-since-2000/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">States United Democracy Center &mdash; Voter Turnout Since 2000</a>
+        </li>
+        <li>
+          <a href="https://statesunited.org/resources/when-americans-trust-elections/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">States United &mdash; When Americans Trust Elections, They Vote</a>
+        </li>
+        <li>
+          <a href="https://www.electproject.org/national-1789-present" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Elections Project &mdash; National Voter Turnout (1789&ndash;Present)</a>
+        </li>
+        <li>
+          <a href="https://www.pewresearch.org/politics/2023/07/12/voter-turnout-2018-2022/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center &mdash; Voter Turnout, 2018&ndash;2022</a>
+        </li>
+        <li>
+          <a href="https://www.pewresearch.org/short-reads/2022/11/01/turnout-in-u-s-has-soared-in-recent-elections-but-by-some-measures-still-trails-that-of-many-other-countries/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center &mdash; U.S. Turnout Compared to Other Countries</a>
+        </li>
+        <li>
+          <a href="https://bipartisanpolicy.org/report/2022-primary-turnout/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Bipartisan Policy Center &mdash; 2022 Primary Turnout Report</a>
+        </li>
+        <li>
+          <a href="https://www.brennancenter.org/our-work/research-reports/growing-racial-disparities-voter-turnout-2008-2022" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Brennan Center for Justice &mdash; Growing Racial Disparities in Voter Turnout</a>
+        </li>
+        <li>
+          <a href="https://circle.tufts.edu/latest-research/25-things-we-learned-about-young-voters-2025" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CIRCLE at Tufts University &mdash; 25 Things We Learned About Young Voters</a>
+        </li>
+        <li>
+          <a href="https://www.census.gov/newsroom/press-releases/2025/2024-presidential-election-voting-registration-tables.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Census Bureau &mdash; 2024 Voting and Registration Tables</a>
+        </li>
+        <li>
+          <a href="https://civicscience.com/media-consumption-outlook-for-the-year-ahead-local-news-gains-trust-and-political-attention-rises-as-midterms-approach/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CivicScience &mdash; Political Attention Rises as Midterms Approach</a>
+        </li>
+        <li>
+          <a href="https://fairvote.org/ranked-choice-voting-and-voter-turnout/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FairVote &mdash; Ranked Choice Voting and Voter Turnout</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Ready to make your plan? Use
+          <a href="/find-your-ballot" class="underline">Find Your Ballot</a> to see what's on your ballot,
+          check the <a href="/calendar" class="underline">election calendar</a> for your primary date,
+          or explore our other guides on <a href="/learn/what-are-midterms" class="underline">midterm elections</a>,
+          <a href="/learn/executive-orders" class="underline">executive orders</a>, and
+          <a href="/learn/congressional-hearings" class="underline">congressional hearings</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

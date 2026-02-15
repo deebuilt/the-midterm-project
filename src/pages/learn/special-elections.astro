@@ -1,0 +1,301 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout
+  title="Special Elections"
+  description="What special elections are, why they happen on random dates with almost no media coverage, and why they matter more than you'd think."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Special Elections</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Special Elections</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      The elections nobody tells you about&mdash;and why a handful of voters end up deciding them.
+    </p>
+
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/special-elections.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        When an elected official leaves office before their term is up&mdash;because they resigned, died, got appointed to another job, or were removed&mdash;somebody has to fill that seat. That's what a special election is: an off-schedule election to fill a vacancy. No big campaign season, no national ad blitz, usually no media coverage at all. Just a date on your county elections website that most people will never see.
+      </p>
+      <p class="text-slate-600">
+        The result? Turnout in special elections regularly drops to <strong>10&ndash;15%</strong>, and sometimes into the single digits. A tiny slice of the electorate&mdash;the people who happened to be paying attention&mdash;chooses a representative for everyone else.
+      </p>
+
+      <!-- WHY DO THEY HAPPEN -->
+      <h2 class="text-2xl font-bold">Why Do Special Elections Happen?</h2>
+      <p class="text-slate-600">
+        The most common reasons a seat opens up:
+      </p>
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Resignation</h4>
+          <p class="text-sm text-slate-600">
+            The officeholder takes a different job. When JD Vance became Vice President, his Ohio Senate seat opened up. When Marco Rubio became Secretary of State, his Florida Senate seat opened up. When Mikie Sherrill became governor of New Jersey, her House seat opened up.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Death</h4>
+          <p class="text-sm text-slate-600">
+            When Rep. Doug LaMalfa of California died in January 2026 and Rep. Gerry Connolly of Virginia died in 2025, special elections were called to fill their seats.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Appointment</h4>
+          <p class="text-sm text-slate-600">
+            A state legislator might leave to become a judge or take an executive branch position. Florida's HD-87 opened up when Rep. Mike Caruso resigned to become Palm Beach County Clerk and Comptroller.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Expulsion or removal</h4>
+          <p class="text-sm text-slate-600">
+            Rare, but it happens. If a legislator is expelled by a vote of their chamber or removed from office, a special election fills the vacancy.
+          </p>
+        </div>
+      </div>
+
+      <!-- HOW DO THEY WORK -->
+      <h2 class="text-2xl font-bold">How Special Elections Work</h2>
+      <p class="text-slate-600">
+        A special election is basically a mini version of a normal election, but squeezed into a much shorter window:
+      </p>
+      <ol class="list-decimal list-inside space-y-3 text-slate-600">
+        <li>
+          <strong>A vacancy occurs</strong> and the governor (or another authority, depending on the state and office) issues an executive order calling the special election.
+        </li>
+        <li>
+          <strong>For Senate seats, the governor may appoint someone</strong> to serve temporarily. This happens in 45 of 50 states. Five states (Kentucky, North Dakota, Oregon, Rhode Island, and Wisconsin) don't allow this&mdash;the seat stays empty until voters decide. Some states require the appointee to be from the same party as the departing senator.
+        </li>
+        <li>
+          <strong>For House seats, there is no appointment.</strong> The Constitution (Article I, Section 2) requires that all House vacancies be filled by election. This is why a House district can go unrepresented for months.
+        </li>
+        <li>
+          <strong>A special primary is held</strong> where candidates compete for their party's nomination, just like a regular primary but on its own schedule.
+        </li>
+        <li>
+          <strong>A special general election follows</strong> where the primary winners face off. In some states, the special general is scheduled to coincide with the next regular election. In others, it's held on its own date entirely.
+        </li>
+      </ol>
+
+      <p class="text-slate-600">
+        The timeline varies enormously. Massachusetts schedules special elections 145&ndash;160 days after the vacancy. Montana does it in 85&ndash;100 days. Some states wait until the next regular general election, which can mean an appointed senator serves for nearly two years before voters get a say.
+      </p>
+
+      <!-- THE TURNOUT PROBLEM -->
+      <h2 class="text-2xl font-bold">The Turnout Problem</h2>
+      <p class="text-slate-600">
+        This is the core issue. Special elections happen on random dates, get minimal media coverage, and most voters simply don't know they're happening. The numbers are striking:
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Election Type</th>
+              <th class="px-4 py-3 font-semibold">Typical Turnout</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Presidential general</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">60&ndash;67%</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600">Midterm general</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">40&ndash;52%</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600">Regular primary</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">18&ndash;29%</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Special elections</td>
+              <td class="px-4 py-3 text-slate-600 font-medium">8&ndash;20%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-slate-600">
+        In Fairfax County, Virginia, special elections for state delegate seats in 2025 drew turnout of about <strong>12&ndash;13%</strong>&mdash;compared to nearly 55% for the regular November election. Louisiana's special legislative primaries in February 2026 had turnout of just <strong>13.8%</strong>. Texas constitutional special elections average <strong>8.7%</strong>.
+      </p>
+
+      <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 not-prose">
+        <h4 class="font-bold text-navy mb-2">Why this matters</h4>
+        <p class="text-sm text-slate-600">
+          When turnout drops this low, the people who vote don't look like the community they're choosing a representative for. Special election voters tend to be older, more politically active, and less diverse than the general population. When most people stay home, a single organized group can swing the entire outcome&mdash;something that's much harder to do when millions of people show up.
+        </p>
+      </div>
+
+      <!-- REAL STAKES -->
+      <h2 class="text-2xl font-bold">Real Stakes: When Special Elections Changed Everything</h2>
+      <p class="text-slate-600">
+        Special elections aren't trivial. They've changed the balance of power in Congress and state legislatures multiple times:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Massachusetts Senate (Scott Brown)</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2010</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            After Ted Kennedy died, Republican Scott Brown won the special election&mdash;the first Republican to hold that seat in over 60 years. Brown became the 41st Republican senator, which meant Democrats no longer had enough votes to block Republican opposition on their own. This nearly killed the Affordable Care Act (Obamacare) and forced Democrats to find a different procedural path to pass it.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Alabama Senate (Doug Jones)</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2017</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Democrat Doug Jones defeated Republican Roy Moore by just 21,924 votes in deep-red Alabama&mdash;a state Trump had won by 28 points. The win shrunk the Republican Senate majority to a razor-thin <strong>51&ndash;49</strong>, making it much harder for them to pass bills. It was the first Democratic Senate victory in Alabama in 25 years.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Minnesota State House (67&ndash;67 Tie)</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2025</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            After the 2024 election gave Republicans a narrow 67&ndash;66 majority in the Minnesota House, a special election in District 40B swung to Democrat David Gottfried by a <strong>70&ndash;30 margin</strong>. The result created a 67&ndash;67 tie, forcing a power-sharing agreement. One single special election transformed how the entire state legislature operated.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Between 1987 and 2024, <strong>39% of U.S. Senate special elections</strong> resulted in a party flip, according to
+        <a href="https://ballotpedia.org/U.S._Congress_special_elections_historical_data,_1987-2024" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Ballotpedia</a>.
+        For House specials, it was 16%. These aren't rare flukes.
+      </p>
+
+      <!-- HAPPENING RIGHT NOW -->
+      <h2 class="text-2xl font-bold">Special Elections Happening Right Now</h2>
+      <p class="text-slate-600">
+        As of early 2026, the U.S. House stands at <strong>218 Republicans, 214 Democrats, with 3 vacancies</strong>&mdash;a one-vote margin. That means every single special election could shift the balance of power. Here are the ones coming up:
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Race</th>
+              <th class="px-4 py-3 font-semibold">Date</th>
+              <th class="px-4 py-3 font-semibold">Why It's Open</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Georgia 14th (U.S. House)</td>
+              <td class="px-4 py-3 text-slate-600">March 10, 2026</td>
+              <td class="px-4 py-3 text-slate-600">Marjorie Taylor Greene resigned</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Florida HD-87 (State House)</td>
+              <td class="px-4 py-3 text-slate-600">March 24, 2026</td>
+              <td class="px-4 py-3 text-slate-600">Rep. Mike Caruso became county clerk</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">New Jersey 11th (U.S. House)</td>
+              <td class="px-4 py-3 text-slate-600">April 16, 2026</td>
+              <td class="px-4 py-3 text-slate-600">Mikie Sherrill became governor</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Ohio Senate (U.S. Senate)</td>
+              <td class="px-4 py-3 text-slate-600">Primary: May 5; General: Nov 3</td>
+              <td class="px-4 py-3 text-slate-600">JD Vance became Vice President</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">California 1st (U.S. House)</td>
+              <td class="px-4 py-3 text-slate-600">Primary: June 2; General: Aug 4</td>
+              <td class="px-4 py-3 text-slate-600">Rep. Doug LaMalfa died</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Florida Senate (U.S. Senate)</td>
+              <td class="px-4 py-3 text-slate-600">Primary: Aug 18; General: Nov 3</td>
+              <td class="px-4 py-3 text-slate-600">Marco Rubio became Secretary of State</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-sm text-slate-500 mt-2">
+        There are also state legislative special elections happening in Florida, Louisiana, and other states with even less coverage than these.
+      </p>
+
+      <!-- HOW TO FIND OUT -->
+      <h2 class="text-2xl font-bold">How to Find Out About Special Elections</h2>
+      <p class="text-slate-600">
+        This is the hard part. There's no national notification system for special elections. Nobody is going to knock on your door and tell you. Here's where to look:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="https://www.vote411.org" target="_blank" rel="noopener noreferrer" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Vote411</h4>
+          <p class="text-sm text-slate-500">Personalized ballot lookup from the League of Women Voters. Enter your address to see any upcoming elections, including specials.</p>
+        </a>
+        <a href="https://www.vote.org/election-reminders/" target="_blank" rel="noopener noreferrer" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Vote.org Reminders</h4>
+          <p class="text-sm text-slate-500">Sign up for email and text alerts so you never miss an election&mdash;including special elections in your area.</p>
+        </a>
+        <a href="/find-your-ballot" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Find Your Ballot</h4>
+          <p class="text-sm text-slate-500">Use our tool to find your Secretary of State and county elections office&mdash;the most reliable sources for special election info.</p>
+        </a>
+        <a href="https://ballotpedia.org" target="_blank" rel="noopener noreferrer" class="group block bg-white rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Ballotpedia</h4>
+          <p class="text-sm text-slate-500">Tracks every special election at every level across the country. The most comprehensive source.</p>
+        </a>
+      </div>
+
+      <p class="text-slate-600">
+        Your <strong>county supervisor of elections website</strong> is always the most accurate, up-to-date source. If you're in Florida, for example,
+        <a href="https://www.votepalmbeach.gov" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">votepalmbeach.gov</a>
+        had all the details on the HD-87 special election&mdash;registration deadlines, voting locations, candidates&mdash;but you had to know to look for it.
+      </p>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns/vacancies-in-the-united-states-senate" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Conference of State Legislatures &mdash; Senate Vacancies</a>
+        </li>
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns/filling-legislative-vacancies" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NCSL &mdash; Filling Legislative Vacancies</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/crs-product/IF11907" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Research Service &mdash; U.S. Senate Vacancies: How Are They Filled?</a>
+        </li>
+        <li>
+          <a href="https://ballotpedia.org/U.S._Congress_special_elections_historical_data,_1987-2024" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Ballotpedia &mdash; U.S. Congress Special Elections Historical Data (1987&ndash;2024)</a>
+        </li>
+        <li>
+          <a href="https://fairvote.org/resources/voter-turnout/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FairVote &mdash; Voter Turnout</a>
+        </li>
+        <li>
+          <a href="https://floridapolitics.com/archives/773651-emily-gregory-jon-maples-advance-in-hd-87-special-election-with-primary-wins-tuesday/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Florida Politics &mdash; HD-87 Special Election Results</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Want the bigger picture on who votes and why? Read our guide on
+          <a href="/learn/voter-turnout" class="underline">voter turnout in America</a>,
+          explore <a href="/learn/what-are-midterms" class="underline">what midterm elections are</a>,
+          or use <a href="/find-your-ballot" class="underline">Find Your Ballot</a> to check what's coming up in your state.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
