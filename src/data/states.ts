@@ -738,6 +738,15 @@ export const states: StateInfo[] = [
     hasCompetitiveRace: false,
     governorUpIn2026: false,
   },
+  {
+    name: "District of Columbia",
+    abbr: "DC",
+    fips: "11",
+    houseDistricts: 1, // non-voting delegate
+    hasSenateRace: false,
+    hasCompetitiveRace: false,
+    governorUpIn2026: false,
+  },
 ];
 
 // Lookup helpers

@@ -101,8 +101,8 @@ VALUES
   ((SELECT id FROM election_cycles WHERE year = 2026 AND is_active = true), (SELECT id FROM states WHERE abbr = 'UT'), 'primary', '2026-06-23', 'Utah Primary Election', 'https://www.ncsl.org/elections-and-campaigns/2026-state-primary-election-dates'),
   ((SELECT id FROM election_cycles WHERE year = 2026 AND is_active = true), (SELECT id FROM states WHERE abbr = 'CO'), 'primary', '2026-06-30', 'Colorado Primary Election', 'https://www.ncsl.org/elections-and-campaigns/2026-state-primary-election-dates'),
 
-  -- July 2026
-  ((SELECT id FROM election_cycles WHERE year = 2026 AND is_active = true), (SELECT id FROM states WHERE abbr = 'AZ'), 'primary', '2026-08-04', 'Arizona Primary Election', 'https://www.ncsl.org/elections-and-campaigns/2026-state-primary-election-dates'),
+  -- July 2026 (AZ moved from Aug 4 via HB 2022, signed Feb 6 2026)
+  ((SELECT id FROM election_cycles WHERE year = 2026 AND is_active = true), (SELECT id FROM states WHERE abbr = 'AZ'), 'primary', '2026-07-21', 'Arizona Primary Election', 'https://www.ncsl.org/elections-and-campaigns/2026-state-primary-election-dates'),
 
   -- August 2026
   ((SELECT id FROM election_cycles WHERE year = 2026 AND is_active = true), (SELECT id FROM states WHERE abbr = 'KS'), 'primary', '2026-08-04', 'Kansas Primary Election', 'https://www.ncsl.org/elections-and-campaigns/2026-state-primary-election-dates'),

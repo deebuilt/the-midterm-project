@@ -334,6 +334,12 @@ export default function FindYourBallot({ states, primaryDates }: FindYourBallotP
                 url="https://ballotpedia.org/Sample_Ballot_Lookup"
               />
               <ResourceLink
+                name="State Election Offices"
+                org="USA.gov"
+                description="Official directory of every state's election office"
+                url="https://www.usa.gov/state-election-office"
+              />
+              <ResourceLink
                 name="Preview Your Ballot"
                 org="The Midterm Project"
                 description="Interactive ballot map — plan your vote"

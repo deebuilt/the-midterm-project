@@ -34,6 +34,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filterState, setFilterState] = useState<string>("all");
   const [isMobile, setIsMobile] = useState(false);
+  const [calendarValue, setCalendarValue] = useState<dayjs.Dayjs>(dayjs());
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -72,22 +73,27 @@ export default function CalendarView({ events }: CalendarViewProps) {
 
   const selectedEvents = selectedDate ? eventsByDate.get(selectedDate) ?? [] : [];
 
-  // Find the first month with events for the initial view
-  const initialMonth = useMemo(() => {
+  // When state filter changes, jump the calendar to that state's next event
+  useEffect(() => {
     const now = dayjs();
     for (const ev of filteredEvents) {
       const evDate = dayjs(ev.eventDate);
       if (evDate.isAfter(now) || evDate.isSame(now, "day")) {
-        return evDate.startOf("month");
+        setCalendarValue(evDate);
+        return;
       }
     }
-    return now;
+    // If all events are past, jump to the last one
+    if (filteredEvents.length > 0) {
+      setCalendarValue(dayjs(filteredEvents[filteredEvents.length - 1].eventDate));
+    }
   }, [filteredEvents]);
 
   function handleDateSelect(date: dayjs.Dayjs) {
     const key = date.format("YYYY-MM-DD");
     const dayEvents = eventsByDate.get(key);
     setSelectedDate(key);
+    setCalendarValue(date);
     if (dayEvents && dayEvents.length > 0) {
       setDrawerOpen(true);
     }
@@ -197,7 +203,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
         {!isMobile && (
           <div style={{ border: "1px solid #E2E8F0", borderRadius: 8, overflow: "hidden" }}>
             <Calendar
-              defaultValue={initialMonth}
+              value={calendarValue}
               cellRender={(date, info) => {
                 if (info.type !== "date") return info.originNode;
                 return desktopCellRender(date);
@@ -223,7 +229,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                     }}
                   >
                     <button
-                      onClick={() => onChange(value.subtract(1, "month"))}
+                      onClick={() => { const next = value.subtract(1, "month"); onChange(next); setCalendarValue(next); }}
                       style={{
                         background: "none",
                         border: "1px solid #E2E8F0",
@@ -239,7 +245,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <Select
                         value={value.month()}
-                        onChange={(m) => onChange(value.month(m))}
+                        onChange={(m) => { const next = value.month(m); onChange(next); setCalendarValue(next); }}
                         options={monthOptions}
                         style={{ width: 130 }}
                         variant="borderless"
@@ -247,7 +253,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                       />
                       <Select
                         value={value.year()}
-                        onChange={(y) => onChange(value.year(y))}
+                        onChange={(y) => { const next = value.year(y); onChange(next); setCalendarValue(next); }}
                         options={yearOptions}
                         style={{ width: 80 }}
                         variant="borderless"
@@ -255,7 +261,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                       />
                     </div>
                     <button
-                      onClick={() => onChange(value.add(1, "month"))}
+                      onClick={() => { const next = value.add(1, "month"); onChange(next); setCalendarValue(next); }}
                       style={{
                         background: "none",
                         border: "1px solid #E2E8F0",
@@ -287,7 +293,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
               }}
             >
               <Calendar
-                defaultValue={initialMonth}
+                value={calendarValue}
                 fullscreen={false}
                 cellRender={(date, info) => {
                   if (info.type !== "date") return info.originNode;
@@ -327,7 +333,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                       }}
                     >
                       <button
-                        onClick={() => onChange(value.subtract(1, "month"))}
+                        onClick={() => { const next = value.subtract(1, "month"); onChange(next); setCalendarValue(next); }}
                         style={{
                           background: "none",
                           border: "1px solid #E2E8F0",
@@ -343,7 +349,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                         <Select
                           value={value.month()}
-                          onChange={(m) => onChange(value.month(m))}
+                          onChange={(m) => { const next = value.month(m); onChange(next); setCalendarValue(next); }}
                           options={monthOptions}
                           style={{ width: 80 }}
                           variant="borderless"
@@ -351,7 +357,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                         />
                         <Select
                           value={value.year()}
-                          onChange={(y) => onChange(value.year(y))}
+                          onChange={(y) => { const next = value.year(y); onChange(next); setCalendarValue(next); }}
                           options={yearOptions}
                           style={{ width: 70 }}
                           variant="borderless"
@@ -359,7 +365,7 @@ export default function CalendarView({ events }: CalendarViewProps) {
                         />
                       </div>
                       <button
-                        onClick={() => onChange(value.add(1, "month"))}
+                        onClick={() => { const next = value.add(1, "month"); onChange(next); setCalendarValue(next); }}
                         style={{
                           background: "none",
                           border: "1px solid #E2E8F0",
