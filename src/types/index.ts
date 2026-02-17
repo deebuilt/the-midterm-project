@@ -234,6 +234,61 @@ export interface SwipeResult {
   choice: SwipeChoice;
 }
 
+export type RaceRating =
+  | "Safe R"
+  | "Likely R"
+  | "Lean R"
+  | "Toss-up"
+  | "Lean D"
+  | "Likely D"
+  | "Safe D";
+
+export type CandidateParty =
+  | "Democrat"
+  | "Republican"
+  | "Independent"
+  | "Libertarian"
+  | "Green"
+  | "Other";
+
+export interface RaceCandidateInfo {
+  id: number;
+  name: string;
+  party: CandidateParty;
+  photo: string | null;
+  isIncumbent: boolean;
+  status: string;
+  fundsRaised: number | null;
+  fundsSpent: number | null;
+  cashOnHand: number | null;
+  fecCandidateId: string | null;
+  website: string | null;
+  twitter: string | null;
+}
+
+export interface RaceWithCandidates {
+  raceId: number;
+  state: string;
+  stateAbbr: string;
+  body: "Senate" | "House" | "Governor";
+  district: number | null;
+  rating: RaceRating | null;
+  isSpecialElection: boolean;
+  isOpenSeat: boolean;
+  primaryDate: string | null;
+  generalDate: string | null;
+  whyCompetitive: string | null;
+  candidates: RaceCandidateInfo[];
+}
+
+export interface RacesByState {
+  stateAbbr: string;
+  stateName: string;
+  primaryDate: string | null;
+  daysUntilPrimary: number | null;
+  races: RaceWithCandidates[];
+}
+
 export interface StateInfo {
   name: string;
   abbr: string;

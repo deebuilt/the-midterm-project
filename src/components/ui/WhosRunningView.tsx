@@ -1,9 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
-import type { FilingsByState, FecFiling } from "../../types";
+import type { RacesByState, RaceWithCandidates, RaceCandidateInfo } from "../../types";
 
 interface WhosRunningViewProps {
-  senateFilings: FilingsByState[];
-  houseFilings: FilingsByState[];
+  racesByState: RacesByState[];
 }
 
 const PARTY_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
@@ -13,6 +12,16 @@ const PARTY_COLORS: Record<string, { bg: string; text: string; bar: string }> = 
   Libertarian: { bg: "bg-amber-50", text: "text-amber-700", bar: "bg-amber-500" },
   Green: { bg: "bg-emerald-50", text: "text-emerald-700", bar: "bg-emerald-500" },
   Other: { bg: "bg-slate-100", text: "text-slate-600", bar: "bg-slate-400" },
+};
+
+const RATING_COLORS: Record<string, string> = {
+  "Safe D": "bg-dem/20 text-dem",
+  "Likely D": "bg-dem/15 text-dem",
+  "Lean D": "bg-dem/10 text-dem",
+  "Toss-up": "bg-tossup-light text-tossup",
+  "Lean R": "bg-gop/10 text-gop",
+  "Likely R": "bg-gop/15 text-gop",
+  "Safe R": "bg-gop/20 text-gop",
 };
 
 function formatMoney(n: number): string {
@@ -30,89 +39,141 @@ function urgencyBadge(days: number | null) {
   return { label: `${days}d away`, color: "bg-slate-100 text-slate-600" };
 }
 
-function challengeBadge(challenge: "I" | "C" | "O" | null) {
-  if (challenge === "I")
-    return { label: "Incumbent", className: "bg-emerald-100 text-emerald-700" };
-  if (challenge === "C")
-    return { label: "Challenger", className: "bg-slate-200 text-slate-600" };
-  if (challenge === "O")
-    return { label: "Open Seat", className: "bg-amber-100 text-amber-700" };
-  return null;
-}
-
-function partyBreakdown(filings: FecFiling[]): string {
-  const counts: Record<string, number> = {};
-  for (const f of filings) {
-    const key = f.party === "Democrat" ? "D" : f.party === "Republican" ? "R" : "I";
-    counts[key] = (counts[key] ?? 0) + 1;
+function statusBadge(status: string) {
+  switch (status) {
+    case "primary_winner":
+      return { label: "Primary Winner", className: "bg-emerald-100 text-emerald-700" };
+    case "withdrawn":
+      return { label: "Withdrawn", className: "bg-slate-200 text-slate-500" };
+    case "won":
+      return { label: "Won", className: "bg-emerald-100 text-emerald-700" };
+    case "lost":
+      return { label: "Lost", className: "bg-red-100 text-red-600" };
+    case "runoff":
+      return { label: "Runoff", className: "bg-amber-100 text-amber-700" };
+    default:
+      return null;
   }
-  return Object.entries(counts)
-    .sort(([, a], [, b]) => b - a)
-    .map(([k, v]) => `${v}${k}`)
-    .join(", ");
 }
 
-function FilingRow({ filing, maxRaised, office }: { filing: FecFiling; maxRaised: number; office: "S" | "H" }) {
-  const colors = PARTY_COLORS[filing.party] ?? PARTY_COLORS.Other;
-  const barWidth = maxRaised > 0 ? (filing.fundsRaised / maxRaised) * 100 : 0;
-  const badge = challengeBadge(filing.incumbentChallenge);
-
-  // Check if this is a battleground district (competitive rating)
-  const isBattleground = filing.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(filing.rating);
+function CandidateRow({ candidate, maxRaised }: { candidate: RaceCandidateInfo; maxRaised: number }) {
+  const colors = PARTY_COLORS[candidate.party] ?? PARTY_COLORS.Other;
+  const raised = candidate.fundsRaised ?? 0;
+  const barWidth = maxRaised > 0 ? (raised / maxRaised) * 100 : 0;
+  const status = statusBadge(candidate.status);
+  const fecUrl = candidate.fecCandidateId
+    ? `https://www.fec.gov/data/candidate/${candidate.fecCandidateId}/`
+    : null;
+  const linkUrl = candidate.website ?? fecUrl;
 
   return (
-    <div className="flex items-center gap-3 py-2 group">
-      {/* Name + party + status */}
+    <div className="flex items-center gap-3 py-2">
+      {/* Name + party + badges */}
       <div className="w-48 sm:w-56 flex-shrink-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <a
-            href={`https://www.fec.gov/data/candidate/${filing.fecCandidateId}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-sm text-slate-800 hover:underline"
-          >
-            {filing.firstName} {filing.lastName}
-          </a>
-          {office === "H" && filing.district && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-600">
-              {filing.stateAbbr}-{String(filing.district).padStart(2, "0")}
+          {linkUrl ? (
+            <a
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-sm text-slate-800 hover:underline"
+            >
+              {candidate.name}
+            </a>
+          ) : (
+            <span className="font-medium text-sm text-slate-800">{candidate.name}</span>
+          )}
+          {candidate.isIncumbent && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">
+              Incumbent
             </span>
           )}
-          {isBattleground && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-tossup-light text-tossup" title={`Battleground: ${filing.rating}`}>
-              ⭐ {filing.rating}
-            </span>
-          )}
-          {badge && (
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge.className}`}>
-              {badge.label}
+          {status && (
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${status.className}`}>
+              {status.label}
             </span>
           )}
         </div>
         <span className={`text-xs ${colors.text}`}>
-          {filing.party === "Democrat" ? "D" : filing.party === "Republican" ? "R" : "I"}
+          {candidate.party === "Democrat" ? "D" : candidate.party === "Republican" ? "R" : candidate.party.charAt(0)}
         </span>
       </div>
 
       {/* Fundraising bar + details */}
       <div className="flex-1 min-w-0">
-        <div className="relative h-6 bg-slate-100 rounded overflow-hidden">
-          <div
-            className={`absolute inset-y-0 left-0 ${colors.bar} transition-all duration-500 rounded`}
-            style={{ width: `${Math.max(barWidth, 1)}%` }}
-          />
-          <span className="absolute right-2 top-0 h-full flex items-center text-xs font-semibold text-slate-700">
-            {formatMoney(filing.fundsRaised)}
+        {raised > 0 ? (
+          <>
+            <div className="relative h-6 bg-slate-100 rounded overflow-hidden">
+              <div
+                className={`absolute inset-y-0 left-0 ${colors.bar} transition-all duration-500 rounded`}
+                style={{ width: `${Math.max(barWidth, 1)}%` }}
+              />
+              <span className="absolute right-2 top-0 h-full flex items-center text-xs font-semibold text-slate-700">
+                {formatMoney(raised)}
+              </span>
+            </div>
+            <div className="flex gap-3 mt-0.5">
+              {candidate.fundsSpent != null && (
+                <span className="text-[11px] text-slate-400">Spent: {formatMoney(candidate.fundsSpent)}</span>
+              )}
+              {candidate.cashOnHand != null && (
+                <span className="text-[11px] text-slate-400">Cash: {formatMoney(candidate.cashOnHand)}</span>
+              )}
+            </div>
+          </>
+        ) : (
+          <span className="text-[11px] text-slate-400">No fundraising data</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RaceSection({ race }: { race: RaceWithCandidates }) {
+  const maxRaised = Math.max(...race.candidates.map((c) => c.fundsRaised ?? 0), 1);
+  const ratingColor = race.rating ? RATING_COLORS[race.rating] ?? "bg-slate-100 text-slate-600" : null;
+
+  const searchTerm = race.body === "House"
+    ? `${race.state} congressional district ${race.district}`
+    : `${race.state} ${race.body.toLowerCase()} election 2026`;
+
+  return (
+    <div className="mb-5 last:mb-0">
+      {/* Race header */}
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <span className="font-semibold text-sm text-slate-700">
+          {race.body === "House" ? `District ${race.district}` : race.body}
+        </span>
+        {ratingColor && (
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${ratingColor}`}>
+            {race.rating}
           </span>
-        </div>
-        <div className="flex gap-3 mt-0.5">
-          <span className="text-[11px] text-slate-400">
-            Spent: {formatMoney(filing.fundsSpent)}
+        )}
+        {race.isOpenSeat && (
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+            Open Seat
           </span>
-          <span className="text-[11px] text-slate-400">
-            Cash: {formatMoney(filing.cashOnHand)}
+        )}
+        {race.isSpecialElection && (
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
+            Special
           </span>
-        </div>
+        )}
+        <a
+          href={`https://ballotpedia.org/Special:Search?search=${encodeURIComponent(searchTerm)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto text-[11px] text-slate-400 hover:text-navy underline"
+        >
+          Research on Ballotpedia
+        </a>
+      </div>
+
+      {/* Candidates */}
+      <div className="divide-y divide-slate-100">
+        {race.candidates.map((c) => (
+          <CandidateRow key={c.id} candidate={c} maxRaised={maxRaised} />
+        ))}
       </div>
     </div>
   );
@@ -122,14 +183,18 @@ function StateCard({
   group,
   isOpen,
   onToggle,
-  office,
+  bodyFilter,
 }: {
-  group: FilingsByState;
+  group: RacesByState;
   isOpen: boolean;
   onToggle: () => void;
-  office: "S" | "H";
+  bodyFilter: "all" | "Senate" | "House";
 }) {
-  const maxRaised = Math.max(...group.filings.map((f) => f.fundsRaised), 1);
+  const races = bodyFilter === "all"
+    ? group.races
+    : group.races.filter((r) => r.body === bodyFilter);
+
+  const totalCandidates = races.reduce((sum, r) => sum + r.candidates.length, 0);
   const badge = urgencyBadge(group.daysUntilPrimary);
   const primaryFormatted = group.primaryDate
     ? new Date(group.primaryDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -139,23 +204,7 @@ function StateCard({
       })
     : null;
 
-  // Count battleground districts for House
-  const battlegroundCount = office === "H"
-    ? group.filings.filter((f) => f.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(f.rating)).length
-    : 0;
-
-  // Sort battlegrounds to top for House districts
-  const sortedFilings = office === "H"
-    ? [...group.filings].sort((a, b) => {
-        const aIsBattleground = a.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(a.rating);
-        const bIsBattleground = b.rating && ["Toss-up", "Lean D", "Lean R", "Likely D", "Likely R"].includes(b.rating);
-        if (aIsBattleground && !bIsBattleground) return -1;
-        if (!aIsBattleground && bIsBattleground) return 1;
-        // Within battlegrounds or non-battlegrounds, sort by district number
-        if (a.district && b.district) return a.district - b.district;
-        return 0;
-      })
-    : group.filings;
+  if (races.length === 0) return null;
 
   return (
     <div className="border border-slate-200 rounded-xl mb-3 overflow-hidden">
@@ -177,16 +226,8 @@ function StateCard({
             <p className="text-sm text-slate-500">
               {primaryFormatted ? `Primary: ${primaryFormatted}` : "Primary: TBD"}
               <span className="text-slate-300 mx-1.5">&middot;</span>
-              {group.filings.length} candidate{group.filings.length !== 1 ? "s" : ""}{" "}
-              ({partyBreakdown(group.filings)})
-              {battlegroundCount > 0 && (
-                <>
-                  <span className="text-slate-300 mx-1.5">&middot;</span>
-                  <span className="text-tossup font-semibold">
-                    {battlegroundCount} battleground{battlegroundCount !== 1 ? "s" : ""}
-                  </span>
-                </>
-              )}
+              {races.length} race{races.length !== 1 ? "s" : ""},{" "}
+              {totalCandidates} candidate{totalCandidates !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -198,17 +239,12 @@ function StateCard({
       </button>
 
       {isOpen && (
-        <div className="px-5 pb-4 border-t border-slate-100">
-          <div className="divide-y divide-slate-100 pt-2">
-            {sortedFilings.map((filing) => (
-              <FilingRow key={filing.fecCandidateId} filing={filing} maxRaised={maxRaised} office={office} />
-            ))}
-          </div>
+        <div className="px-5 pb-4 border-t border-slate-100 pt-3">
+          {races.map((race) => (
+            <RaceSection key={race.raceId} race={race} />
+          ))}
           <p className="text-[11px] text-slate-400 mt-2">
-            Source: FEC
-            {group.filings[0]?.lastSyncedAt && (
-              <> | Updated {new Date(group.filings[0].lastSyncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</>
-            )}
+            Source: FEC. Fundraising totals may not reflect the latest filings.
           </p>
         </div>
       )}
@@ -216,49 +252,67 @@ function StateCard({
   );
 }
 
-export default function WhosRunningView({ senateFilings, houseFilings }: WhosRunningViewProps) {
-  const [activeTab, setActiveTab] = useState<"senate" | "house">("senate");
+export default function WhosRunningView({ racesByState }: WhosRunningViewProps) {
+  const [bodyFilter, setBodyFilter] = useState<"all" | "Senate" | "House">("all");
   const [stateFilter, setStateFilter] = useState("");
-  const [sortBy, setSortBy] = useState<"primary" | "state" | "filings">("primary");
+  const [sortBy, setSortBy] = useState<"primary" | "state" | "candidates">("primary");
   const [openStates, setOpenStates] = useState<Set<string>>(new Set());
 
-  // Read hash on mount to set initial tab
+  // Read hash on mount to set initial body filter
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash === "house") setActiveTab("house");
+    if (hash === "house") setBodyFilter("House");
+    else if (hash === "senate") setBodyFilter("Senate");
   }, []);
 
-  // Update hash when tab changes
+  // Update hash when filter changes
   useEffect(() => {
-    window.location.hash = activeTab;
-  }, [activeTab]);
+    if (bodyFilter !== "all") {
+      window.location.hash = bodyFilter.toLowerCase();
+    } else {
+      // Clear hash without scrolling
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, [bodyFilter]);
 
-  const filingsByState = activeTab === "senate" ? senateFilings : houseFilings;
-  const office = activeTab === "senate" ? "S" : "H";
+  // Check which bodies are available
+  const availableBodies = useMemo(() => {
+    const bodies = new Set<string>();
+    for (const g of racesByState) {
+      for (const r of g.races) bodies.add(r.body);
+    }
+    return bodies;
+  }, [racesByState]);
 
   const stateOptions = useMemo(
     () =>
-      filingsByState
+      racesByState
         .map((g) => ({ abbr: g.stateAbbr, name: g.stateName }))
         .sort((a, b) => a.name.localeCompare(b.name)),
-    [filingsByState]
+    [racesByState]
   );
 
   const filtered = useMemo(() => {
-    let result = filingsByState;
+    let result = racesByState;
     if (stateFilter) {
       result = result.filter((g) => g.stateAbbr === stateFilter);
     }
     if (sortBy === "state") {
       result = [...result].sort((a, b) => a.stateName.localeCompare(b.stateName));
-    } else if (sortBy === "filings") {
-      result = [...result].sort((a, b) => b.filings.length - a.filings.length);
+    } else if (sortBy === "candidates") {
+      result = [...result].sort((a, b) => {
+        const aCandidates = a.races.reduce((s, r) => s + r.candidates.length, 0);
+        const bCandidates = b.races.reduce((s, r) => s + r.candidates.length, 0);
+        return bCandidates - aCandidates;
+      });
     }
-    // "primary" is the default sort from the query
     return result;
-  }, [filingsByState, stateFilter, sortBy]);
+  }, [racesByState, stateFilter, sortBy]);
 
-  const totalFilings = filtered.reduce((sum, g) => sum + g.filings.length, 0);
+  const totalCandidates = filtered.reduce(
+    (sum, g) => sum + g.races.reduce((s, r) => s + r.candidates.length, 0),
+    0
+  );
 
   function toggleState(abbr: string) {
     setOpenStates((prev) => {
@@ -279,28 +333,42 @@ export default function WhosRunningView({ senateFilings, houseFilings }: WhosRun
 
   return (
     <div>
-      {/* Tabs */}
+      {/* Body tabs */}
       <div className="flex gap-2 mb-6 border-b border-slate-200">
         <button
-          onClick={() => setActiveTab("senate")}
+          onClick={() => setBodyFilter("all")}
           className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
-            activeTab === "senate"
+            bodyFilter === "all"
               ? "border-navy text-navy"
               : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
-          Senate
+          All
         </button>
-        <button
-          onClick={() => setActiveTab("house")}
-          className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
-            activeTab === "house"
-              ? "border-navy text-navy"
-              : "border-transparent text-slate-500 hover:text-slate-700"
-          }`}
-        >
-          House
-        </button>
+        {availableBodies.has("Senate") && (
+          <button
+            onClick={() => setBodyFilter("Senate")}
+            className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
+              bodyFilter === "Senate"
+                ? "border-navy text-navy"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            Senate
+          </button>
+        )}
+        {availableBodies.has("House") && (
+          <button
+            onClick={() => setBodyFilter("House")}
+            className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 -mb-px ${
+              bodyFilter === "House"
+                ? "border-navy text-navy"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            House
+          </button>
+        )}
       </div>
 
       {/* Filter bar */}
@@ -310,7 +378,7 @@ export default function WhosRunningView({ senateFilings, houseFilings }: WhosRun
           onChange={(e) => setStateFilter(e.target.value)}
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white"
         >
-          <option value="">All States ({filingsByState.length})</option>
+          <option value="">All States ({stateOptions.length})</option>
           {stateOptions.map((s) => (
             <option key={s.abbr} value={s.abbr}>
               {s.name}
@@ -325,11 +393,12 @@ export default function WhosRunningView({ senateFilings, houseFilings }: WhosRun
         >
           <option value="primary">Sort by Primary Date</option>
           <option value="state">Sort by State Name</option>
-          <option value="filings">Sort by Most Candidates</option>
+          <option value="candidates">Sort by Most Candidates</option>
         </select>
 
         <span className="text-sm text-slate-500">
-          {totalFilings} candidate{totalFilings !== 1 ? "s" : ""} across {filtered.length} state{filtered.length !== 1 ? "s" : ""}
+          {totalCandidates} candidate{totalCandidates !== 1 ? "s" : ""} across{" "}
+          {filtered.length} state{filtered.length !== 1 ? "s" : ""}
         </span>
 
         <div className="ml-auto flex gap-2">
@@ -356,18 +425,18 @@ export default function WhosRunningView({ senateFilings, houseFilings }: WhosRun
             group={group}
             isOpen={openStates.has(group.stateAbbr)}
             onToggle={() => toggleState(group.stateAbbr)}
-            office={office}
+            bodyFilter={bodyFilter}
           />
         ))
       ) : (
         <p className="text-center py-8 text-slate-400">
-          No filings found for the selected filter.
+          No candidates found for the selected filter.
         </p>
       )}
 
       {/* Footer note */}
       <p className="text-xs text-slate-400 mt-6 text-center">
-        Data from the Federal Election Commission (FEC). Only candidates who have raised at least $5,000 are shown.
+        Data from the Federal Election Commission (FEC).
         Fundraising totals are updated periodically and may not reflect the latest filings.
       </p>
     </div>

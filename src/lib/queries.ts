@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, HouseRace, GovernorRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState, IncumbentCard, VotingRecord } from "../types";
+import type { StateInfo, SenateRace, HouseRace, GovernorRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState, IncumbentCard, VotingRecord, RacesByState, RaceWithCandidates, RaceCandidateInfo } from "../types";
 
 // ─── States ───
 
@@ -1180,6 +1180,188 @@ export async function fetchGovernorRaces(): Promise<GovernorRace[]> {
     });
   } catch {
     console.warn("Governor races table may not be ready yet");
+    return [];
+  }
+}
+
+// ─── Race Candidates (for Who's Running page) ───
+
+export async function fetchRaceCandidates(): Promise<RacesByState[]> {
+  try {
+    const { data: cycle } = await supabase
+      .from("election_cycles")
+      .select("id")
+      .eq("is_active", true)
+      .single();
+
+    if (!cycle) return [];
+
+    const { data: races, error } = await supabase
+      .from("races")
+      .select(`
+        id,
+        rating,
+        is_special_election,
+        is_open_seat,
+        primary_date,
+        general_date,
+        why_competitive,
+        district:districts!inner(
+          state_id,
+          number,
+          name,
+          state:states!inner(name, abbr),
+          body:government_bodies!inner(slug, member_title)
+        ),
+        race_candidates(
+          is_incumbent,
+          status,
+          candidate:candidates!inner(
+            id,
+            first_name,
+            last_name,
+            party,
+            photo_url,
+            website,
+            twitter,
+            funds_raised,
+            funds_spent,
+            cash_on_hand,
+            fec_candidate_id
+          )
+        )
+      `)
+      .eq("cycle_id", cycle.id);
+
+    if (error) {
+      console.warn(`Race candidates unavailable: ${error.message}`);
+      return [];
+    }
+
+    // Only include races that have at least one FEC-promoted candidate
+    const racesWithFecCandidates = (races ?? []).filter((race: any) => {
+      const rcs = race.race_candidates as any[];
+      return rcs && rcs.some((rc: any) => rc.candidate?.fec_candidate_id);
+    });
+
+    // Get primary dates from calendar_events as fallback
+    const { data: primaryEvents } = await supabase
+      .from("calendar_events")
+      .select("state_id, event_date")
+      .eq("cycle_id", cycle.id)
+      .eq("event_type", "primary");
+
+    const primaryDateByStateId = new Map<number, string>();
+    for (const ev of primaryEvents ?? []) {
+      primaryDateByStateId.set(ev.state_id, ev.event_date);
+    }
+
+    // Group by state
+    const grouped = new Map<string, {
+      stateAbbr: string;
+      stateName: string;
+      stateId: number;
+      races: RaceWithCandidates[];
+    }>();
+
+    for (const race of racesWithFecCandidates) {
+      const dist = race.district as any;
+      const state = dist.state as any;
+      const body = dist.body as any;
+      const abbr: string = state.abbr;
+      const stateId: number = dist.state_id;
+
+      if (!grouped.has(abbr)) {
+        grouped.set(abbr, {
+          stateAbbr: abbr,
+          stateName: state.name,
+          stateId,
+          races: [],
+        });
+      }
+
+      const bodySlug: string = body.slug;
+      const bodyLabel: "Senate" | "House" | "Governor" =
+        bodySlug === "us-senate" ? "Senate"
+        : bodySlug === "us-house" ? "House"
+        : "Governor";
+
+      const rcs = (race.race_candidates ?? []) as any[];
+      const candidates: RaceCandidateInfo[] = rcs
+        .filter((rc: any) => rc.candidate)
+        .map((rc: any) => {
+          const c = rc.candidate;
+          return {
+            id: c.id,
+            name: `${c.first_name} ${c.last_name}`,
+            party: c.party,
+            photo: c.photo_url ?? null,
+            isIncumbent: rc.is_incumbent,
+            status: rc.status,
+            fundsRaised: c.funds_raised != null ? Number(c.funds_raised) : null,
+            fundsSpent: c.funds_spent != null ? Number(c.funds_spent) : null,
+            cashOnHand: c.cash_on_hand != null ? Number(c.cash_on_hand) : null,
+            fecCandidateId: c.fec_candidate_id ?? null,
+            website: c.website ?? null,
+            twitter: c.twitter ?? null,
+          };
+        })
+        .sort((a: RaceCandidateInfo, b: RaceCandidateInfo) => {
+          if (a.isIncumbent !== b.isIncumbent) return a.isIncumbent ? -1 : 1;
+          return (b.fundsRaised ?? 0) - (a.fundsRaised ?? 0);
+        });
+
+      grouped.get(abbr)!.races.push({
+        raceId: race.id,
+        state: state.name,
+        stateAbbr: abbr,
+        body: bodyLabel,
+        district: dist.number ?? null,
+        rating: race.rating as RaceWithCandidates["rating"],
+        isSpecialElection: race.is_special_election,
+        isOpenSeat: race.is_open_seat,
+        primaryDate: race.primary_date ?? null,
+        generalDate: race.general_date ?? null,
+        whyCompetitive: race.why_competitive ?? null,
+        candidates,
+      });
+    }
+
+    const now = new Date();
+    return Array.from(grouped.values())
+      .map((g) => {
+        const sortedRaces = [...g.races].sort((a, b) => {
+          const bodyOrder = { Senate: 0, Governor: 1, House: 2 };
+          const bodyDiff = bodyOrder[a.body] - bodyOrder[b.body];
+          if (bodyDiff !== 0) return bodyDiff;
+          return (a.district ?? 0) - (b.district ?? 0);
+        });
+
+        const primaryDate =
+          sortedRaces.find((r) => r.primaryDate)?.primaryDate
+          ?? (primaryDateByStateId.get(g.stateId) ?? null);
+
+        return {
+          stateAbbr: g.stateAbbr,
+          stateName: g.stateName,
+          primaryDate,
+          daysUntilPrimary: primaryDate
+            ? Math.ceil((new Date(primaryDate).getTime() - now.getTime()) / 86_400_000)
+            : null,
+          races: sortedRaces,
+        };
+      })
+      .sort((a, b) => {
+        if (a.primaryDate && b.primaryDate) {
+          const d = a.primaryDate.localeCompare(b.primaryDate);
+          if (d !== 0) return d;
+        }
+        if (a.primaryDate && !b.primaryDate) return -1;
+        if (!a.primaryDate && b.primaryDate) return 1;
+        return a.stateName.localeCompare(b.stateName);
+      });
+  } catch (err) {
+    console.warn("fetchRaceCandidates failed:", err);
     return [];
   }
 }

@@ -211,6 +211,87 @@ export default function FecPage({ setHeaderActions }: FecPageProps) {
 }
 
 // ═══════════════════════════════════════════
+// Shared helper: find or create district + race
+// ═══════════════════════════════════════════
+
+async function findOrCreateDistrictAndRace(
+  stateId: number,
+  office: "S" | "H",
+  districtNumber: number | null,
+  stateName: string,
+  stateAbbr: string,
+  bodyOptions: { value: number; slug: string }[],
+  cycleId: number
+): Promise<{ districtId: number; raceId: number }> {
+  const bodySlug = office === "S" ? "us-senate" : "us-house";
+  const bodyId = bodyOptions.find((b) => b.slug === bodySlug)?.value;
+  if (!bodyId) throw new Error(`Body "${bodySlug}" not found in government_bodies`);
+
+  // Look up existing district
+  let districtId: number | null = null;
+  if (office === "S") {
+    const { data } = await supabase
+      .from("districts")
+      .select("id")
+      .eq("state_id", stateId)
+      .eq("body_id", bodyId)
+      .single();
+    if (data) districtId = data.id;
+  } else {
+    const { data } = await supabase
+      .from("districts")
+      .select("id")
+      .eq("state_id", stateId)
+      .eq("body_id", bodyId)
+      .eq("number", districtNumber)
+      .single();
+    if (data) districtId = data.id;
+  }
+
+  // Create district if not found
+  if (!districtId) {
+    const districtName = office === "S"
+      ? `${stateName} Senate`
+      : `${stateAbbr} House District ${districtNumber}`;
+    const { data: newDistrict, error: districtError } = await supabase
+      .from("districts")
+      .insert({
+        state_id: stateId,
+        body_id: bodyId,
+        number: office === "H" ? districtNumber : null,
+        name: districtName,
+      })
+      .select()
+      .single();
+    if (districtError) throw districtError;
+    districtId = newDistrict.id;
+  }
+
+  // Look up or create race
+  let raceId: number | null = null;
+  const { data: existingRace } = await supabase
+    .from("races")
+    .select("id")
+    .eq("district_id", districtId)
+    .eq("cycle_id", cycleId)
+    .single();
+
+  if (existingRace) {
+    raceId = existingRace.id;
+  } else {
+    const { data: newRace, error: raceError } = await supabase
+      .from("races")
+      .insert({ district_id: districtId, cycle_id: cycleId, rating: null })
+      .select()
+      .single();
+    if (raceError) throw raceError;
+    raceId = newRace.id;
+  }
+
+  return { districtId, raceId };
+}
+
+// ═══════════════════════════════════════════
 // Filings Tab
 // ═══════════════════════════════════════════
 
@@ -325,7 +406,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           state_id: selectedFiling.state_id,
           photo_url: promoteForm.photoUrl || null,
           website: promoteForm.website || null,
-          twitter_handle: promoteForm.twitter || null,
+          twitter: promoteForm.twitter || null,
           bio: promoteForm.bio || null,
           fec_candidate_id: selectedFiling.fec_candidate_id,
           funds_raised: selectedFiling.funds_raised,
@@ -337,59 +418,15 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
         .single();
       if (candidateError) throw candidateError;
 
-      let districtId: number | null = null;
-      if (selectedFiling.office === "S") {
-        const { data: senateDistrict } = await supabase
-          .from("districts")
-          .select("id")
-          .eq("state_id", selectedFiling.state_id)
-          .eq("body", "senate")
-          .single();
-        if (senateDistrict) districtId = senateDistrict.id;
-      } else {
-        const { data: houseDistrict } = await supabase
-          .from("districts")
-          .select("id")
-          .eq("state_id", selectedFiling.state_id)
-          .eq("body", "house")
-          .eq("district_number", selectedFiling.district_number)
-          .single();
-        if (houseDistrict) districtId = houseDistrict.id;
-      }
-
-      if (!districtId) {
-        const { data: newDistrict, error: districtError } = await supabase
-          .from("districts")
-          .insert({
-            state_id: selectedFiling.state_id,
-            body: selectedFiling.office === "S" ? "senate" : "house",
-            district_number: selectedFiling.district_number,
-          })
-          .select()
-          .single();
-        if (districtError) throw districtError;
-        districtId = newDistrict.id;
-      }
-
-      let raceId: number | null = null;
-      const { data: existingRace } = await supabase
-        .from("races")
-        .select("id")
-        .eq("district_id", districtId)
-        .eq("cycle_id", activeCycleId)
-        .single();
-
-      if (existingRace) {
-        raceId = existingRace.id;
-      } else {
-        const { data: newRace, error: raceError } = await supabase
-          .from("races")
-          .insert({ district_id: districtId, cycle_id: activeCycleId, rating: null })
-          .select()
-          .single();
-        if (raceError) throw raceError;
-        raceId = newRace.id;
-      }
+      const { raceId } = await findOrCreateDistrictAndRace(
+        selectedFiling.state_id,
+        selectedFiling.office,
+        selectedFiling.district_number,
+        selectedFiling.state?.name ?? "Unknown",
+        selectedFiling.state?.abbr ?? "??",
+        bodyOptions,
+        activeCycleId!
+      );
 
       const { error: raceCandidateError } = await supabase
         .from("race_candidates")
@@ -475,7 +512,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
             state_id: filing.state_id,
             photo_url: null,
             website: null,
-            twitter_handle: null,
+            twitter: null,
             bio: null,
             fec_candidate_id: filing.fec_candidate_id,
             funds_raised: filing.funds_raised,
@@ -487,59 +524,15 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           .single();
         if (candidateError) throw candidateError;
 
-        let districtId: number | null = null;
-        if (filing.office === "S") {
-          const { data: senateDistrict } = await supabase
-            .from("districts")
-            .select("id")
-            .eq("state_id", filing.state_id)
-            .eq("body", "senate")
-            .single();
-          if (senateDistrict) districtId = senateDistrict.id;
-        } else {
-          const { data: houseDistrict } = await supabase
-            .from("districts")
-            .select("id")
-            .eq("state_id", filing.state_id)
-            .eq("body", "house")
-            .eq("district_number", filing.district_number)
-            .single();
-          if (houseDistrict) districtId = houseDistrict.id;
-        }
-
-        if (!districtId) {
-          const { data: newDistrict, error: districtError } = await supabase
-            .from("districts")
-            .insert({
-              state_id: filing.state_id,
-              body: filing.office === "S" ? "senate" : "house",
-              district_number: filing.district_number,
-            })
-            .select()
-            .single();
-          if (districtError) throw districtError;
-          districtId = newDistrict.id;
-        }
-
-        let raceId: number | null = null;
-        const { data: existingRace } = await supabase
-          .from("races")
-          .select("id")
-          .eq("district_id", districtId)
-          .eq("cycle_id", activeCycleId)
-          .single();
-
-        if (existingRace) {
-          raceId = existingRace.id;
-        } else {
-          const { data: newRace, error: raceError } = await supabase
-            .from("races")
-            .insert({ district_id: districtId, cycle_id: activeCycleId, rating: null })
-            .select()
-            .single();
-          if (raceError) throw raceError;
-          raceId = newRace.id;
-        }
+        const { raceId } = await findOrCreateDistrictAndRace(
+          filing.state_id,
+          filing.office,
+          filing.district_number,
+          filing.state?.name ?? "Unknown",
+          filing.state?.abbr ?? "??",
+          bodyOptions,
+          activeCycleId!
+        );
 
         const { error: raceCandidateError } = await supabase
           .from("race_candidates")
@@ -1062,7 +1055,7 @@ function SyncTab({
   const [onlyActive, setOnlyActive] = useState(true);
   const [onlyFunded, setOnlyFunded] = useState(true);
   const [majorPartiesOnly, setMajorPartiesOnly] = useState(true);
-  const [minFiveK, setMinFiveK] = useState(true);
+  const [minFundsRaised, setMinFundsRaised] = useState<number>(5000);
 
   const [previewing, setPreviewing] = useState(false);
   const [previewCandidates, setPreviewCandidates] = useState<PreviewCandidate[]>([]);
@@ -1200,8 +1193,8 @@ function SyncTab({
       setImportProgress(0);
 
       let filtered = preview;
-      if (minFiveK) {
-        filtered = preview.filter((p) => (p.financials?.raised ?? 0) >= 5000);
+      if (minFundsRaised > 0) {
+        filtered = preview.filter((p) => (p.financials?.raised ?? 0) >= minFundsRaised);
       }
 
       setPreviewCandidates(filtered);
@@ -1211,7 +1204,7 @@ function SyncTab({
     } finally {
       setPreviewing(false);
     }
-  }, [apiKey, cycle, officeFilter, stateFilter, onlyActive, onlyFunded, majorPartiesOnly, minFiveK, connectionStatus, messageApi]);
+  }, [apiKey, cycle, officeFilter, stateFilter, onlyActive, onlyFunded, majorPartiesOnly, minFundsRaised, connectionStatus, messageApi]);
 
   async function runImport() {
     const selected = previewCandidates.filter((p) => p.selected);
@@ -1414,9 +1407,21 @@ function SyncTab({
               <Checkbox checked={majorPartiesOnly} onChange={(e) => setMajorPartiesOnly(e.target.checked)}>
                 <Tooltip title="Democrat, Republican, and Independent only"><span style={{ borderBottom: "1px dashed #999" }}>Major parties only</span></Tooltip>
               </Checkbox>
-              <Checkbox checked={minFiveK} onChange={(e) => setMinFiveK(e.target.checked)}>
-                <Tooltip title="Only candidates who have raised at least $5,000"><span style={{ borderBottom: "1px dashed #999" }}>Min $5K raised</span></Tooltip>
-              </Checkbox>
+              <div>
+                <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Min raised</Text>
+                <Select
+                  value={minFundsRaised}
+                  onChange={setMinFundsRaised}
+                  style={{ width: isMobile ? "100%" : 140 }}
+                  options={[
+                    { value: 0, label: "No minimum" },
+                    { value: 5000, label: "$5K+" },
+                    { value: 100000, label: "$100K+" },
+                    { value: 500000, label: "$500K+" },
+                    { value: 1000000, label: "$1M+" },
+                  ]}
+                />
+              </div>
             </div>
           </div>
 
