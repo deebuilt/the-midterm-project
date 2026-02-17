@@ -86,6 +86,7 @@ export interface DbCandidate {
   first_name: string;
   last_name: string;
   party: Party;
+  state_id: number | null;
   photo_url: string | null;
   website: string | null;
   twitter: string | null;

@@ -8,7 +8,7 @@
  */
 
 import { supabase } from "./supabase";
-import type { StateInfo, SenateRace, HouseRace, GovernorRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState } from "../types";
+import type { StateInfo, SenateRace, HouseRace, GovernorRace, Candidate, SwipeCard, BallotMeasure, CalendarEvent, FecFiling, FilingsByState, IncumbentCard, VotingRecord } from "../types";
 
 // ─── States ───
 
@@ -555,6 +555,142 @@ export async function fetchSwipeCards(): Promise<SwipeCard[]> {
   }
 
   return swipeCards;
+}
+
+// ─── Re-elect or Reject ───
+
+export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
+  // Query incumbent candidates directly via state_id (migration 016)
+  // Do NOT use race_candidates — that table is empty
+  const { data: candidates, error: candErr } = await supabase
+    .from("candidates")
+    .select(`
+      id,
+      slug,
+      first_name,
+      last_name,
+      party,
+      photo_url,
+      website,
+      twitter,
+      bio,
+      role_title,
+      is_incumbent,
+      state:states!inner(id, name, abbr)
+    `)
+    .eq("is_incumbent", true)
+    .not("state_id", "is", null);
+
+  if (candErr) throw new Error(`Failed to fetch incumbents: ${candErr.message}`);
+
+  // Filter to only senators (role_title contains "Senator")
+  const senators = (candidates ?? []).filter((c: any) => {
+    const role = (c.role_title ?? "") as string;
+    return role.toLowerCase().includes("senator");
+  });
+
+  // Get race ratings for these states (senate races only)
+  const { data: cycle } = await supabase
+    .from("election_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .single();
+
+  const ratingByStateId = new Map<number, { rating: string; isSpecial: boolean; isOpenSeat: boolean }>();
+  if (cycle) {
+    const { data: races } = await supabase
+      .from("races")
+      .select(`
+        rating,
+        is_special_election,
+        is_open_seat,
+        district:districts!inner(
+          state_id,
+          body:government_bodies!inner(slug)
+        )
+      `)
+      .eq("cycle_id", cycle.id);
+
+    for (const race of races ?? []) {
+      const dist = race.district as any;
+      if (dist.body?.slug === "us-senate") {
+        ratingByStateId.set(dist.state_id, {
+          rating: race.rating,
+          isSpecial: race.is_special_election,
+          isOpenSeat: race.is_open_seat,
+        });
+      }
+    }
+  }
+
+  // Get votes for all incumbent senators (left join — may be empty)
+  const candidateIds = senators.map((c: any) => c.id);
+  let votesByCandidate = new Map<number, VotingRecord[]>();
+
+  if (candidateIds.length > 0) {
+    const { data: votes } = await supabase
+      .from("votes")
+      .select(`
+        id,
+        candidate_id,
+        bill_name,
+        bill_number,
+        vote,
+        vote_date,
+        summary,
+        source_url,
+        topic:topics(name)
+      `)
+      .in("candidate_id", candidateIds)
+      .order("vote_date", { ascending: false });
+
+    for (const v of votes ?? []) {
+      const record: VotingRecord = {
+        id: v.id,
+        billName: v.bill_name,
+        billNumber: v.bill_number,
+        vote: v.vote as VotingRecord["vote"],
+        voteDate: v.vote_date,
+        topic: (v.topic as any)?.name ?? null,
+        summary: v.summary,
+        sourceUrl: v.source_url,
+      };
+      if (!votesByCandidate.has(v.candidate_id)) {
+        votesByCandidate.set(v.candidate_id, []);
+      }
+      votesByCandidate.get(v.candidate_id)!.push(record);
+    }
+  }
+
+  // Transform to IncumbentCard[] sorted by state name
+  const cards: IncumbentCard[] = senators
+    .map((c: any) => {
+      const state = c.state as any;
+      const raceInfo = ratingByStateId.get(state.id);
+      const roleTitle = (c.role_title ?? "") as string;
+      const isRetiring = roleTitle.toLowerCase().includes("retiring");
+
+      return {
+        id: c.slug,
+        candidateId: c.id,
+        name: `${c.first_name} ${c.last_name}`,
+        party: c.party as IncumbentCard["party"],
+        photo: c.photo_url ?? "",
+        state: state.name,
+        stateAbbr: state.abbr,
+        currentRole: roleTitle,
+        isSpecialElection: raceInfo?.isSpecial ?? false,
+        isRetiring,
+        rating: raceInfo?.rating ?? null,
+        website: c.website ?? undefined,
+        twitter: c.twitter ?? undefined,
+        bio: c.bio ?? undefined,
+        votes: votesByCandidate.get(c.id) ?? [],
+      };
+    })
+    .sort((a, b) => a.state.localeCompare(b.state));
+
+  return cards;
 }
 
 // ─── Ballot Measures ───

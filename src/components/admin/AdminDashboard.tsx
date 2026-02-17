@@ -4,9 +4,9 @@ import type { User } from "@supabase/supabase-js";
 import { getSession, isAdmin, onAuthStateChange, signOut } from "../../lib/supabase";
 import AdminLayout from "./AdminLayout";
 
-export type AdminRoute = "dashboard" | "volunteers" | "cycles" | "candidates" | "races" | "ballot-measures" | "fec" | "calendar-events" | "states" | "automation" | "setup-guide";
+export type AdminRoute = "dashboard" | "volunteers" | "cycles" | "candidates" | "votes" | "races" | "ballot-measures" | "fec" | "calendar-events" | "states" | "automation" | "setup-guide";
 
-const VALID_ROUTES: AdminRoute[] = ["dashboard", "volunteers", "cycles", "candidates", "races", "ballot-measures", "fec", "calendar-events", "states", "automation", "setup-guide"];
+const VALID_ROUTES: AdminRoute[] = ["dashboard", "volunteers", "cycles", "candidates", "votes", "races", "ballot-measures", "fec", "calendar-events", "states", "automation", "setup-guide"];
 
 const theme = {
   token: {

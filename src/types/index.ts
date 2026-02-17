@@ -192,6 +192,47 @@ export interface GovernorRace {
   whyCompetitive?: string;
 }
 
+// Re-elect or Reject feature types
+export interface VotingRecord {
+  id: number;
+  billName: string;
+  billNumber: string | null;
+  vote: "yea" | "nay" | "abstain" | "not_voting";
+  voteDate: string | null;
+  topic: string | null;
+  summary: string | null;
+  sourceUrl: string | null;
+}
+
+export interface IncumbentCard {
+  id: string;
+  candidateId: number;
+  name: string;
+  party: "Democrat" | "Republican" | "Independent";
+  photo: string;
+  state: string;
+  stateAbbr: string;
+  currentRole: string;
+  isSpecialElection: boolean;
+  isRetiring: boolean;
+  rating: string | null;
+  website?: string;
+  twitter?: string;
+  bio?: string;
+  votes: VotingRecord[];
+}
+
+export type SwipeChoice = "reelect" | "reject";
+
+export interface SwipeResult {
+  candidateId: string;
+  name: string;
+  party: "Democrat" | "Republican" | "Independent";
+  state: string;
+  stateAbbr: string;
+  choice: SwipeChoice;
+}
+
 export interface StateInfo {
   name: string;
   abbr: string;

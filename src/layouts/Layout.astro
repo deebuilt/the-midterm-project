@@ -6,9 +6,11 @@ import Footer from "../components/layout/Footer.astro";
 interface Props {
   title: string;
   description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
 }
 
-const { title, description = "Nonpartisan voter education for the 2026 U.S. midterm elections." } = Astro.props;
+const { title, description = "Voter education for the 2026 U.S. midterm elections.", ogTitle, ogDescription } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,6 +30,12 @@ const { title, description = "Nonpartisan voter education for the 2026 U.S. midt
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Midterms 2026" />
+    <meta property="og:title" content={ogTitle ?? title} />
+    <meta property="og:description" content={ogDescription ?? description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={ogTitle ?? title} />
+    <meta name="twitter:description" content={ogDescription ?? description} />
     <title>{title} | The Midterm Project</title>
 
     <!-- Google Analytics (GA4) -->

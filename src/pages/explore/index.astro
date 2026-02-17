@@ -1,20 +1,25 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import SwipeCards from "../../components/ui/SwipeCards";
-import { fetchSwipeCards } from "../../lib/queries";
+import ReelectOrReject from "../../components/ui/ReelectOrReject";
+import { fetchIncumbentsWithVotes } from "../../lib/queries";
 
-const swipeCards = await fetchSwipeCards();
+const incumbents = await fetchIncumbentsWithVotes();
 ---
 
-<Layout title="Explore Candidates" description="Swipe through 2026 candidates and learn key facts about the midterm elections.">
-  <section class="max-w-lg mx-auto py-12 px-4">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold mb-2">Explore</h1>
-      <p class="text-slate-500">
-        Swipe through candidates and key facts about the 2026 midterms.
+<Layout
+  title="Re-elect or Reject"
+  description="All 35 Senate seats up in 2026. Swipe right to re-elect, left to reject."
+  ogTitle="Re-elect or Reject | The Midterm Project"
+  ogDescription="All 35 Senate seats up in 2026. Swipe right to re-elect, left to reject. How would you vote?"
+>
+  <section class="max-w-lg mx-auto py-8 px-4">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-black mb-2">Re-elect or Reject</h1>
+      <p class="text-slate-500 text-sm">
+        All {incumbents.length} Senate seats up in 2026. Swipe right to re-elect, left to reject.
       </p>
     </div>
 
-    <SwipeCards client:load cards={swipeCards} />
+    <ReelectOrReject client:load incumbents={incumbents} />
   </section>
 </Layout>

@@ -13,6 +13,7 @@ import {
   EnvironmentOutlined,
   BookOutlined,
   RobotOutlined,
+  AuditOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
 import type { AdminRoute } from "./AdminDashboard";
@@ -21,6 +22,7 @@ import DashboardPage from "./DashboardPage";
 import VolunteersPage from "./VolunteersPage";
 import CyclesPage from "./CyclesPage";
 import CandidatesPage from "./CandidatesPage";
+import VotesPage from "./VotesPage";
 import RacesPage from "./RacesPage";
 import BallotMeasuresPage from "./BallotMeasuresPage";
 import CalendarEventsPage from "./CalendarEventsPage";
@@ -43,6 +45,7 @@ const menuItems = [
   { key: "volunteers", icon: <TeamOutlined />, label: "Volunteers" },
   { key: "cycles", icon: <CalendarOutlined />, label: "Election Cycles" },
   { key: "candidates", icon: <UserOutlined />, label: "Candidates" },
+  { key: "votes", icon: <AuditOutlined />, label: "Voting Records" },
   { key: "races", icon: <TrophyOutlined />, label: "Races" },
   { key: "ballot-measures", icon: <FileTextOutlined />, label: "Ballot Measures" },
   { key: "calendar-events", icon: <ScheduleOutlined />, label: "Calendar Events" },
@@ -56,6 +59,7 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   volunteers: "Volunteers",
   cycles: "Election Cycles",
   candidates: "Candidates",
+  votes: "Voting Records",
   races: "Races",
   "ballot-measures": "Ballot Measures",
   "calendar-events": "Calendar Events",
@@ -279,6 +283,7 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "volunteers" && <VolunteersPage setHeaderActions={setHeaderActions} />}
           {route === "cycles" && <CyclesPage setHeaderActions={setHeaderActions} />}
           {route === "candidates" && <CandidatesPage setHeaderActions={setHeaderActions} />}
+          {route === "votes" && <VotesPage setHeaderActions={setHeaderActions} />}
           {route === "races" && <RacesPage setHeaderActions={setHeaderActions} />}
           {route === "ballot-measures" && <BallotMeasuresPage setHeaderActions={setHeaderActions} />}
           {route === "calendar-events" && <CalendarEventsPage setHeaderActions={setHeaderActions} />}
