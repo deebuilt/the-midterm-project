@@ -99,20 +99,34 @@ const isMoreActive = moreLinks.some(
         </ul>
       </li>
 
-      <!-- Map, Explore, News -->
+      <!-- Primary nav links -->
       {primaryLinks.filter((l) => l.href !== "/").map((link) => (
         <li>
-          <a
-            href={link.href}
-            class:list={[
-              "hover:text-tossup transition-colors",
-              currentPath === link.href || currentPath.startsWith(link.href + "/")
-                ? "text-tossup"
-                : "text-white/80",
-            ]}
-          >
-            {link.label}
-          </a>
+          {link.href === "/reelect-or-reject" ? (
+            <a
+              href={link.href}
+              class:list={[
+                "px-3 py-1.5 rounded-t-md border border-b-0 border-white/15 bg-white/10 backdrop-blur-sm font-semibold hover:bg-white/15 transition-all",
+                currentPath === link.href || currentPath.startsWith(link.href + "/")
+                  ? "text-tossup bg-white/15"
+                  : "text-white",
+              ]}
+            >
+              <span class="text-tossup mr-1.5 text-xs">&#9733;</span>{link.label}
+            </a>
+          ) : (
+            <a
+              href={link.href}
+              class:list={[
+                "hover:text-tossup transition-colors",
+                currentPath === link.href || currentPath.startsWith(link.href + "/")
+                  ? "text-tossup"
+                  : "text-white/80",
+              ]}
+            >
+              {link.label}
+            </a>
+          )}
         </li>
       ))}
 
@@ -170,17 +184,31 @@ const isMoreActive = moreLinks.some(
     {/* Primary links */}
     {primaryLinks.map((link) => (
       <li>
-        <a
-          href={link.href}
-          class:list={[
-            "block py-2 hover:text-tossup transition-colors",
-            currentPath === link.href || currentPath.startsWith(link.href + "/")
-              ? "text-tossup"
-              : "text-white/80",
-          ]}
-        >
-          {link.label}
-        </a>
+        {link.href === "/reelect-or-reject" ? (
+          <a
+            href={link.href}
+            class:list={[
+              "block py-2 border-l-2 border-tossup pl-2 font-semibold hover:text-tossup transition-colors",
+              currentPath === link.href || currentPath.startsWith(link.href + "/")
+                ? "text-tossup"
+                : "text-white",
+            ]}
+          >
+            <span class="text-tossup mr-1">&#9733;</span>{link.label}
+          </a>
+        ) : (
+          <a
+            href={link.href}
+            class:list={[
+              "block py-2 hover:text-tossup transition-colors",
+              currentPath === link.href || currentPath.startsWith(link.href + "/")
+                ? "text-tossup"
+                : "text-white/80",
+            ]}
+          >
+            {link.label}
+          </a>
+        )}
       </li>
     ))}
 
