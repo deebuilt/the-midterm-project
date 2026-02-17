@@ -336,6 +336,27 @@ function buildVoteHtmlUrl(congress: number, session: number, voteNumber: string)
   return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${padded}.htm`;
 }
 
+/** Fetch a Senate.gov XML URL via our Edge Function proxy (bypasses CORS) */
+async function fetchSenateXml(url: string, authToken: string): Promise<string> {
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const resp = await fetch(`${supabaseUrl}/functions/v1/senate-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+      apikey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!resp.ok) {
+    const body = await resp.json().catch(() => ({ error: `HTTP ${resp.status}` }));
+    throw new Error(body.error ?? `Proxy returned ${resp.status}`);
+  }
+
+  return resp.text();
+}
+
 /** Parse a Senate.gov date like "18-Dec" into YYYY-MM-DD using the congress year */
 function parseSenateDate(dateStr: string, congressYear: number): string | null {
   if (!dateStr) return null;
@@ -790,17 +811,17 @@ export default function VotesPage({ setHeaderActions }: Props) {
     setSenateListLoading(true);
     const url = `https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_${senateCongress}_${senateSession}.xml`;
     try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const text = await resp.text();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const text = await fetchSenateXml(url, session.access_token);
       const votes = parseVoteListXml(text);
       setSenateVoteList(votes);
       setSenateListPasteMode(false);
       messageApi.success(`Loaded ${votes.length} votes`);
-    } catch {
-      // CORS or network error — switch to paste mode
+    } catch (err: any) {
+      // Edge Function unavailable — fall back to paste mode
       setSenateListPasteMode(true);
-      messageApi.info("Direct fetch blocked — paste the XML instead");
+      messageApi.info(err.message || "Fetch failed — paste the XML instead");
     } finally {
       setSenateListLoading(false);
     }
@@ -839,40 +860,43 @@ export default function VotesPage({ setHeaderActions }: Props) {
       return;
     }
 
+    // Get auth token upfront
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      messageApi.error("Not authenticated");
+      return;
+    }
+
     setSenateImportStep("loading");
     const progress = { current: 0, total: selected.length, imported: 0, skipped: 0, failed: 0 };
     setSenateImportProgress(progress);
     const results: typeof senateImportResults = [];
 
-    // Try to fetch the first vote detail to test CORS
+    // Try proxy for the first vote to verify it works
     let usePasteMode = false;
     const firstUrl = buildVoteDetailUrl(senateCongress, senateSession, selected[0]);
     try {
-      const resp = await fetch(firstUrl);
-      if (!resp.ok) throw new Error();
-      await resp.text(); // Just test if it works
+      await fetchSenateXml(firstUrl, session.access_token);
     } catch {
       usePasteMode = true;
     }
 
     if (usePasteMode) {
-      // Switch to paste queue mode
+      // Edge Function unavailable — fall back to paste queue
       setSenateDetailPasteMode(true);
       setSenateDetailPasteQueue(selected);
       setSenateDetailPasteIdx(0);
       return;
     }
 
-    // Direct fetch mode — process all selected votes
+    // Proxy works — fetch all selected votes through it
     for (const voteNum of selected) {
       progress.current++;
       setSenateImportProgress({ ...progress });
 
       try {
         const url = buildVoteDetailUrl(senateCongress, senateSession, voteNum);
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const xml = await resp.text();
+        const xml = await fetchSenateXml(url, session.access_token);
         const result = await importSingleVote(xml, voteNum);
         results.push(result);
         if (result.status === "imported") progress.imported++;
@@ -1267,7 +1291,18 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Form.Item name="result" label="Result">
-              <Input placeholder="e.g. Passed, Rejected, Agreed to" />
+              <Select
+                allowClear
+                placeholder="Select result"
+                options={[
+                  { value: "Passed", label: "Passed" },
+                  { value: "Rejected", label: "Rejected" },
+                  { value: "Agreed to", label: "Agreed to" },
+                  { value: "Not Sustained", label: "Not Sustained" },
+                  { value: "Well Taken", label: "Well Taken" },
+                  { value: "Confirmed", label: "Confirmed" },
+                ]}
+              />
             </Form.Item>
             <div />
           </div>
