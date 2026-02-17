@@ -257,6 +257,20 @@ function SenatorDetailSheet({
               <div>
                 <h4 className="text-sm font-bold text-slate-700 mb-3">
                   How They Voted ({incumbent.votes.length})
+                  {incumbent.govtrackUrl && (
+                    <>
+                      {" · "}
+                      <a
+                        href={incumbent.govtrackUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-normal text-slate-400 hover:text-blue-700 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                      >
+                        view key votes
+                        <ExternalLinkIcon className="w-3 h-3" />
+                      </a>
+                    </>
+                  )}
                 </h4>
                 <div className="space-y-2.5">
                   {incumbent.votes.map((v) => (
@@ -293,6 +307,22 @@ function SenatorDetailSheet({
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : incumbent.govtrackUrl ? (
+              <div>
+                <h4 className="text-sm font-bold text-slate-700 mb-2">How They Voted</h4>
+                <p className="text-sm text-slate-400">
+                  No voting records here yet.{" "}
+                  <a
+                    href={incumbent.govtrackUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-500 hover:text-blue-700 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                  >
+                    View key votes on GovTrack
+                    <ExternalLinkIcon className="w-3 h-3" />
+                  </a>
+                </p>
               </div>
             ) : (
               <p className="text-sm text-slate-400 italic">
@@ -508,7 +538,7 @@ function ResultsSummary({
 Re-elect: ${reelectCount} | Reject: ${rejectCount}
 Democrats: ${partyStats.Democrat.reelect}/${partyStats.Democrat.reject} | Republicans: ${partyStats.Republican.reelect}/${partyStats.Republican.reject}
 
-Take the quiz: https://themidtermproject.com/explore`;
+Take the quiz: https://themidtermproject.com/reelect-or-reject`;
 
   const handleShare = async () => {
     try {

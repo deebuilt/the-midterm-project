@@ -333,7 +333,7 @@ function GuideHouse({ navigate, isMobile }: Props) {
 function GuideExplore({ navigate, isMobile }: Props) {
   return (
     <div>
-      <PageHeader icon={<SwapOutlined />} iconBg="#FEF3C7" iconColor={AMBER} title="Explore (Swipe Cards)" url="/explore" />
+      <PageHeader icon={<SwapOutlined />} iconBg="#FEF3C7" iconColor={AMBER} title="Re-elect or Reject" url="/reelect-or-reject" />
       <Paragraph style={{ fontSize: 15, lineHeight: 1.8, color: SLATE }}>
         Tinder-style cards for competitive races. Swipe right/left to browse. Only competitive races appear here — the rating acts as the filter.
       </Paragraph>
@@ -533,7 +533,7 @@ const GUIDE_LINKS: { key: GuidePage; icon: React.ReactNode; title: string; url: 
   { key: "map", icon: <EnvironmentOutlined />, title: "Interactive Map", url: "/map", desc: "Color-coded US map + state ballot panels (4 admin pages)", bg: "#DCFCE7", iconColor: GREEN },
   { key: "senate", icon: <FlagOutlined />, title: "Senate Races", url: "/senate", desc: "All 33 Class II seats + 2 special elections, grouped by rating", bg: "#FEE2E2", iconColor: RED },
   { key: "house", icon: <BankOutlined />, title: "House Overview", url: "/house", desc: "Aggregate stats only — no individual races yet", bg: "#E0E7FF", iconColor: "#4F46E5" },
-  { key: "explore", icon: <SwapOutlined />, title: "Explore (Swipe Cards)", url: "/explore", desc: "Toss-up and lean races as swipeable cards", bg: "#FEF3C7", iconColor: AMBER },
+  { key: "reelect-or-reject", icon: <SwapOutlined />, title: "Re-elect or Reject", url: "/reelect-or-reject", desc: "Swipe through Senate incumbents and view voting records", bg: "#FEF3C7", iconColor: AMBER },
   { key: "calendar", icon: <ScheduleOutlined />, title: "Election Calendar", url: "/calendar", desc: "Primary dates, deadlines, early voting for all 50 states", bg: "#D1FAE5", iconColor: GREEN },
   { key: "whos-running", icon: <FileSearchOutlined />, title: "Who's Running", url: "/whos-running", desc: "FEC filings staging area — everyone who filed and raised $5K+", bg: "#EDE9FE", iconColor: PURPLE },
   { key: "volunteer", icon: <TeamOutlined />, title: "Volunteer Form", url: "footer", desc: "Footer signup form → volunteers table", bg: "#FCE7F3", iconColor: "#DB2777" },

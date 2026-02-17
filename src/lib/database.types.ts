@@ -95,6 +95,7 @@ export interface DbCandidate {
   is_incumbent: boolean;
   bioguide_id: string | null;
   fec_candidate_id: string | null;
+  govtrack_url: string | null;
   funds_raised: number | null;
   funds_spent: number | null;
   cash_on_hand: number | null;

@@ -52,6 +52,7 @@ interface CandidateRow {
   is_incumbent: boolean;
   bioguide_id: string | null;
   fec_candidate_id: string | null;
+  govtrack_url: string | null;
   funds_raised: number | null;
   funds_spent: number | null;
   cash_on_hand: number | null;
@@ -330,6 +331,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       is_incumbent: record.is_incumbent,
       bioguide_id: record.bioguide_id ?? "",
       fec_candidate_id: record.fec_candidate_id ?? "",
+      govtrack_url: record.govtrack_url ?? "",
       race_id: record.race_id ?? undefined,
     });
     setPhotoPreview(record.photo_url ?? "");
@@ -358,6 +360,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       is_incumbent: values.is_incumbent ?? false,
       bioguide_id: values.bioguide_id || null,
       fec_candidate_id: values.fec_candidate_id || null,
+      govtrack_url: values.govtrack_url || null,
     };
 
     if (editingCandidate) {
@@ -845,7 +848,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       {contextHolder}
 
       <Text type="secondary" style={{ display: "block", marginBottom: 16, fontSize: 13 }}>
-        Candidates appear on the Senate, Map, and Explore pages when assigned to a race.
+        Candidates appear on the Senate, Map, and Re-elect or Reject pages when assigned to a race.
         {" "}Select rows to bulk-assign to a race or delete.
       </Text>
 
@@ -1058,6 +1061,19 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               <Input placeholder="e.g., S8CA00502" />
             </Form.Item>
           </div>
+          <Form.Item
+            name="govtrack_url"
+            label={
+              <span>
+                GovTrack URL{" "}
+                <Tooltip title="Link to this candidate's GovTrack.us profile page. Shows voting records, bill sponsorships, and more.">
+                  <InfoCircleOutlined style={{ color: "#999" }} />
+                </Tooltip>
+              </span>
+            }
+          >
+            <Input placeholder="https://www.govtrack.us/congress/members/..." />
+          </Form.Item>
           <Form.Item
             name="is_incumbent"
             valuePropName="checked"
@@ -1276,7 +1292,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                   ) : (
                     <div>
                       <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
-                        Positions appear on the Explore page swipe cards and candidate profiles.
+                        Positions appear on the Re-elect or Reject page and candidate profiles.
                       </Text>
 
                       {/* Add position form */}
