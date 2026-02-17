@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { Card, Form, Input, Button, Alert, Typography, Tabs } from "antd";
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { signIn, sendMagicLink, sendPasswordReset } from "../../lib/supabase";
+import { Card, Form, Input, Button, Alert, Typography } from "antd";
+import { LockOutlined, MailOutlined, HomeOutlined } from "@ant-design/icons";
+import { signIn, sendPasswordReset } from "../../lib/supabase";
 
-const { Title, Text, Paragraph } = Typography;
-
-type TabKey = "password" | "magic-link" | "reset-password";
+const { Title, Text } = Typography;
 
 export default function LoginPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("password");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -27,27 +24,17 @@ export default function LoginPage() {
     // On success, LoginFlow will handle redirect
   }
 
-  async function handleMagicLink(values: { email: string }) {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    const { error } = await sendMagicLink(values.email);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess("Check your email for a magic link to sign in!");
+  async function handleForgotPassword() {
+    const email = (document.querySelector('input[type="text"]') as HTMLInputElement)?.value;
+    if (!email) {
+      setError("Enter your email above, then click Forgot password.");
+      return;
     }
-    setLoading(false);
-  }
-
-  async function handlePasswordReset(values: { email: string }) {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    const { error } = await sendPasswordReset(values.email);
+    const { error } = await sendPasswordReset(email);
 
     if (error) {
       setError(error.message);
@@ -108,118 +95,42 @@ export default function LoginPage() {
           />
         )}
 
-        <Tabs
-          activeKey={activeTab}
-          onChange={(key) => {
-            setActiveTab(key as TabKey);
-            setError(null);
-            setSuccess(null);
-          }}
-          items={[
-            {
-              key: "password",
-              label: "Password",
-              children: (
-                <Form layout="vertical" onFinish={handlePasswordLogin} autoComplete="off">
-                  <Form.Item
-                    name="email"
-                    label="Email"
-                    rules={[
-                      { required: true, message: "Please enter your email" },
-                      { type: "email", message: "Please enter a valid email" },
-                    ]}
-                  >
-                    <Input prefix={<MailOutlined />} placeholder="admin@example.com" />
-                  </Form.Item>
+        <Form layout="vertical" onFinish={handlePasswordLogin} autoComplete="off">
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Please enter your email" },
+              { type: "email", message: "Please enter a valid email" },
+            ]}
+          >
+            <Input prefix={<MailOutlined />} placeholder="admin@example.com" />
+          </Form.Item>
 
-                  <Form.Item
-                    name="password"
-                    label="Password"
-                    rules={[{ required: true, message: "Please enter your password" }]}
-                  >
-                    <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-                  </Form.Item>
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[{ required: true, message: "Please enter your password" }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+          </Form.Item>
 
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={loading} block>
-                      Sign In
-                    </Button>
-                  </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              Sign In
+            </Button>
+          </Form.Item>
 
-                  <div style={{ textAlign: "center" }}>
-                    <Button type="link" onClick={() => setActiveTab("reset-password")} style={{ padding: 0 }}>
-                      Forgot password?
-                    </Button>
-                  </div>
-                </Form>
-              ),
-            },
-            {
-              key: "magic-link",
-              label: "Magic Link",
-              children: (
-                <div>
-                  <Paragraph type="secondary" style={{ fontSize: 13, marginBottom: 16 }}>
-                    Enter your email and we'll send you a magic link to sign in.
-                  </Paragraph>
-                  <Form layout="vertical" onFinish={handleMagicLink} autoComplete="off">
-                    <Form.Item
-                      name="email"
-                      label="Email"
-                      rules={[
-                        { required: true, message: "Please enter your email" },
-                        { type: "email", message: "Please enter a valid email" },
-                      ]}
-                    >
-                      <Input prefix={<MailOutlined />} placeholder="admin@example.com" />
-                    </Form.Item>
-
-                    <Form.Item>
-                      <Button type="primary" htmlType="submit" loading={loading} block>
-                        Send Magic Link
-                      </Button>
-                    </Form.Item>
-                  </Form>
-                </div>
-              ),
-            },
-            {
-              key: "reset-password",
-              label: "Reset Password",
-              children: (
-                <div>
-                  <Paragraph type="secondary" style={{ fontSize: 13, marginBottom: 16 }}>
-                    Enter your email and we'll send you a link to reset your password.
-                  </Paragraph>
-                  <Form layout="vertical" onFinish={handlePasswordReset} autoComplete="off">
-                    <Form.Item
-                      name="email"
-                      label="Email"
-                      rules={[
-                        { required: true, message: "Please enter your email" },
-                        { type: "email", message: "Please enter a valid email" },
-                      ]}
-                    >
-                      <Input prefix={<MailOutlined />} placeholder="admin@example.com" />
-                    </Form.Item>
-
-                    <Form.Item>
-                      <Button type="primary" htmlType="submit" loading={loading} block>
-                        Send Reset Link
-                      </Button>
-                    </Form.Item>
-
-                    <div style={{ textAlign: "center" }}>
-                      <Button type="link" onClick={() => setActiveTab("password")} style={{ padding: 0 }}>
-                        Back to login
-                      </Button>
-                    </div>
-                  </Form>
-                </div>
-              ),
-            },
-          ]}
-        />
+          <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 4 }}>
+            <Button type="link" onClick={handleForgotPassword} style={{ padding: 0 }}>
+              Forgot password?
+            </Button>
+            <a href="/" style={{ fontSize: 13, color: "#64748b" }}>
+              <HomeOutlined style={{ marginRight: 4 }} />
+              Back to main site
+            </a>
+          </div>
+        </Form>
       </Card>
     </div>
   );

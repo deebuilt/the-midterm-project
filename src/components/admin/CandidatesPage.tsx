@@ -56,9 +56,11 @@ interface CandidateRow {
   funds_raised: number | null;
   funds_spent: number | null;
   cash_on_hand: number | null;
+  state_id: number | null;
   created_at: string;
   updated_at: string;
   // Loaded separately and merged in
+  state_abbr?: string | null;
   race_id?: number | null;
   race_label?: string | null;
 }
@@ -170,7 +172,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const loadCandidates = useCallback(async () => {
     setLoading(true);
     const [candidatesRes, assignmentsRes] = await Promise.all([
-      supabase.from("candidates").select("*").order("last_name"),
+      supabase.from("candidates").select("*, state:states!candidates_state_id_fkey(abbr)").order("last_name"),
       supabase.from("race_candidates").select(`
         candidate_id, race_id,
         race:races!inner(
@@ -196,13 +198,14 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       }
     }
 
-    const rows = ((candidatesRes.data as CandidateRow[]) ?? []).map((c) => {
+    const rows = ((candidatesRes.data ?? []) as any[]).map((c) => {
       const assignment = raceMap.get(c.id);
       return {
         ...c,
+        state_abbr: c.state?.abbr ?? null,
         race_id: assignment?.race_id ?? null,
         race_label: assignment?.label ?? null,
-      };
+      } as CandidateRow;
     });
 
     setCandidates(rows);
@@ -632,6 +635,39 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     Other: "O",
   };
 
+  /** Build smart-filtered race options for a given candidate */
+  function getSmartRaceOptions(record: CandidateRow) {
+    if (!record.state_abbr && !record.role_title) return raceSelectOptions;
+
+    const role = (record.role_title ?? "").toLowerCase();
+    let bodyMatch: string | null = null;
+    if (role.includes("senator")) bodyMatch = "US Senate";
+    else if (role.includes("representative") || role.includes("rep.")) bodyMatch = "US House";
+    else if (role.includes("governor")) bodyMatch = "Governor";
+
+    // Split into matching and non-matching races
+    const matching: typeof raceSelectOptions = [];
+    const rest: typeof raceSelectOptions = [];
+
+    for (const opt of raceSelectOptions) {
+      const race = allRaces.find((r) => r.id === opt.value);
+      if (!race) { rest.push(opt); continue; }
+
+      const stateMatch = !record.state_abbr || race.state_abbr === record.state_abbr;
+      const bodyOk = !bodyMatch || race.body_name === bodyMatch;
+
+      if (stateMatch && bodyOk) matching.push(opt);
+      else rest.push(opt);
+    }
+
+    if (matching.length === 0) return raceSelectOptions;
+    return [
+      ...matching,
+      ...(rest.length > 0 ? [{ value: -1 as number, label: "── Other races ──", disabled: true }] : []),
+      ...rest,
+    ];
+  }
+
   const columns = [
     {
       title: "",
@@ -650,11 +686,17 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     {
       title: "Name",
       key: "name",
-      width: 180,
+      width: 200,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         a.last_name.localeCompare(b.last_name),
-      filters: partyOptions.map((p) => ({ text: p.label, value: p.value })),
-      onFilter: (value: unknown, record: CandidateRow) => record.party === value,
+      filters: [
+        ...partyOptions.map((p) => ({ text: p.label, value: p.value })),
+        { text: "Incumbent", value: "__incumbent__" },
+      ],
+      onFilter: (value: unknown, record: CandidateRow) => {
+        if (value === "__incumbent__") return record.is_incumbent;
+        return record.party === value;
+      },
       render: (_: unknown, record: CandidateRow) => (
         <span>
           <a onClick={() => openDetailDrawer(record)}>
@@ -666,8 +708,24 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           >
             {partyLetters[record.party] ?? "?"}
           </Tag>
+          {record.is_incumbent && (
+            <Tag color="green" style={{ fontSize: 10, lineHeight: "16px", padding: "0 3px" }}>Inc</Tag>
+          )}
         </span>
       ),
+    },
+    {
+      title: "State",
+      key: "state",
+      width: 60,
+      sorter: (a: CandidateRow, b: CandidateRow) =>
+        (a.state_abbr ?? "").localeCompare(b.state_abbr ?? ""),
+      render: (_: unknown, record: CandidateRow) =>
+        record.state_abbr ? (
+          <Text style={{ fontSize: 12 }}>{record.state_abbr}</Text>
+        ) : (
+          <Text type="secondary" style={{ fontSize: 11 }}>—</Text>
+        ),
     },
     {
       title: "Role",
@@ -693,9 +751,10 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           loading={racesLoading}
           onChange={(val: number | undefined) => handleInlineRaceAssign(record.id, val ?? null)}
           filterOption={(input, option) =>
+            !(option as any)?.disabled &&
             (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
           }
-          options={raceSelectOptions}
+          options={getSmartRaceOptions(record)}
           style={{ width: "100%" }}
         />
       ),
@@ -716,20 +775,6 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             <Tag color="cyan" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>FEC</Tag>
           </Tooltip>
         ) : <Text type="secondary" style={{ fontSize: 11 }}>—</Text>,
-    },
-    {
-      title: "Inc.",
-      dataIndex: "is_incumbent",
-      key: "is_incumbent",
-      width: 50,
-      filters: [
-        { text: "Yes", value: true },
-        { text: "No", value: false },
-      ],
-      onFilter: (value: unknown, record: CandidateRow) =>
-        record.is_incumbent === value,
-      render: (val: boolean) =>
-        val ? <Tag color="green" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>Inc</Tag> : <Text type="secondary">—</Text>,
     },
     {
       title: "",
@@ -789,7 +834,8 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                 </a>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 2 }}>
                   <Tag color={partyColors[c.party] ?? "default"} style={{ margin: 0, fontSize: 10 }}>{c.party}</Tag>
-                  {c.is_incumbent && <Tag color="green" style={{ margin: 0, fontSize: 10 }}>Incumbent</Tag>}
+                  {c.is_incumbent && <Tag color="green" style={{ margin: 0, fontSize: 10 }}>Inc</Tag>}
+                  {c.state_abbr && <Tag style={{ margin: 0, fontSize: 10 }}>{c.state_abbr}</Tag>}
                 </div>
               </div>
             </div>
@@ -1085,6 +1131,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           <Form.Item
             name="race_id"
             label="Race Assignment"
+            tooltip="Races are auto-filtered based on the candidate's state and role when available."
           >
             <Select
               showSearch
@@ -1092,9 +1139,13 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               loading={racesLoading}
               placeholder="Assign to a race (optional)..."
               filterOption={(input, option) =>
+                !(option as any)?.disabled &&
                 (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
               }
-              options={raceSelectOptions}
+              options={(() => {
+                if (!editingCandidate) return raceSelectOptions;
+                return getSmartRaceOptions(editingCandidate);
+              })()}
             />
           </Form.Item>
 
