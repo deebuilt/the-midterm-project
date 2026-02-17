@@ -623,42 +623,50 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
     }
   }
 
-  // Get votes for all incumbent senators (left join — may be empty)
+  // Get votes for all incumbent senators via candidate_votes join table (may be empty)
   const candidateIds = senators.map((c: any) => c.id);
   let votesByCandidate = new Map<number, VotingRecord[]>();
 
   if (candidateIds.length > 0) {
-    const { data: votes } = await supabase
-      .from("votes")
+    const { data: candidateVotes } = await supabase
+      .from("candidate_votes")
       .select(`
         id,
         candidate_id,
-        bill_name,
-        bill_number,
         vote,
-        vote_date,
-        summary,
-        source_url,
-        topic:topics(name)
+        bill:votes!inner(
+          id,
+          bill_name,
+          bill_number,
+          vote_date,
+          summary,
+          source_url,
+          topic:topics(name)
+        )
       `)
-      .in("candidate_id", candidateIds)
-      .order("vote_date", { ascending: false });
+      .in("candidate_id", candidateIds);
 
-    for (const v of votes ?? []) {
+    for (const cv of candidateVotes ?? []) {
+      const bill = cv.bill as any;
       const record: VotingRecord = {
-        id: v.id,
-        billName: v.bill_name,
-        billNumber: v.bill_number,
-        vote: v.vote as VotingRecord["vote"],
-        voteDate: v.vote_date,
-        topic: (v.topic as any)?.name ?? null,
-        summary: v.summary,
-        sourceUrl: v.source_url,
+        id: bill.id,
+        billName: bill.bill_name,
+        billNumber: bill.bill_number,
+        vote: cv.vote as VotingRecord["vote"],
+        voteDate: bill.vote_date,
+        topic: bill.topic?.name ?? null,
+        summary: bill.summary,
+        sourceUrl: bill.source_url,
       };
-      if (!votesByCandidate.has(v.candidate_id)) {
-        votesByCandidate.set(v.candidate_id, []);
+      if (!votesByCandidate.has(cv.candidate_id)) {
+        votesByCandidate.set(cv.candidate_id, []);
       }
-      votesByCandidate.get(v.candidate_id)!.push(record);
+      votesByCandidate.get(cv.candidate_id)!.push(record);
+    }
+
+    // Sort each candidate's votes by date descending
+    for (const records of votesByCandidate.values()) {
+      records.sort((a, b) => (b.voteDate ?? "").localeCompare(a.voteDate ?? ""));
     }
   }
 

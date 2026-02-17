@@ -144,16 +144,25 @@ export interface DbCandidatePosition {
   created_at: string;
 }
 
+export type VoteEnum = "yea" | "nay" | "abstain" | "not_voting";
+
 export interface DbVote {
   id: number;
-  candidate_id: number;
   bill_name: string;
   bill_number: string | null;
-  vote: "yea" | "nay" | "abstain" | "not_voting";
   vote_date: string | null;
   topic_id: number | null;
   summary: string | null;
   source_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbCandidateVote {
+  id: number;
+  candidate_id: number;
+  vote_id: number;
+  vote: VoteEnum;
   created_at: string;
 }
 
