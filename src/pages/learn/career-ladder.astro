@@ -1,0 +1,372 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+---
+
+<Layout title="The Political Career Ladder" description="There's no single path to the top in American politics. Learn how politicians move between the House, Senate, Governor's mansion, and the presidency.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>The Political Career Ladder</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">The Political Career Ladder</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      There's no single path to the top. Careers in American politics zigzag, skip rungs, and sometimes move sideways.
+    </p>
+
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/career-ladder.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+
+      <!-- Intro -->
+      <p class="text-lg text-slate-600">
+        You might assume politicians climb a neat ladder: city council &rarr; state legislature &rarr; U.S. House &rarr; U.S. Senate &rarr; president. But in reality, there's no fixed career path. Some skip steps entirely, some move sideways, and plenty of careers top out at a single level &mdash; by choice or by losing.
+      </p>
+
+      <!-- The Rough Hierarchy -->
+      <h2 class="text-2xl font-bold">The Rough Hierarchy</h2>
+      <p class="text-slate-600">
+        There <em>is</em> a general pecking order based on scope of power. Here's how the major offices compare:
+      </p>
+
+      <!-- Desktop: visual tier diagram -->
+      <div class="hidden md:block not-prose">
+        <div class="space-y-3">
+          <!-- President -->
+          <div class="flex items-center gap-4">
+            <div class="w-28 text-right">
+              <span class="text-xs font-mono uppercase tracking-widest text-slate-400">Tier 1</span>
+            </div>
+            <div class="flex-1 bg-navy rounded-lg p-4 text-white">
+              <p class="font-bold text-lg">President &amp; Vice President</p>
+              <p class="text-sm text-white/70">Head of the executive branch. Sets the national agenda, commands the military, signs or vetoes laws.</p>
+            </div>
+          </div>
+          <!-- Senate / Governor -->
+          <div class="flex items-center gap-4">
+            <div class="w-28 text-right">
+              <span class="text-xs font-mono uppercase tracking-widest text-slate-400">Tier 2</span>
+            </div>
+            <div class="flex-1 grid grid-cols-2 gap-3">
+              <div class="bg-dem-light rounded-lg p-4 border border-dem/20">
+                <p class="font-bold text-dem-dark">U.S. Senator</p>
+                <p class="text-xs text-slate-600">100 members &middot; 6-year terms &middot; represents an entire state</p>
+              </div>
+              <div class="bg-tossup/10 rounded-lg p-4 border border-tossup/30">
+                <p class="font-bold text-slate-800">Governor</p>
+                <p class="text-xs text-slate-600">Executive of their state &middot; 4-year terms &middot; runs the government</p>
+              </div>
+            </div>
+          </div>
+          <!-- House -->
+          <div class="flex items-center gap-4">
+            <div class="w-28 text-right">
+              <span class="text-xs font-mono uppercase tracking-widest text-slate-400">Tier 3</span>
+            </div>
+            <div class="flex-1 bg-gop-light rounded-lg p-4 border border-gop/20">
+              <p class="font-bold text-gop-dark">U.S. Representative</p>
+              <p class="text-xs text-slate-600">435 members &middot; 2-year terms &middot; represents a congressional district</p>
+            </div>
+          </div>
+          <!-- State -->
+          <div class="flex items-center gap-4">
+            <div class="w-28 text-right">
+              <span class="text-xs font-mono uppercase tracking-widest text-slate-400">Tier 4</span>
+            </div>
+            <div class="flex-1 bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p class="font-bold text-slate-700">State Legislature</p>
+              <p class="text-xs text-slate-500">State senators &amp; state representatives &middot; make state laws &middot; the most common launching pad</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile: vertical tier diagram -->
+      <div class="md:hidden not-prose">
+        <div class="space-y-3">
+          <div class="bg-navy rounded-lg p-4 text-white">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-white/40">Tier 1</span>
+            <p class="font-bold">President &amp; Vice President</p>
+            <p class="text-xs text-white/70">Head of the executive branch</p>
+          </div>
+          <div class="bg-dem-light rounded-lg p-4 border border-dem/20">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Tier 2</span>
+            <p class="font-bold text-dem-dark">U.S. Senator</p>
+            <p class="text-xs text-slate-600">100 members &middot; 6-year terms &middot; represents a state</p>
+          </div>
+          <div class="bg-tossup/10 rounded-lg p-4 border border-tossup/30">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Tier 2</span>
+            <p class="font-bold text-slate-800">Governor</p>
+            <p class="text-xs text-slate-600">Executive of their state &middot; 4-year terms</p>
+          </div>
+          <div class="bg-gop-light rounded-lg p-4 border border-gop/20">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Tier 3</span>
+            <p class="font-bold text-gop-dark">U.S. Representative</p>
+            <p class="text-xs text-slate-600">435 members &middot; 2-year terms &middot; represents a district</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Tier 4</span>
+            <p class="font-bold text-slate-700">State Legislature</p>
+            <p class="text-xs text-slate-500">State senators &amp; state reps &middot; the most common launching pad</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-5 not-prose">
+        <p class="text-sm text-slate-700">
+          <strong>Why are governors on the same tier as senators?</strong> A senator is one vote out of 100 and must negotiate constantly. A governor is the singular executive of their state &mdash; they sign laws, command the National Guard, manage the state budget, and make appointments. Former Senator and Governor John Hoeven of North Dakota has said: "Anybody who's been a governor and a senator will tell you &mdash; being governor is the best job."
+        </p>
+      </div>
+
+      <!-- Common Paths -->
+      <h2 class="text-2xl font-bold">Common Career Paths</h2>
+      <p class="text-slate-600">
+        Here are the moves politicians actually make &mdash; and real examples of each:
+      </p>
+
+      <!-- Path cards -->
+      <div class="space-y-4 not-prose">
+
+        <!-- State Legislature → U.S. House -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">State Legislature</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-gop-light text-gop-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. House</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            The most common first step into federal politics. State lawmakers run for their local congressional district.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Jasmine Crockett</strong> &mdash; Texas state rep (District 100) &rarr; U.S. House (TX-30, 2023)
+          </p>
+        </div>
+
+        <!-- U.S. House → U.S. Senate -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-gop-light text-gop-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. House</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-dem-light text-dem-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. Senate</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            One of the most well-traveled paths in American politics. House members build a national profile, then run statewide.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Adam Schiff</strong> (CA), <strong>Andy Kim</strong> (NJ), <strong>Elissa Slotkin</strong> (MI) &mdash; all won Senate seats in 2024 after serving in the House
+          </p>
+        </div>
+
+        <!-- State Legislature → U.S. Senate (skip) -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full">State Legislature</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-dem-light text-dem-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. Senate</span>
+            <span class="text-xs text-tossup font-medium ml-1">(skipping the House)</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            Less common, but it happens. Some state legislators skip the House entirely and run statewide for Senate.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>James Talarico</strong> &mdash; Texas state rep (District 50) running for U.S. Senate in 2026, bypassing the U.S. House
+          </p>
+        </div>
+
+        <!-- U.S. House → Governor -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-gop-light text-gop-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. House</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-tossup/20 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Governor</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            Some House members trade the legislative branch for executive power back home.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Mikie Sherrill</strong> &mdash; U.S. House (NJ-11) &rarr; Governor of New Jersey (won 2025)
+          </p>
+        </div>
+
+        <!-- Governor → U.S. Senate -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-tossup/20 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Governor</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-dem-light text-dem-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. Senate</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            Very common. Former governors bring executive experience to the Senate.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Mitt Romney</strong> (MA Gov &rarr; UT Senate), <strong>John Hickenlooper</strong> (CO Gov &rarr; CO Senate), <strong>Tim Kaine</strong> (VA Gov &rarr; VA Senate)
+          </p>
+        </div>
+
+        <!-- U.S. Senator → Governor -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-dem-light text-dem-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. Senate</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-tossup/20 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Governor</span>
+            <span class="text-xs text-tossup font-medium ml-1">(rare &mdash; not a downgrade)</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            This one surprises people. Moving from the Senate to a governor's mansion is actually a move <em>toward</em> more direct power, not away from it. It's rare though &mdash; governors who become senators outnumber the reverse by more than 7&ratio;1.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Pete Wilson</strong> (CA Senator &rarr; CA Governor), <strong>Lawton Chiles</strong> (FL Senator &rarr; FL Governor)
+          </p>
+        </div>
+
+        <!-- Governor or Senate → President -->
+        <div class="border border-slate-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span class="inline-block bg-tossup/20 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Governor</span>
+            <span class="text-slate-400 mx-0.5">or</span>
+            <span class="inline-block bg-dem-light text-dem-dark text-xs font-bold px-2.5 py-1 rounded-full">U.S. Senate</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="inline-block bg-navy text-white text-xs font-bold px-2.5 py-1 rounded-full">President</span>
+          </div>
+          <p class="text-sm text-slate-600">
+            Both paths lead to the White House. Historically, governors have a slight edge &mdash; 17 presidents were previously governors.
+          </p>
+          <p class="text-xs text-slate-400 mt-2">
+            <strong>Governors:</strong> Reagan (CA), Clinton (AR), George W. Bush (TX) &nbsp;&middot;&nbsp;
+            <strong>Senators:</strong> Obama (IL), JFK (MA), Biden (DE)
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Case Study: Texas 2026 -->
+      <h2 class="text-2xl font-bold">Case Study: Texas 2026</h2>
+      <p class="text-slate-600">
+        The 2026 Texas Senate race is a perfect example of how different career paths converge on the same seat. Two Democrats from very different backgrounds are competing for the chance to challenge four-term Republican incumbent <strong>John Cornyn</strong>.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <p class="text-xs font-mono uppercase tracking-widest text-slate-400 mb-2">Path A: State &rarr; Federal</p>
+          <p class="font-bold text-navy text-lg mb-1">James Talarico</p>
+          <div class="space-y-2 text-sm text-slate-600">
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</span>
+              <span>Teacher (Teach For America, San Antonio)</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</span>
+              <span>Texas State Representative (2019&ndash;present)</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-dem text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</span>
+              <span>Running for U.S. Senate (2026) &mdash; skipping the House</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <p class="text-xs font-mono uppercase tracking-widest text-slate-400 mb-2">Path B: State &rarr; House &rarr; Senate</p>
+          <p class="font-bold text-navy text-lg mb-1">Jasmine Crockett</p>
+          <div class="space-y-2 text-sm text-slate-600">
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">1</span>
+              <span>Civil rights attorney (Dallas)</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">2</span>
+              <span>Texas State Representative, Dist. 100 (2021&ndash;2023)</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">3</span>
+              <span>U.S. House, TX-30 (2023&ndash;present)</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="inline-block w-5 h-5 rounded-full bg-dem text-white text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">4</span>
+              <span>Running for U.S. Senate (2026)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Both started in the Texas state legislature. Crockett took the more traditional route through the U.S. House first, while Talarico is attempting the rarer leap straight from state rep to U.S. Senate. Either would face Cornyn, who has held his seat since 2002 and is seeking a fifth term.
+      </p>
+
+      <!-- New Jersey 2025 -->
+      <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 not-prose">
+        <p class="text-xs font-mono uppercase tracking-widest text-slate-400 mb-2">Bonus: New Jersey pulled off both paths in one cycle</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
+          <div>
+            <p class="font-bold text-navy">Andy Kim</p>
+            <p>U.S. House (NJ-3) &rarr; U.S. Senate (2024)</p>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Mikie Sherrill</p>
+            <p>U.S. House (NJ-11) &rarr; Governor (2025)</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mt-3">
+          Two House members from the same state, same party, same era &mdash; one moved up to the Senate, the other moved sideways to the governor's mansion. Neither path was a "promotion" over the other.
+        </p>
+      </div>
+
+      <!-- The Lifers -->
+      <h2 class="text-2xl font-bold">Not Everyone Climbs</h2>
+      <p class="text-slate-600">
+        Many politicians stay in one chamber their entire career &mdash; sometimes for decades. That doesn't mean they lack ambition. It often means they've built seniority, chair powerful committees, and wield enormous influence right where they are.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">House Lifers</p>
+          <ul class="space-y-1 text-sm text-slate-600">
+            <li><strong>John Dingell</strong> (MI) &mdash; 59 years in the House, the all-time record</li>
+            <li><strong>John Conyers</strong> (MI) &mdash; 52 years, co-founded the Congressional Black Caucus</li>
+          </ul>
+        </div>
+        <div class="border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-800 mb-1">Senate Lifers</p>
+          <ul class="space-y-1 text-sm text-slate-600">
+            <li><strong>Robert Byrd</strong> (WV) &mdash; 51 years in the Senate, the longest-serving ever</li>
+            <li><strong>Patrick Leahy</strong> (VT) &mdash; 48 years, never attempted a presidential run</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Key Takeaway -->
+      <h2 class="text-2xl font-bold">The Takeaway</h2>
+
+      <div class="bg-navy rounded-xl p-6 not-prose text-white">
+        <div class="space-y-3 text-sm">
+          <p>There's no single career ladder in American politics. Here's what the data shows:</p>
+          <ul class="space-y-2 text-white/80">
+            <li><strong class="text-white">Most common path:</strong> State legislature &rarr; U.S. House &rarr; U.S. Senate</li>
+            <li><strong class="text-white">Governor &ne; demotion:</strong> Moving from the Senate to a governor's mansion is a move toward more direct power</li>
+            <li><strong class="text-white">Skipping steps is possible:</strong> Obama went from state senate to U.S. Senate to president &mdash; never serving in the House</li>
+            <li><strong class="text-white">Many careers plateau:</strong> And that's okay. Seniority in one chamber can mean more real power than a title upgrade</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-sm font-medium text-slate-700 mb-2">
+          Now that you know the paths, explore the races:
+        </p>
+        <p class="text-sm font-medium">
+          <a href="/reelect-or-reject" class="text-tossup underline">Re-elect or Reject</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/find-your-ballot" class="text-dem underline">Find Your Ballot</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/learn/how-congress-works" class="text-navy underline">How Congress Works</a>
+          &nbsp;&middot;&nbsp;
+          <a href="/learn/how-to-run" class="text-gop underline">How to Run for Congress</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

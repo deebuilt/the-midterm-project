@@ -10,19 +10,45 @@ const primaryLinks = [
   { href: "/news", label: "News" },
 ];
 
-const learnLinks = [
-  { href: "/learn", label: "All Guides" },
-  { href: "/learn/what-are-midterms", label: "What Are Midterms?" },
-  { href: "/learn/how-congress-works", label: "How Congress Works" },
-  { href: "/learn/congressional-hearings", label: "Congressional Hearings" },
-  { href: "/senate", label: "Senate" },
-  { href: "/house", label: "House" },
-  { href: "/governors", label: "Governors" },
-  { href: "/learn/reading-your-ballot", label: "Reading Your Ballot" },
-  { href: "/learn/open-closed-primaries", label: "Open vs. Closed Primaries" },
-  { href: "/learn/how-to-run", label: "How to Run" },
-  { href: "/learn/voter-turnout", label: "Voter Turnout" },
+const learnGroups = [
+  {
+    label: "The Basics",
+    links: [
+      { href: "/learn/what-are-midterms", label: "What Are Midterms?" },
+      { href: "/learn/how-congress-works", label: "How Congress Works" },
+    ],
+  },
+  {
+    label: "The Bodies",
+    links: [
+      { href: "/senate", label: "Senate" },
+      { href: "/house", label: "House" },
+      { href: "/governors", label: "Governors" },
+    ],
+  },
+  {
+    label: "Understanding Elections",
+    links: [
+      { href: "/learn/congressional-hearings", label: "Congressional Hearings" },
+      { href: "/learn/executive-orders", label: "Executive Orders" },
+      { href: "/learn/reading-your-ballot", label: "Reading Your Ballot" },
+      { href: "/learn/open-closed-primaries", label: "Open vs. Closed Primaries" },
+      { href: "/learn/voter-turnout", label: "Voter Turnout" },
+      { href: "/learn/special-elections", label: "Special Elections" },
+      { href: "/learn/bills-and-votes", label: "How Bills & Votes Work" },
+      { href: "/learn/career-ladder", label: "The Political Career Ladder" },
+    ],
+  },
+  {
+    label: "Get Involved",
+    links: [
+      { href: "/learn/how-to-run", label: "How to Run" },
+      { href: "/take-action", label: "Take Action" },
+    ],
+  },
 ];
+
+const allLearnLinks = learnGroups.flatMap((g) => g.links);
 
 const moreLinks = [
   { href: "/engage", label: "Voter Tools" },
@@ -33,13 +59,18 @@ const moreLinks = [
 ];
 
 const isLearnActive =
-  learnLinks.some(
+  allLearnLinks.some(
     (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
   ) || currentPath.startsWith("/learn/");
 
 const isMoreActive = moreLinks.some(
   (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
 );
+
+const isGroupActive = (links: { href: string }[]) =>
+  links.some(
+    (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
+  );
 ---
 
 <header class="bg-navy text-white sticky top-0 z-50">
@@ -63,7 +94,7 @@ const isMoreActive = moreLinks.some(
         </a>
       </li>
 
-      <!-- Learn dropdown -->
+      <!-- Learn dropdown with flyout -->
       <li class="relative">
         <button
           id="learn-btn"
@@ -77,26 +108,58 @@ const isMoreActive = moreLinks.some(
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <ul
+        <div
           id="learn-menu"
           class="hidden absolute left-0 top-full mt-2 bg-navy border border-white/10 rounded-lg py-2 min-w-[200px] shadow-lg"
         >
-          {learnLinks.map((link) => (
-            <li>
-              <a
-                href={link.href}
+          <!-- All Guides link -->
+          <a
+            href="/learn"
+            class:list={[
+              "block px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors",
+              currentPath === "/learn" ? "text-tossup" : "text-white/80",
+            ]}
+          >
+            All Guides
+          </a>
+          <div class="border-t border-white/10 my-1"></div>
+          <!-- Category rows -->
+          {learnGroups.map((group, i) => (
+            <div class="relative learn-group" data-group={i}>
+              <button
                 class:list={[
-                  "block px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors",
-                  currentPath === link.href || currentPath.startsWith(link.href + "/")
-                    ? "text-tossup"
-                    : "text-white/80",
+                  "w-full text-left px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors flex items-center justify-between cursor-default learn-group-btn",
+                  isGroupActive(group.links) ? "text-tossup" : "text-white/80",
                 ]}
+                data-group={i}
               >
-                {link.label}
-              </a>
-            </li>
+                {group.label}
+                <svg class="w-3 h-3 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <!-- Flyout sub-panel -->
+              <div
+                class="hidden absolute left-full top-0 -ml-1 bg-navy border border-white/10 rounded-lg py-2 min-w-[220px] shadow-lg learn-flyout"
+                data-group={i}
+              >
+                {group.links.map((link) => (
+                  <a
+                    href={link.href}
+                    class:list={[
+                      "block px-4 py-2 text-sm hover:text-tossup hover:bg-white/5 transition-colors",
+                      currentPath === link.href || currentPath.startsWith(link.href + "/")
+                        ? "text-tossup"
+                        : "text-white/80",
+                    ]}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </li>
 
       <!-- Primary nav links -->
@@ -212,22 +275,49 @@ const isMoreActive = moreLinks.some(
       </li>
     ))}
 
-    {/* Learn section */}
-    <li class="pt-3 pb-1 text-xs text-white/30 uppercase tracking-wider">Learn</li>
-    {learnLinks.map((link) => (
-      <li>
-        <a
-          href={link.href}
-          class:list={[
-            "block py-2 hover:text-tossup transition-colors pl-2",
-            currentPath === link.href || currentPath.startsWith(link.href + "/")
-              ? "text-tossup"
-              : "text-white/80",
-          ]}
-        >
-          {link.label}
-        </a>
-      </li>
+    {/* Learn section — accordion */}
+    <li class="pt-3 pb-1">
+      <a href="/learn" class:list={[
+        "text-xs uppercase tracking-wider hover:text-tossup transition-colors",
+        currentPath === "/learn" ? "text-tossup" : "text-white/30",
+      ]}>Learn &mdash; All Guides</a>
+    </li>
+    {learnGroups.map((group, i) => (
+      <>
+        <li>
+          <button
+            class:list={[
+              "w-full text-left py-2 pl-2 flex items-center justify-between hover:text-tossup transition-colors mobile-learn-toggle",
+              isGroupActive(group.links) ? "text-tossup" : "text-white/80",
+            ]}
+            data-mobile-group={i}
+          >
+            {group.label}
+            <svg class="w-3.5 h-3.5 text-white/30 transition-transform mobile-learn-chevron" data-mobile-group={i} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </li>
+        <li>
+          <ul class="hidden mobile-learn-links" data-mobile-group={i}>
+            {group.links.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class:list={[
+                    "block py-2 hover:text-tossup transition-colors pl-4",
+                    currentPath === link.href || currentPath.startsWith(link.href + "/")
+                      ? "text-tossup"
+                      : "text-white/80",
+                  ]}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </li>
+      </>
     ))}
 
     {/* More section */}
@@ -265,11 +355,31 @@ const isMoreActive = moreLinks.some(
   learnBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     learnMenu?.classList.toggle("hidden");
+    // Close all flyouts when re-opening
+    document.querySelectorAll(".learn-flyout").forEach((f) => f.classList.add("hidden"));
     moreMenu?.classList.add("hidden");
   });
 
   learnMenu?.addEventListener("click", (e) => {
     e.stopPropagation();
+  });
+
+  // Desktop flyout: show sub-panel on hover
+  document.querySelectorAll(".learn-group").forEach((groupEl) => {
+    const btn = groupEl.querySelector(".learn-group-btn") as HTMLElement;
+    const flyout = groupEl.querySelector(".learn-flyout") as HTMLElement;
+    if (!btn || !flyout) return;
+
+    groupEl.addEventListener("mouseenter", () => {
+      // Hide all other flyouts
+      document.querySelectorAll(".learn-flyout").forEach((f) => f.classList.add("hidden"));
+      flyout.classList.remove("hidden");
+    });
+  });
+
+  // Hide flyouts when mouse leaves the entire learn menu
+  learnMenu?.addEventListener("mouseleave", () => {
+    document.querySelectorAll(".learn-flyout").forEach((f) => f.classList.add("hidden"));
   });
 
   // Desktop "More" dropdown
@@ -290,5 +400,32 @@ const isMoreActive = moreLinks.some(
   document.addEventListener("click", () => {
     learnMenu?.classList.add("hidden");
     moreMenu?.classList.add("hidden");
+  });
+
+  // Mobile accordion toggles
+  document.querySelectorAll(".mobile-learn-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const groupId = (btn as HTMLElement).dataset.mobileGroup;
+      const links = document.querySelector(
+        `.mobile-learn-links[data-mobile-group="${groupId}"]`
+      );
+      const chevron = document.querySelector(
+        `.mobile-learn-chevron[data-mobile-group="${groupId}"]`
+      );
+
+      if (!links) return;
+
+      const isOpen = !links.classList.contains("hidden");
+
+      // Close all other groups
+      document.querySelectorAll(".mobile-learn-links").forEach((el) => el.classList.add("hidden"));
+      document.querySelectorAll(".mobile-learn-chevron").forEach((el) => el.classList.remove("rotate-180"));
+
+      // Toggle this group
+      if (!isOpen) {
+        links.classList.remove("hidden");
+        chevron?.classList.add("rotate-180");
+      }
+    });
   });
 </script>
