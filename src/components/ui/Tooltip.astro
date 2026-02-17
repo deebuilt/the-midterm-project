@@ -1,16 +1,117 @@
 ---
+import { glossary } from "../../data/glossary";
+
 interface Props {
+  /** Display text (what the user sees inline). */
   term: string;
-  definition: string;
+  /** Direct definition override. If omitted, looks up by slug. */
+  definition?: string;
+  /** Glossary slug to auto-look up the short definition. */
+  slug?: string;
 }
 
-const { term, definition } = Astro.props;
+const { term, definition, slug } = Astro.props;
+
+// Look up from glossary if slug provided and no definition override
+const entry = slug ? glossary.find((g) => g.slug === slug) : undefined;
+const tipText = definition ?? entry?.short ?? "";
+const glossaryHref = entry ? `/glossary#${entry.slug}` : slug ? `/glossary#${slug}` : undefined;
 ---
 
-<span class="group relative inline-block">
-  <span class="border-b border-dotted border-slate-400 cursor-help">{term}</span>
-  <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-navy text-white text-xs rounded-lg p-3 leading-relaxed shadow-lg z-50">
-    {definition}
-    <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-navy"></span>
-  </span>
+<span class="glossary-tip relative inline-block">
+  <span
+    class="border-b border-dotted border-slate-400 cursor-help text-navy"
+    data-tip={tipText}
+    data-href={glossaryHref}
+    tabindex="0"
+    role="button"
+    aria-label={`Definition: ${term}`}
+  >{term}</span>
 </span>
+
+<script>
+  // Glossary tooltip handler — runs once, delegates all tips
+  if (!window.__glossaryTipInit) {
+    window.__glossaryTipInit = true;
+
+    let activePopup: HTMLElement | null = null;
+
+    function closePopup() {
+      if (activePopup) {
+        activePopup.remove();
+        activePopup = null;
+      }
+    }
+
+    function showPopup(target: HTMLElement) {
+      closePopup();
+
+      const tip = target.dataset.tip;
+      if (!tip) return;
+
+      const popup = document.createElement("div");
+      popup.className =
+        "fixed z-[60] w-72 bg-navy text-white text-xs rounded-lg p-3 leading-relaxed shadow-lg";
+      popup.style.pointerEvents = "auto";
+
+      const href = target.dataset.href;
+      popup.innerHTML = href
+        ? `${tip} <a href="${href}" class="underline text-tossup ml-1">Full definition &rarr;</a>`
+        : tip;
+
+      document.body.appendChild(popup);
+
+      // Position: above the target if room, below if not
+      const rect = target.getBoundingClientRect();
+      const popupH = popup.offsetHeight;
+      const popupW = popup.offsetWidth;
+
+      let top = rect.top - popupH - 8;
+      if (top < 8) top = rect.bottom + 8;
+
+      let left = rect.left + rect.width / 2 - popupW / 2;
+      if (left < 8) left = 8;
+      if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8;
+
+      popup.style.top = `${top}px`;
+      popup.style.left = `${left}px`;
+
+      activePopup = popup;
+    }
+
+    // Click/tap on tip trigger
+    document.addEventListener("click", (e) => {
+      const trigger = (e.target as HTMLElement).closest("[data-tip]");
+      if (trigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (activePopup && activePopup.previousElementSibling === trigger) {
+          closePopup();
+        } else {
+          showPopup(trigger as HTMLElement);
+        }
+        return;
+      }
+      // Click outside popup closes it
+      if (activePopup && !activePopup.contains(e.target as Node)) {
+        closePopup();
+      }
+    });
+
+    // Escape closes
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closePopup();
+    });
+
+    // Also support Enter/Space on focused tips
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        const trigger = (e.target as HTMLElement).closest("[data-tip]");
+        if (trigger) {
+          e.preventDefault();
+          showPopup(trigger as HTMLElement);
+        }
+      }
+    });
+  }
+</script>

@@ -1,0 +1,371 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
+import Tooltip from "../../components/ui/Tooltip.astro";
+---
+
+<Layout title="How Bills & Votes Work" description="How a bill becomes a law, how the Senate and House vote differently, and what a filibuster actually is.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Bills &amp; Votes</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-3">How Bills &amp; Votes Work in Congress</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      Where laws start, how the Senate and House handle them differently, and why 60 votes matter more than 51.
+    </p>
+
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/bills-and-votes.mp3" />
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+
+      <!-- INTRO -->
+      <p class="text-slate-600">
+        Every federal law in the United States starts as a bill. Someone in Congress writes it, it gets debated, it gets voted on, and&mdash;if everything lines up&mdash;the president signs it into law. That's the simple version. The real process is messier, slower, and full of chokepoints that can kill a bill without a vote ever happening.
+      </p>
+
+      <!-- WHERE BILLS START -->
+      <h2 class="text-2xl font-bold">Where Bills Start</h2>
+      <p class="text-slate-600">
+        Any member of Congress&mdash;a senator or a representative&mdash;can introduce a bill. It gets a number (like <strong>H.R. 1234</strong> for House bills or <strong>S. 567</strong> for Senate bills) and is assigned to a <Tooltip term="committee" slug="committee" />.
+      </p>
+      <p class="text-slate-600">
+        A bill can start in either chamber, with one exception: revenue bills (anything about taxes or spending) must originate in the House. This was a deliberate choice by the framers&mdash;since House members face voters every two years, they're considered closer to the people and should have first say over the purse strings.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 not-prose">
+        <p class="text-sm text-slate-600">
+          <strong class="text-navy">Numbering tip:</strong> &ldquo;H.R.&rdquo; stands for House of Representatives, not &ldquo;House Resolution.&rdquo; A Senate bill gets an &ldquo;S.&rdquo; prefix. Joint resolutions (H.J.Res. / S.J.Res.) have the force of law too and are used for things like constitutional amendments. Bill numbers reset every two years when a new Congress starts&mdash;H.R. 1 in the 119th Congress is a completely different bill from H.R. 1 in the 118th. The number &ldquo;1&rdquo; is traditionally reserved for the majority party's top priority.
+        </p>
+      </div>
+
+      <!-- COMMITTEES -->
+      <h2 class="text-2xl font-bold">What Are Congressional Committees?</h2>
+      <p class="text-slate-600">
+        Congress can't have all 535 members debate every bill together&mdash;nothing would get done. Instead, work is divided among <strong>committees</strong>: smaller groups of senators or representatives who specialize in a specific policy area. Think of them as the workgroups that do the heavy lifting before anything reaches the full chamber.
+      </p>
+      <p class="text-slate-600">
+        Each committee has a <strong>chair</strong> (always from the majority party) who controls the agenda&mdash;which bills get hearings, which get ignored. Members are assigned to committees by their party leadership, often based on seniority, expertise, or strategic value. A senator might serve on the Armed Services Committee and the Judiciary Committee at the same time.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 not-prose">
+        <p class="text-sm text-slate-600 mb-2">
+          <strong class="text-navy">Key committees you'll hear about:</strong>
+        </p>
+        <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+          <li><strong>Appropriations</strong> &mdash; controls federal spending</li>
+          <li><strong>Armed Services</strong> &mdash; military and defense policy</li>
+          <li><strong>Judiciary</strong> &mdash; courts, immigration, constitutional issues</li>
+          <li><strong>Finance</strong> (Senate) / <strong>Ways and Means</strong> (House) &mdash; taxes and revenue</li>
+          <li><strong>Intelligence</strong> &mdash; oversight of CIA, NSA, and other agencies</li>
+          <li><strong>Rules</strong> (House only) &mdash; controls how bills are debated on the floor</li>
+        </ul>
+      </div>
+
+      <h2 class="text-2xl font-bold">The Committee Stage</h2>
+      <p class="text-slate-600">
+        Most bills die in committee&mdash;this is where the gatekeeping happens. The committee chair decides whether a bill even gets a hearing. If it does, the committee holds hearings (where experts and officials testify), debates the bill, possibly amends it, and votes on whether to send it to the full chamber. This is called <strong>reporting</strong> the bill out.
+      </p>
+      <p class="text-slate-600">
+        If the chair doesn't want a bill to move, it simply never gets scheduled. No hearing, no vote, no debate. The bill quietly dies. This is one reason committee assignments matter so much&mdash;the chair of a committee has enormous power over what legislation even gets considered.
+      </p>
+
+      <!-- HOW THE HOUSE VOTES -->
+      <h2 class="text-2xl font-bold">How the House Votes</h2>
+      <p class="text-slate-600">
+        The House of Representatives has 435 voting members. To pass a bill, you need a <strong>simple majority: 218 votes</strong>. Debate time is limited and tightly controlled by the Rules Committee.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Vote Type</th>
+              <th class="px-4 py-3 font-semibold">How It Works</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Voice Vote</td>
+              <td class="px-4 py-3 text-slate-600">Members shout &ldquo;aye&rdquo; or &ldquo;nay.&rdquo; The presiding officer judges which side is louder. No individual votes are recorded.</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Division Vote</td>
+              <td class="px-4 py-3 text-slate-600">Members stand to be counted. Still no names recorded&mdash;just a head count.</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Recorded Vote (<Tooltip term="Roll Call" slug="roll-call" />)</td>
+              <td class="px-4 py-3 text-slate-600">Electronic voting. Each member's name and vote are published. This is the one that shows up in voting records.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-slate-600">
+        In the House, the Speaker and majority leadership have enormous power. They control which bills reach the floor, how debate is structured, and often the outcome is known before a vote happens. The minority party can propose amendments, but the Rules Committee can block them.
+      </p>
+
+      <!-- HOW THE SENATE VOTES -->
+      <h2 class="text-2xl font-bold">How the Senate Votes</h2>
+      <p class="text-slate-600">
+        The Senate has 100 members. To pass most bills, you need a <strong>simple majority: 51 votes</strong> (or 50 plus the vice president breaking a tie). But there's a catch&mdash;before you can <em>vote</em>, you often need to <em>end debate</em> first.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Threshold</th>
+              <th class="px-4 py-3 font-semibold">Votes Needed</th>
+              <th class="px-4 py-3 font-semibold">Used For</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Simple Majority</td>
+              <td class="px-4 py-3 text-slate-600">51</td>
+              <td class="px-4 py-3 text-slate-600">Passing most bills, confirming nominees</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Cloture (end debate)</td>
+              <td class="px-4 py-3 text-slate-600">60</td>
+              <td class="px-4 py-3 text-slate-600">Overcoming a filibuster on legislation</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Supermajority</td>
+              <td class="px-4 py-3 text-slate-600">67</td>
+              <td class="px-4 py-3 text-slate-600">Overriding a veto, constitutional amendments, convicting in impeachment</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- THE FILIBUSTER -->
+      <h2 class="text-2xl font-bold">The Filibuster</h2>
+      <p class="text-slate-600">
+        The Senate allows unlimited debate unless 60 senators vote to end it. This means a single senator (or a group of 41) can block a bill from ever reaching a final vote by refusing to stop debating. That's a <Tooltip term="filibuster" slug="filibuster" />.
+      </p>
+      <p class="text-slate-600">
+        In practice, senators don't have to stand and talk for hours anymore (though they can). The modern filibuster is mostly procedural&mdash;a senator signals they'll filibuster, and the majority leader knows they don't have 60 votes for <Tooltip term="cloture" slug="cloture" />, so the bill simply never comes to a vote.
+      </p>
+
+      <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 not-prose">
+        <h4 class="font-bold text-navy mb-2">Why 60, not 51?</h4>
+        <p class="text-sm text-slate-600">
+          The filibuster isn't in the Constitution. It's a Senate rule. The Senate could change it with a simple majority vote at any time. Over the years, both parties have carved out exceptions: in 2013, Democrats eliminated the filibuster for most judicial and executive nominations. In 2017, Republicans extended that exception to Supreme Court nominees. But for legislation, the 60-vote threshold remains.
+        </p>
+      </div>
+
+      <p class="text-slate-600">
+        This is why you'll hear phrases like &ldquo;doesn't have the votes to overcome a filibuster&rdquo; even when a bill has majority support. A bill can have 55 senators in favor and still fail.
+      </p>
+
+      <!-- BUDGET RECONCILIATION -->
+      <h2 class="text-2xl font-bold">The Filibuster Workaround: Budget Reconciliation</h2>
+      <p class="text-slate-600">
+        There's one major way to bypass the filibuster: <Tooltip term="budget reconciliation" slug="reconciliation" />. This special process lets the Senate pass certain spending, revenue, and debt limit bills with just 51 votes. It's limited to budget-related provisions and can only be used a few times per year.
+      </p>
+      <p class="text-slate-600">
+        Major legislation has been passed this way, including the 2017 Tax Cuts and Jobs Act, the 2021 American Rescue Plan, and the 2022 Inflation Reduction Act. If a bill can be framed as a budget matter, reconciliation is often the only realistic path when the Senate is closely divided.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 not-prose">
+        <p class="text-sm text-slate-600">
+          <strong class="text-navy">The Byrd Rule:</strong> Named after Senator Robert Byrd, this rule prevents non-budgetary provisions from being smuggled into reconciliation bills. The Senate parliamentarian decides what qualifies. Provisions that don't directly affect spending or revenue get stripped out&mdash;they call this a &ldquo;Byrd bath.&rdquo;
+        </p>
+      </div>
+
+      <!-- BILL TO LAW FLOWCHART -->
+      <h2 class="text-2xl font-bold">From Bill to Law: The Full Path</h2>
+      <p class="text-slate-600">
+        Here's the complete journey. A bill can start in either chamber (except revenue bills, which must start in the House).
+      </p>
+
+      <div class="not-prose">
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+            <div>
+              <p class="font-semibold text-navy">Introduction</p>
+              <p class="text-sm text-slate-600">A member of the House or Senate introduces the bill. It gets a number and is assigned to a committee.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+            <div>
+              <p class="font-semibold text-navy">Committee Review</p>
+              <p class="text-sm text-slate-600">The committee holds hearings, debates the bill, and may amend it. If approved, it's reported to the full chamber. Most bills die here.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+            <div>
+              <p class="font-semibold text-navy">Floor Debate &amp; Vote</p>
+              <p class="text-sm text-slate-600">The full chamber debates and votes. In the House, debate is time-limited. In the Senate, debate can go on indefinitely unless 60 senators vote for cloture.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">4</div>
+            <div>
+              <p class="font-semibold text-navy">The Other Chamber</p>
+              <p class="text-sm text-slate-600">If passed, the bill goes to the other chamber and starts the process over&mdash;committee, debate, vote.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">5</div>
+            <div>
+              <p class="font-semibold text-navy">Conference Committee</p>
+              <p class="text-sm text-slate-600">If the two chambers pass different versions, a <Tooltip term="conference committee" slug="conference-committee" /> works out a compromise. Both chambers must then vote on the identical final text.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">6</div>
+            <div>
+              <p class="font-semibold text-navy">Presidential Action</p>
+              <p class="text-sm text-slate-600">The president signs the bill into law, <Tooltip term="vetoes" slug="veto" /> it (Congress can override with a two-thirds vote in both chambers), or does nothing&mdash;in which case it becomes law after 10 days, unless Congress adjourns (a &ldquo;pocket veto&rdquo;).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TYPES OF VOTES -->
+      <h2 class="text-2xl font-bold">Types of Votes You'll See</h2>
+      <p class="text-slate-600">
+        When you look up how a senator or representative voted, you'll see several categories:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+          <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">YEA</span>
+          <p class="text-sm text-slate-600 mt-2">Voted in favor of the bill or amendment.</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+          <span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">NAY</span>
+          <p class="text-sm text-slate-600 mt-2">Voted against the bill or amendment.</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">NOT VOTING</span>
+          <p class="text-sm text-slate-600 mt-2">Absent or chose not to vote. Common during medical leave, travel, or conflicts of interest.</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">PRESENT</span>
+          <p class="text-sm text-slate-600 mt-2">Attended but didn't vote yea or nay. Rare&mdash;used as a form of protest or to avoid a conflict of interest while still being on record.</p>
+        </div>
+      </div>
+
+      <!-- PROCEDURAL VS FINAL VOTES -->
+      <h2 class="text-2xl font-bold">Procedural vs. Final Passage Votes</h2>
+      <p class="text-slate-600">
+        Not every vote is on a final bill. Many votes are <strong>procedural</strong>&mdash;votes on whether to bring a bill to the floor, whether to limit debate, or whether to allow specific amendments. These are often more revealing than the final vote because they show who's willing to let a bill move forward at all.
+      </p>
+      <p class="text-slate-600">
+        A senator might vote &ldquo;yea&rdquo; on cloture (ending debate) but &ldquo;nay&rdquo; on final passage. This means they wanted the bill to get a vote but didn't support it. Conversely, some senators vote against cloture knowing the bill will pass anyway&mdash;a way to oppose it on the record without actually blocking it.
+      </p>
+
+      <!-- WHY BILLS FAIL -->
+      <h2 class="text-2xl font-bold">Why Most Bills Never Become Law</h2>
+      <p class="text-slate-600">
+        In any given Congress, thousands of bills are introduced. Fewer than 10% become law. Here's where they die:
+      </p>
+      <ul class="list-disc list-inside space-y-1.5 text-slate-600">
+        <li><strong>Committee:</strong> The chair never schedules a hearing</li>
+        <li><strong>Leadership:</strong> The Speaker or Majority Leader never brings it to the floor</li>
+        <li><strong>Filibuster:</strong> Can't get 60 votes in the Senate to end debate</li>
+        <li><strong>Conference:</strong> The two chambers can't agree on a final version</li>
+        <li><strong>Veto:</strong> The president rejects it and Congress can't muster a two-thirds override</li>
+        <li><strong>Expiration:</strong> Each Congress lasts two years. Any unfinished bill dies when the session ends and must be reintroduced from scratch</li>
+      </ul>
+
+      <!-- SENATE VS HOUSE COMPARISON -->
+      <h2 class="text-2xl font-bold">Senate vs. House: How Voting Differs</h2>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold"></th>
+              <th class="px-4 py-3 font-semibold">House</th>
+              <th class="px-4 py-3 font-semibold">Senate</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Members</td>
+              <td class="px-4 py-3 text-slate-600">435</td>
+              <td class="px-4 py-3 text-slate-600">100</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Majority needed</td>
+              <td class="px-4 py-3 text-slate-600">218</td>
+              <td class="px-4 py-3 text-slate-600">51 (or 50 + VP)</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Debate</td>
+              <td class="px-4 py-3 text-slate-600">Time-limited by Rules Committee</td>
+              <td class="px-4 py-3 text-slate-600">Unlimited unless 60 vote for cloture</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Amendments</td>
+              <td class="px-4 py-3 text-slate-600">Controlled&mdash;must be pre-approved</td>
+              <td class="px-4 py-3 text-slate-600">Open&mdash;senators can offer any amendment</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Filibuster</td>
+              <td class="px-4 py-3 text-slate-600">Not possible</td>
+              <td class="px-4 py-3 text-slate-600">Requires 60 votes to overcome</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Power center</td>
+              <td class="px-4 py-3 text-slate-600">The Speaker</td>
+              <td class="px-4 py-3 text-slate-600">The Majority Leader (+ individual senators)</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">How members vote</td>
+              <td class="px-4 py-3 text-slate-600">Electronic voting system (15-minute window)</td>
+              <td class="px-4 py-3 text-slate-600">Roll call&mdash;clerk reads each name</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- WHAT THIS MEANS FOR YOU -->
+      <h2 class="text-2xl font-bold">What This Means for Your Vote</h2>
+      <p class="text-slate-600">
+        Understanding how bills and votes work helps you cut through the noise. When a politician says they &ldquo;support&rdquo; a bill, check whether they actually voted for it&mdash;or whether they voted against the procedural steps needed to bring it to a vote. When a bill &ldquo;fails in the Senate,&rdquo; it might have had majority support but not the 60 votes to overcome a filibuster.
+      </p>
+      <p class="text-slate-600">
+        The representatives and senators you elect in midterm elections determine which bills get heard, which get voted on, and whether anything actually becomes law. Every committee chair, every leadership position, every vote threshold&mdash;it all comes down to who holds those seats.
+      </p>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          See how your senators actually voted: try
+          <a href="/explore" class="underline">Re-elect or Reject</a>
+          to swipe through Senate incumbents and view their voting records. Or learn more about
+          <a href="/learn/how-congress-works" class="underline">how Congress works</a> and
+          <a href="/learn/congressional-hearings" class="underline">what congressional hearings actually do</a>.
+        </p>
+      </div>
+
+      <!-- SOURCES -->
+      <div class="border-t border-slate-200 pt-6 mt-4 not-prose">
+        <h3 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-3">Sources</h3>
+        <ul class="space-y-1 text-sm text-slate-500">
+          <li>
+            <a href="https://www.senate.gov/legislative/common/briefing/Senate_Glossary.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Senate Glossary</a>
+          </li>
+          <li>
+            <a href="https://www.house.gov/the-house-explained/the-legislative-process" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">House.gov: The Legislative Process</a>
+          </li>
+          <li>
+            <a href="https://www.govtrack.us" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">GovTrack.us &mdash; Track bills and votes</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Layout>
