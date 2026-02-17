@@ -641,6 +641,7 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
           vote_date,
           summary,
           source_url,
+          result,
           topic:topics(name)
         )
       `)
@@ -657,6 +658,7 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
         topic: bill.topic?.name ?? null,
         summary: bill.summary,
         sourceUrl: bill.source_url,
+        result: bill.result ?? null,
       };
       if (!votesByCandidate.has(cv.candidate_id)) {
         votesByCandidate.set(cv.candidate_id, []);

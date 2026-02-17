@@ -42,63 +42,25 @@ function VoteBadge({ vote }: { vote: VotingRecord["vote"] }) {
   );
 }
 
-// ─── Voting Record Dropdown ───
+// ─── External Link Icon ───
 
-function VotingRecordDropdown({ votes }: { votes: VotingRecord[] }) {
-  const [open, setOpen] = useState(false);
-
-  if (votes.length === 0) return null;
-
+function ExternalLinkIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <div className="mt-3 border-t border-slate-200 pt-2">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(!open);
-        }}
-        className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors w-full"
-      >
-        <svg
-          className={`w-4 h-4 transition-transform ${open ? "rotate-90" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-        How They Voted ({votes.length})
-      </button>
-      {open && (
-        <div className="mt-2 max-h-[200px] overflow-y-auto space-y-2">
-          {votes.map((v) => (
-            <div key={v.id} className="bg-slate-50 rounded-lg p-2.5 text-sm">
-              <div className="flex items-start justify-between gap-2">
-                <div className="font-medium text-slate-800 leading-tight">
-                  {v.billName}
-                  {v.billNumber && (
-                    <span className="text-slate-400 font-normal ml-1">({v.billNumber})</span>
-                  )}
-                </div>
-                <VoteBadge vote={v.vote} />
-              </div>
-              {v.summary && (
-                <p className="text-slate-500 text-xs mt-1 leading-relaxed">{v.summary}</p>
-              )}
-              <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
-                {v.topic && <span>{v.topic}</span>}
-                {v.voteDate && <span>{new Date(v.voteDate).toLocaleDateString()}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
   );
 }
 
 // ─── Card Content ───
 
-function CardContent({ incumbent }: { incumbent: IncumbentCard }) {
+function CardContent({
+  incumbent,
+  photoRef,
+}: {
+  incumbent: IncumbentCard;
+  photoRef?: React.RefObject<HTMLDivElement | null>;
+}) {
   const partyColors: Record<string, string> = {
     Democrat: "bg-blue-100 text-blue-700",
     Republican: "bg-red-100 text-red-700",
@@ -108,7 +70,10 @@ function CardContent({ incumbent }: { incumbent: IncumbentCard }) {
   return (
     <div className="flex flex-col h-full">
       {/* Photo — 3:2 ratio, center on face */}
-      <div className="w-full aspect-[3/2] bg-slate-100 rounded-t-2xl overflow-hidden relative">
+      <div
+        ref={photoRef}
+        className="w-full aspect-[3/2] bg-slate-100 rounded-t-2xl overflow-hidden relative"
+      >
         {incumbent.photo ? (
           <img
             src={incumbent.photo}
@@ -123,11 +88,31 @@ function CardContent({ incumbent }: { incumbent: IncumbentCard }) {
             </svg>
           </div>
         )}
+        {/* Tap hint overlay */}
+        <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Tap for details
+        </div>
       </div>
 
       {/* Info */}
-      <div className="p-4 flex-1 overflow-y-auto">
-        <h2 className="text-xl font-bold text-slate-900">{incumbent.name}</h2>
+      <div className="p-4 flex-1">
+        {incumbent.website ? (
+          <a
+            href={incumbent.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xl font-bold text-slate-900 hover:text-blue-700 inline-flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {incumbent.name}
+            <ExternalLinkIcon className="w-4 h-4 shrink-0" />
+          </a>
+        ) : (
+          <h2 className="text-xl font-bold text-slate-900">{incumbent.name}</h2>
+        )}
         <p className="text-sm text-slate-500 mt-0.5">
           {incumbent.state} &middot; {incumbent.currentRole}
         </p>
@@ -154,10 +139,170 @@ function CardContent({ incumbent }: { incumbent: IncumbentCard }) {
           )}
         </div>
 
-        {/* Voting Records */}
-        <VotingRecordDropdown votes={incumbent.votes} />
+        {/* Votes hint (if they have voting records) */}
+        {incumbent.votes.length > 0 && (
+          <p className="text-xs text-slate-400 mt-3 italic">
+            {incumbent.votes.length} voting record{incumbent.votes.length !== 1 ? "s" : ""} — tap photo for details
+          </p>
+        )}
       </div>
     </div>
+  );
+}
+
+// ─── Senator Detail Bottom Sheet ───
+
+function SenatorDetailSheet({
+  incumbent,
+  isOpen,
+  onClose,
+}: {
+  incumbent: IncumbentCard | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [isOpen, onClose]);
+
+  const partyColors: Record<string, string> = {
+    Democrat: "bg-blue-100 text-blue-700",
+    Republican: "bg-red-100 text-red-700",
+    Independent: "bg-purple-100 text-purple-700",
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-[54] bg-black/40 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <div
+        className={`
+          fixed inset-x-0 bottom-0 z-[55] bg-white rounded-t-2xl shadow-2xl
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-y-0" : "translate-y-full"}
+        `}
+        style={{ maxHeight: "70vh" }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={incumbent ? `Details for ${incumbent.name}` : undefined}
+      >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 bg-slate-300 rounded-full" />
+        </div>
+
+        {incumbent && (
+          <div className="overflow-y-auto px-5 pb-6" style={{ maxHeight: "calc(70vh - 20px)" }}>
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                {incumbent.website ? (
+                  <a
+                    href={incumbent.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-lg font-bold text-slate-900 hover:text-blue-700 inline-flex items-center gap-1"
+                  >
+                    {incumbent.name}
+                    <ExternalLinkIcon className="w-4 h-4 shrink-0" />
+                  </a>
+                ) : (
+                  <h3 className="text-lg font-bold text-slate-900">{incumbent.name}</h3>
+                )}
+                <p className="text-sm text-slate-500">
+                  {incumbent.state} &middot; {incumbent.currentRole}
+                </p>
+                <div className="flex gap-1.5 mt-1">
+                  <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${partyColors[incumbent.party] ?? ""}`}>
+                    {incumbent.party}
+                  </span>
+                  {incumbent.rating && (
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                      {incumbent.rating}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors shrink-0 ml-3"
+                aria-label="Close details"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Voting Records */}
+            {incumbent.votes.length > 0 ? (
+              <div>
+                <h4 className="text-sm font-bold text-slate-700 mb-3">
+                  How They Voted ({incumbent.votes.length})
+                </h4>
+                <div className="space-y-2.5">
+                  {incumbent.votes.map((v) => (
+                    <div key={v.id} className="bg-slate-50 rounded-lg p-3 text-sm">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-medium text-slate-800 leading-tight">
+                          {v.sourceUrl ? (
+                            <a
+                              href={v.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-blue-700 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                            >
+                              {v.billName}
+                              <ExternalLinkIcon className="w-3 h-3 shrink-0 inline" />
+                            </a>
+                          ) : (
+                            v.billName
+                          )}
+                          {v.billNumber && (
+                            <span className="text-slate-400 font-normal ml-1">({v.billNumber})</span>
+                          )}
+                        </div>
+                        <VoteBadge vote={v.vote} />
+                      </div>
+                      {v.summary && (
+                        <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">{v.summary}</p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
+                        {v.result && <span className="font-medium">{v.result}</span>}
+                        {v.topic && <span>{v.topic}</span>}
+                        {v.voteDate && <span>{new Date(v.voteDate).toLocaleDateString()}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">
+                No voting records available yet.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -167,16 +312,23 @@ function SwipeableCard({
   incumbent,
   onSwipe,
   isTop,
+  onPhotoTap,
+  isSheetOpen,
 }: {
   incumbent: IncumbentCard;
   onSwipe: (choice: SwipeChoice) => void;
   isTop: boolean;
+  onPhotoTap: (incumbent: IncumbentCard) => void;
+  isSheetOpen: boolean;
 }) {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [exiting, setExiting] = useState<SwipeChoice | null>(null);
   const startX = useRef(0);
   const cardRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLDivElement>(null);
+  const tapStartPos = useRef<{ x: number; y: number } | null>(null);
+  const tapStartTime = useRef(0);
 
   const handleSwipe = useCallback(
     (choice: SwipeChoice) => {
@@ -186,22 +338,36 @@ function SwipeableCard({
     [onSwipe]
   );
 
-  // Keyboard controls
+  // Keyboard controls (suppressed when bottom sheet is open)
   useEffect(() => {
-    if (!isTop) return;
+    if (!isTop || isSheetOpen) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") handleSwipe("reject");
       if (e.key === "ArrowRight") handleSwipe("reelect");
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isTop, handleSwipe]);
+  }, [isTop, isSheetOpen, handleSwipe]);
+
+  const isTap = (endX: number, endY: number): boolean => {
+    if (!tapStartPos.current) return false;
+    const dx = Math.abs(endX - tapStartPos.current.x);
+    const dy = Math.abs(endY - tapStartPos.current.y);
+    const elapsed = Date.now() - tapStartTime.current;
+    return dx < 10 && dy < 10 && elapsed < 300;
+  };
+
+  const isOnPhoto = (target: EventTarget): boolean => {
+    return photoRef.current?.contains(target as Node) ?? false;
+  };
 
   // Mouse drag
   const onMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button, a")) return;
     setIsDragging(true);
     startX.current = e.clientX;
+    tapStartPos.current = { x: e.clientX, y: e.clientY };
+    tapStartTime.current = Date.now();
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
@@ -209,9 +375,15 @@ function SwipeableCard({
     setOffset(e.clientX - startX.current);
   };
 
-  const onMouseUp = () => {
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (exiting) return;
     if (!isDragging) return;
     setIsDragging(false);
+    if (isTap(e.clientX, e.clientY) && isOnPhoto(e.target)) {
+      setOffset(0);
+      onPhotoTap(incumbent);
+      return;
+    }
     if (offset > 100) handleSwipe("reelect");
     else if (offset < -100) handleSwipe("reject");
     else setOffset(0);
@@ -222,6 +394,8 @@ function SwipeableCard({
     if ((e.target as HTMLElement).closest("button, a")) return;
     startX.current = e.touches[0].clientX;
     setIsDragging(true);
+    tapStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    tapStartTime.current = Date.now();
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -230,9 +404,16 @@ function SwipeableCard({
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
+    if (exiting) return;
     if (!isDragging) return;
     setIsDragging(false);
+    const touch = e.changedTouches[0];
+    if (isTap(touch.clientX, touch.clientY) && isOnPhoto(e.target)) {
+      setOffset(0);
+      onPhotoTap(incumbent);
+      return;
+    }
     if (offset > 100) handleSwipe("reelect");
     else if (offset < -100) handleSwipe("reject");
     else setOffset(0);
@@ -273,7 +454,7 @@ function SwipeableCard({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <CardContent incumbent={incumbent} />
+      <CardContent incumbent={incumbent} photoRef={photoRef} />
 
       {/* RE-ELECT overlay */}
       <div
@@ -421,6 +602,8 @@ export default function ReelectOrReject({ incumbents }: Props) {
   const [choices, setChoices] = useState<Record<string, SwipeChoice>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [detailIncumbent, setDetailIncumbent] = useState<IncumbentCard | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Load saved choices on mount
   useEffect(() => {
@@ -432,10 +615,20 @@ export default function ReelectOrReject({ incumbents }: Props) {
     setLoaded(true);
   }, [incumbents]);
 
+  const handlePhotoTap = useCallback((incumbent: IncumbentCard) => {
+    setDetailIncumbent(incumbent);
+    setIsSheetOpen(true);
+  }, []);
+
+  const handleCloseSheet = useCallback(() => {
+    setIsSheetOpen(false);
+  }, []);
+
   const handleSwipe = useCallback(
     (choice: SwipeChoice) => {
       const incumbent = incumbents[currentIndex];
       if (!incumbent) return;
+      setIsSheetOpen(false);
       const updated = { ...choices, [incumbent.id]: choice };
       setChoices(updated);
       saveChoices(updated);
@@ -446,6 +639,7 @@ export default function ReelectOrReject({ incumbents }: Props) {
 
   const handleUndo = useCallback(() => {
     if (currentIndex === 0) return;
+    setIsSheetOpen(false);
     const prevIndex = currentIndex - 1;
     const prevIncumbent = incumbents[prevIndex];
     if (!prevIncumbent) return;
@@ -505,6 +699,8 @@ export default function ReelectOrReject({ incumbents }: Props) {
               incumbent={incumbents[currentIndex]}
               onSwipe={handleSwipe}
               isTop
+              onPhotoTap={handlePhotoTap}
+              isSheetOpen={isSheetOpen}
             />
           </div>
 
@@ -546,6 +742,13 @@ export default function ReelectOrReject({ incumbents }: Props) {
       ) : (
         <ResultsSummary results={choices} incumbents={incumbents} onStartOver={handleStartOver} />
       )}
+
+      {/* Senator Detail Bottom Sheet */}
+      <SenatorDetailSheet
+        incumbent={detailIncumbent}
+        isOpen={isSheetOpen}
+        onClose={handleCloseSheet}
+      />
     </div>
   );
 }

@@ -25,6 +25,7 @@ import {
   DeleteOutlined,
   TagsOutlined,
   UploadOutlined,
+  CloudDownloadOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
@@ -42,6 +43,7 @@ interface BillRow {
   topic_id: number | null;
   summary: string | null;
   source_url: string | null;
+  result: string | null;
   created_at: string;
   // Joined
   topic?: { name: string } | null;
@@ -110,9 +112,10 @@ const BILL_FIELDS = [
   { value: "topic", label: "Topic" },
   { value: "summary", label: "Summary" },
   { value: "source_url", label: "Source URL" },
+  { value: "result", label: "Result" },
 ] as const;
 
-type BillFieldKey = "bill_name" | "bill_number" | "vote_date" | "topic" | "summary" | "source_url";
+type BillFieldKey = "bill_name" | "bill_number" | "vote_date" | "topic" | "summary" | "source_url" | "result";
 
 /** Auto-detect mapping from CSV header to bill field */
 function autoDetectField(header: string): BillFieldKey | "" {
@@ -123,6 +126,7 @@ function autoDetectField(header: string): BillFieldKey | "" {
   if (h.includes("topic") || h.includes("category") || h.includes("subject")) return "topic";
   if (h.includes("summary") || h.includes("description") || h.includes("desc")) return "summary";
   if (h.includes("source") || h.includes("url") || h.includes("link")) return "source_url";
+  if (h.includes("result") || h.includes("outcome") || h.includes("passed")) return "result";
   return "";
 }
 
@@ -173,6 +177,180 @@ function parseCsvText(text: string): { headers: string[]; rows: Record<string, s
   return { headers, rows };
 }
 
+// ─── Senate.gov XML Types ───
+
+interface SenateVoteListItem {
+  key: string;
+  voteNumber: string;
+  voteDate: string;
+  issue: string;
+  question: string;
+  result: string;
+  title: string;
+  yeas: number;
+  nays: number;
+}
+
+interface SenateVoteDetail {
+  voteNumber: string;
+  question: string;
+  result: string;
+  voteDate: string;
+  billNumber: string;
+  title: string;
+  members: SenateVoteMember[];
+}
+
+interface SenateVoteMember {
+  firstName: string;
+  lastName: string;
+  party: string;
+  state: string;
+  voteCast: string;
+}
+
+/** Procedural vote patterns to filter out by default */
+const PROCEDURAL_PATTERNS = [
+  /cloture/i,
+  /motion to proceed/i,
+  /motion to reconsider/i,
+  /motion to table/i,
+  /motion to waive/i,
+];
+
+const NOMINATION_PATTERNS = [
+  /^on the nomination$/i,
+  /^confirmation$/i,
+];
+
+function isProceduralVote(question: string): boolean {
+  return PROCEDURAL_PATTERNS.some((p) => p.test(question));
+}
+
+function isNominationVote(question: string, result: string, issue: string): boolean {
+  if (NOMINATION_PATTERNS.some((p) => p.test(question))) return true;
+  if (result === "Confirmed") return true;
+  if (/^PN\d/.test(issue)) return true;
+  return false;
+}
+
+function isTreatyVote(question: string): boolean {
+  return /treaty/i.test(question);
+}
+
+/** Parse the vote list XML from Senate.gov */
+function parseVoteListXml(xmlText: string): SenateVoteListItem[] {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, "text/xml");
+  const errorNode = doc.querySelector("parsererror");
+  if (errorNode) throw new Error("Invalid XML");
+
+  const votes: SenateVoteListItem[] = [];
+  const voteEls = doc.querySelectorAll("vote");
+
+  for (const el of voteEls) {
+    // Skip en_bloc votes (nominations bundled together)
+    if (el.querySelector("en_bloc")) continue;
+
+    const voteNumber = el.querySelector("vote_number")?.textContent?.trim() ?? "";
+    const voteDate = el.querySelector("vote_date")?.textContent?.trim() ?? "";
+    const issue = el.querySelector("issue")?.textContent?.trim() ?? "";
+    const question = el.querySelector("question")?.textContent?.trim() ?? "";
+    const result = el.querySelector("result")?.textContent?.trim() ?? "";
+    const title = el.querySelector("title")?.textContent?.trim() ?? "";
+    const yeas = parseInt(el.querySelector("vote_tally > yeas")?.textContent ?? "0", 10);
+    const nays = parseInt(el.querySelector("vote_tally > nays")?.textContent ?? "0", 10);
+
+    votes.push({
+      key: voteNumber,
+      voteNumber,
+      voteDate,
+      issue,
+      question,
+      result,
+      title,
+      yeas,
+      nays,
+    });
+  }
+
+  return votes;
+}
+
+/** Parse an individual roll call vote XML from Senate.gov */
+function parseVoteDetailXml(xmlText: string): SenateVoteDetail {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, "text/xml");
+  const errorNode = doc.querySelector("parsererror");
+  if (errorNode) throw new Error("Invalid XML");
+
+  const voteNumber = doc.querySelector("vote_number")?.textContent?.trim() ?? "";
+  const question = doc.querySelector("vote_question_text")?.textContent?.trim()
+    ?? doc.querySelector("question")?.textContent?.trim() ?? "";
+  const result = doc.querySelector("vote_result_text")?.textContent?.trim()
+    ?? doc.querySelector("result")?.textContent?.trim() ?? "";
+  const voteDate = doc.querySelector("vote_date")?.textContent?.trim() ?? "";
+
+  // Build bill number from document section
+  const docType = doc.querySelector("document > document_type")?.textContent?.trim() ?? "";
+  const docNumber = doc.querySelector("document > document_number")?.textContent?.trim() ?? "";
+  const billNumber = docType && docNumber ? `${docType} ${docNumber}` : "";
+
+  const title = doc.querySelector("vote_title")?.textContent?.trim()
+    ?? doc.querySelector("vote_document_text")?.textContent?.trim() ?? "";
+
+  const members: SenateVoteMember[] = [];
+  const memberEls = doc.querySelectorAll("member");
+  for (const m of memberEls) {
+    members.push({
+      firstName: m.querySelector("first_name")?.textContent?.trim() ?? "",
+      lastName: m.querySelector("last_name")?.textContent?.trim() ?? "",
+      party: m.querySelector("party")?.textContent?.trim() ?? "",
+      state: m.querySelector("state")?.textContent?.trim() ?? "",
+      voteCast: m.querySelector("vote_cast")?.textContent?.trim() ?? "",
+    });
+  }
+
+  return { voteNumber, question, result, voteDate, billNumber, title, members };
+}
+
+/** Map Senate.gov vote_cast to our vote_enum */
+function mapVoteCast(voteCast: string): "yea" | "nay" | "abstain" | "not_voting" {
+  const v = voteCast.toLowerCase();
+  if (v === "yea") return "yea";
+  if (v === "nay") return "nay";
+  if (v === "not voting") return "not_voting";
+  if (v === "present") return "abstain";
+  return "not_voting";
+}
+
+/** Build the URL for an individual roll call vote */
+function buildVoteDetailUrl(congress: number, session: number, voteNumber: string): string {
+  const padded = voteNumber.padStart(5, "0");
+  return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${padded}.xml`;
+}
+
+/** Build the HTML URL for a vote (used as source_url) */
+function buildVoteHtmlUrl(congress: number, session: number, voteNumber: string): string {
+  const padded = voteNumber.padStart(5, "0");
+  return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${padded}.htm`;
+}
+
+/** Parse a Senate.gov date like "18-Dec" into YYYY-MM-DD using the congress year */
+function parseSenateDate(dateStr: string, congressYear: number): string | null {
+  if (!dateStr) return null;
+  const match = dateStr.match(/^(\d{1,2})-(\w{3})$/);
+  if (!match) return null;
+  const day = match[1].padStart(2, "0");
+  const monthMap: Record<string, string> = {
+    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+  };
+  const month = monthMap[match[2]];
+  if (!month) return null;
+  return `${congressYear}-${month}-${day}`;
+}
+
 // ─── Component ───
 
 export default function VotesPage({ setHeaderActions }: Props) {
@@ -201,6 +379,28 @@ export default function VotesPage({ setHeaderActions }: Props) {
   const [importFieldMapping, setImportFieldMapping] = useState<Record<string, BillFieldKey | "">>({});
   const [importLoading, setImportLoading] = useState(false);
 
+  // Senate.gov Import
+  const [senateDrawerOpen, setSenateDrawerOpen] = useState(false);
+  const [senateCongress, setSenateCongress] = useState(119);
+  const [senateSession, setSenateSession] = useState(1);
+  const [senateCongressYear, setSenateCongressYear] = useState(2025);
+  const [senateVoteList, setSenateVoteList] = useState<SenateVoteListItem[]>([]);
+  const [senateSelected, setSenateSelected] = useState<Set<string>>(new Set());
+  const [senateListLoading, setSenateListLoading] = useState(false);
+  const [senateListPasteMode, setSenateListPasteMode] = useState(false);
+  const [senateListPasteText, setSenateListPasteText] = useState("");
+  const [senateHideProcedural, setSenateHideProcedural] = useState(true);
+  const [senateHideNominations, setSenateHideNominations] = useState(true);
+  const [senateHideTreaties, setSenateHideTreaties] = useState(true);
+  const [senateSearch, setSenateSearch] = useState("");
+  const [senateImportStep, setSenateImportStep] = useState<"list" | "loading" | "done">("list");
+  const [senateImportProgress, setSenateImportProgress] = useState({ current: 0, total: 0, imported: 0, skipped: 0, failed: 0 });
+  const [senateDetailPasteMode, setSenateDetailPasteMode] = useState(false);
+  const [senateDetailPasteQueue, setSenateDetailPasteQueue] = useState<string[]>([]);
+  const [senateDetailPasteText, setSenateDetailPasteText] = useState("");
+  const [senateDetailPasteIdx, setSenateDetailPasteIdx] = useState(0);
+  const [senateImportResults, setSenateImportResults] = useState<{ voteNumber: string; billName: string; status: "imported" | "skipped" | "failed"; reason?: string }[]>([]);
+
   // Filters
   const [filterBill, setFilterBill] = useState("");
   const [filterTopic, setFilterTopic] = useState<string>("all");
@@ -215,6 +415,9 @@ export default function VotesPage({ setHeaderActions }: Props) {
       <Space>
         <Button size="small" icon={<TagsOutlined />} onClick={() => setTopicsDrawerOpen(true)}>
           Topics
+        </Button>
+        <Button size="small" icon={<CloudDownloadOutlined />} onClick={() => setSenateDrawerOpen(true)}>
+          Senate.gov
         </Button>
         <Button size="small" icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
           Import CSV
@@ -312,6 +515,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
       topic_id: bill.topic_id,
       summary: bill.summary,
       source_url: bill.source_url,
+      result: bill.result,
     });
 
     // Pre-populate senator votes from existing candidate_votes
@@ -341,6 +545,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         topic_id: values.topic_id || null,
         summary: values.summary || null,
         source_url: values.source_url || null,
+        result: values.result || null,
       };
 
       let billId: number;
@@ -534,6 +739,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         topic_id: topicMap.get((row.topic ?? "").trim().toLowerCase()) ?? null,
         summary: row.summary?.trim() || null,
         source_url: row.source_url?.trim() || null,
+        result: row.result?.trim() || null,
       }));
 
       const { error } = await supabase.from("votes").insert(payloads);
@@ -561,6 +767,237 @@ export default function VotesPage({ setHeaderActions }: Props) {
     } finally {
       setImportLoading(false);
     }
+  }
+
+  // ─── Senate.gov Import ───
+
+  function resetSenateImport() {
+    setSenateVoteList([]);
+    setSenateSelected(new Set());
+    setSenateListPasteMode(false);
+    setSenateListPasteText("");
+    setSenateImportStep("list");
+    setSenateImportProgress({ current: 0, total: 0, imported: 0, skipped: 0, failed: 0 });
+    setSenateImportResults([]);
+    setSenateDetailPasteMode(false);
+    setSenateDetailPasteQueue([]);
+    setSenateDetailPasteText("");
+    setSenateDetailPasteIdx(0);
+    setSenateSearch("");
+  }
+
+  async function fetchSenateVoteList() {
+    setSenateListLoading(true);
+    const url = `https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_${senateCongress}_${senateSession}.xml`;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const text = await resp.text();
+      const votes = parseVoteListXml(text);
+      setSenateVoteList(votes);
+      setSenateListPasteMode(false);
+      messageApi.success(`Loaded ${votes.length} votes`);
+    } catch {
+      // CORS or network error — switch to paste mode
+      setSenateListPasteMode(true);
+      messageApi.info("Direct fetch blocked — paste the XML instead");
+    } finally {
+      setSenateListLoading(false);
+    }
+  }
+
+  function handleSenateListPaste() {
+    try {
+      const votes = parseVoteListXml(senateListPasteText);
+      setSenateVoteList(votes);
+      setSenateListPasteText("");
+      messageApi.success(`Loaded ${votes.length} votes`);
+    } catch (err: any) {
+      messageApi.error(`Failed to parse XML: ${err.message}`);
+    }
+  }
+
+  /** Get the filtered+visible senate vote list */
+  function getFilteredSenateVotes(): SenateVoteListItem[] {
+    return senateVoteList.filter((v) => {
+      if (senateHideProcedural && isProceduralVote(v.question)) return false;
+      if (senateHideNominations && isNominationVote(v.question, v.result, v.issue)) return false;
+      if (senateHideTreaties && isTreatyVote(v.question)) return false;
+      if (senateSearch) {
+        const q = senateSearch.toLowerCase();
+        const searchable = `${v.title} ${v.issue} ${v.question}`.toLowerCase();
+        if (!searchable.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  async function importSenateVotes() {
+    const selected = Array.from(senateSelected);
+    if (selected.length === 0) {
+      messageApi.warning("No votes selected");
+      return;
+    }
+
+    setSenateImportStep("loading");
+    const progress = { current: 0, total: selected.length, imported: 0, skipped: 0, failed: 0 };
+    setSenateImportProgress(progress);
+    const results: typeof senateImportResults = [];
+
+    // Try to fetch the first vote detail to test CORS
+    let usePasteMode = false;
+    const firstUrl = buildVoteDetailUrl(senateCongress, senateSession, selected[0]);
+    try {
+      const resp = await fetch(firstUrl);
+      if (!resp.ok) throw new Error();
+      await resp.text(); // Just test if it works
+    } catch {
+      usePasteMode = true;
+    }
+
+    if (usePasteMode) {
+      // Switch to paste queue mode
+      setSenateDetailPasteMode(true);
+      setSenateDetailPasteQueue(selected);
+      setSenateDetailPasteIdx(0);
+      return;
+    }
+
+    // Direct fetch mode — process all selected votes
+    for (const voteNum of selected) {
+      progress.current++;
+      setSenateImportProgress({ ...progress });
+
+      try {
+        const url = buildVoteDetailUrl(senateCongress, senateSession, voteNum);
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const xml = await resp.text();
+        const result = await importSingleVote(xml, voteNum);
+        results.push(result);
+        if (result.status === "imported") progress.imported++;
+        else if (result.status === "skipped") progress.skipped++;
+        else progress.failed++;
+      } catch (err: any) {
+        const listItem = senateVoteList.find((v) => v.voteNumber === voteNum);
+        results.push({ voteNumber: voteNum, billName: listItem?.title ?? voteNum, status: "failed", reason: err.message });
+        progress.failed++;
+      }
+
+      setSenateImportProgress({ ...progress });
+    }
+
+    setSenateImportResults(results);
+    setSenateImportStep("done");
+    await loadBills();
+  }
+
+  async function handleSenateDetailPaste() {
+    if (!senateDetailPasteText.trim()) return;
+    const voteNum = senateDetailPasteQueue[senateDetailPasteIdx];
+
+    try {
+      const result = await importSingleVote(senateDetailPasteText, voteNum);
+      setSenateImportResults((prev) => [...prev, result]);
+      setSenateImportProgress((prev) => ({
+        ...prev,
+        current: prev.current + 1,
+        imported: prev.imported + (result.status === "imported" ? 1 : 0),
+        skipped: prev.skipped + (result.status === "skipped" ? 1 : 0),
+        failed: prev.failed + (result.status === "failed" ? 1 : 0),
+      }));
+    } catch (err: any) {
+      const listItem = senateVoteList.find((v) => v.voteNumber === voteNum);
+      setSenateImportResults((prev) => [...prev, { voteNumber: voteNum, billName: listItem?.title ?? voteNum, status: "failed", reason: err.message }]);
+      setSenateImportProgress((prev) => ({ ...prev, current: prev.current + 1, failed: prev.failed + 1 }));
+    }
+
+    setSenateDetailPasteText("");
+    if (senateDetailPasteIdx + 1 >= senateDetailPasteQueue.length) {
+      // All done
+      setSenateDetailPasteMode(false);
+      setSenateImportStep("done");
+      await loadBills();
+    } else {
+      setSenateDetailPasteIdx(senateDetailPasteIdx + 1);
+    }
+  }
+
+  /** Import a single vote from its detail XML. Returns result info. */
+  async function importSingleVote(xmlText: string, voteNumber: string) {
+    const detail = parseVoteDetailXml(xmlText);
+
+    // Use the issue/bill number from the list if detail doesn't have it
+    const listItem = senateVoteList.find((v) => v.voteNumber === voteNumber);
+    const billNumber = detail.billNumber || listItem?.issue || "";
+    const billName = detail.title || listItem?.title || `Vote #${voteNumber}`;
+
+    // Clean up result text — take first part before parenthetical tallies
+    let resultText = detail.result || listItem?.result || "";
+    const parenIdx = resultText.indexOf("(");
+    if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
+
+    // Check for duplicate by bill_number
+    if (billNumber) {
+      const existing = bills.find((b) => b.bill_number === billNumber);
+      if (existing) {
+        return { voteNumber, billName, status: "skipped" as const, reason: `Already exists: ${existing.bill_name}` };
+      }
+    }
+
+    const voteDate = parseSenateDate(listItem?.voteDate ?? "", senateCongressYear)
+      ?? (detail.voteDate ? detail.voteDate.split("T")[0] : null);
+    const sourceUrl = buildVoteHtmlUrl(senateCongress, senateSession, voteNumber);
+
+    // Insert bill
+    const { data: billData, error: billErr } = await supabase
+      .from("votes")
+      .insert({
+        bill_name: billName,
+        bill_number: billNumber || null,
+        vote_date: voteDate,
+        result: resultText || null,
+        source_url: sourceUrl,
+        summary: null,
+        topic_id: null,
+      })
+      .select("id")
+      .single();
+
+    if (billErr) throw billErr;
+    const billId = billData.id;
+
+    // Match senators and insert candidate_votes
+    let matchedCount = 0;
+    const candidateVoteRows: { candidate_id: number; vote_id: number; vote: string }[] = [];
+
+    for (const member of detail.members) {
+      // Match by last_name + state
+      const match = candidates.find(
+        (c) => c.label.split(",")[0].trim().toLowerCase() === member.lastName.toLowerCase()
+          && c.stateAbbr === member.state
+      );
+      if (match) {
+        candidateVoteRows.push({
+          candidate_id: match.id,
+          vote_id: billId,
+          vote: mapVoteCast(member.voteCast),
+        });
+        matchedCount++;
+      }
+    }
+
+    if (candidateVoteRows.length > 0) {
+      const { error: cvErr } = await supabase.from("candidate_votes").insert(candidateVoteRows);
+      if (cvErr) throw cvErr;
+    }
+
+    return {
+      voteNumber,
+      billName,
+      status: "imported" as const,
+      reason: `${matchedCount} senator votes matched`,
+    };
   }
 
   // ─── Topics Drawer CRUD ───
@@ -632,6 +1069,13 @@ export default function VotesPage({ setHeaderActions }: Props) {
       key: "topic",
       width: 120,
       render: (_: any, r: BillRow) => r.topic?.name ?? <Text type="secondary">—</Text>,
+    },
+    {
+      title: "Result",
+      dataIndex: "result",
+      key: "result",
+      width: 100,
+      render: (r: string | null) => r ? <Tag>{r}</Tag> : <Text type="secondary">—</Text>,
     },
     {
       title: "Votes",
@@ -819,6 +1263,13 @@ export default function VotesPage({ setHeaderActions }: Props) {
             <Form.Item name="source_url" label="Source URL">
               <Input placeholder="Link to official record" />
             </Form.Item>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item name="result" label="Result">
+              <Input placeholder="e.g. Passed, Rejected, Agreed to" />
+            </Form.Item>
+            <div />
           </div>
 
           <Form.Item name="summary" label="Summary">
@@ -1048,6 +1499,318 @@ export default function VotesPage({ setHeaderActions }: Props) {
           </div>
         )}
       </Modal>
+
+      {/* Senate.gov Import Drawer */}
+      <Drawer
+        title="Import from Senate.gov"
+        open={senateDrawerOpen}
+        onClose={() => { setSenateDrawerOpen(false); resetSenateImport(); }}
+        width={780}
+        destroyOnClose
+      >
+        {senateImportStep === "list" && (
+          <>
+            {/* Step 1: Fetch or Paste vote list */}
+            {senateVoteList.length === 0 ? (
+              <div>
+                <Text strong style={{ display: "block", marginBottom: 12 }}>
+                  Step 1: Load Vote List
+                </Text>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  <Select
+                    size="small"
+                    value={senateCongress}
+                    onChange={(v) => {
+                      setSenateCongress(v);
+                      setSenateCongressYear(v === 119 ? 2025 : v === 118 ? 2023 : 2025);
+                    }}
+                    style={{ width: 140 }}
+                    options={[
+                      { value: 119, label: "119th Congress" },
+                      { value: 118, label: "118th Congress" },
+                    ]}
+                  />
+                  <Select
+                    size="small"
+                    value={senateSession}
+                    onChange={setSenateSession}
+                    style={{ width: 110 }}
+                    options={[
+                      { value: 1, label: "Session 1" },
+                      { value: 2, label: "Session 2" },
+                    ]}
+                  />
+                  <Button
+                    size="small"
+                    type="primary"
+                    icon={<CloudDownloadOutlined />}
+                    loading={senateListLoading}
+                    onClick={fetchSenateVoteList}
+                  >
+                    Fetch Votes
+                  </Button>
+                </div>
+
+                {senateListPasteMode && (
+                  <div>
+                    <Alert
+                      type="info"
+                      showIcon
+                      message="Direct fetch blocked (CORS)"
+                      description={
+                        <>
+                          Open{" "}
+                          <a
+                            href={`https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_${senateCongress}_${senateSession}.xml`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            this URL
+                          </a>
+                          {" "}in your browser, select all (Ctrl+A), copy (Ctrl+C), and paste below.
+                        </>
+                      }
+                      style={{ marginBottom: 12 }}
+                    />
+                    <TextArea
+                      rows={8}
+                      placeholder="Paste the XML here..."
+                      value={senateListPasteText}
+                      onChange={(e) => setSenateListPasteText(e.target.value)}
+                    />
+                    <Button
+                      type="primary"
+                      style={{ marginTop: 8 }}
+                      disabled={!senateListPasteText.trim()}
+                      onClick={handleSenateListPaste}
+                    >
+                      Parse XML
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Step 2: Filter & Select */
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <Text strong>
+                    {senateVoteList.length} votes loaded — {senateSelected.size} selected
+                  </Text>
+                  <Space size="small">
+                    <Button size="small" onClick={() => { setSenateVoteList([]); setSenateSelected(new Set()); }}>
+                      Re-fetch
+                    </Button>
+                    <Button
+                      size="small"
+                      type="primary"
+                      disabled={senateSelected.size === 0}
+                      onClick={importSenateVotes}
+                    >
+                      Import {senateSelected.size} Votes
+                    </Button>
+                  </Space>
+                </div>
+
+                {/* Filters */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                  <Input.Search
+                    size="small"
+                    placeholder="Search title or bill..."
+                    allowClear
+                    style={{ width: 220 }}
+                    onSearch={setSenateSearch}
+                    onChange={(e) => { if (!e.target.value) setSenateSearch(""); }}
+                  />
+                  <Checkbox checked={senateHideProcedural} onChange={(e) => setSenateHideProcedural(e.target.checked)}>
+                    <Text style={{ fontSize: 12 }}>Hide Procedural</Text>
+                  </Checkbox>
+                  <Checkbox checked={senateHideNominations} onChange={(e) => setSenateHideNominations(e.target.checked)}>
+                    <Text style={{ fontSize: 12 }}>Hide Nominations</Text>
+                  </Checkbox>
+                  <Checkbox checked={senateHideTreaties} onChange={(e) => setSenateHideTreaties(e.target.checked)}>
+                    <Text style={{ fontSize: 12 }}>Hide Treaties</Text>
+                  </Checkbox>
+                </div>
+
+                {/* Bulk select */}
+                <div style={{ marginBottom: 8 }}>
+                  <Space size="small">
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        const visible = getFilteredSenateVotes();
+                        setSenateSelected(new Set(visible.map((v) => v.voteNumber)));
+                      }}
+                    >
+                      Select All Visible
+                    </Button>
+                    <Button size="small" onClick={() => setSenateSelected(new Set())}>
+                      Deselect All
+                    </Button>
+                  </Space>
+                </div>
+
+                {/* Vote list table */}
+                <Table
+                  dataSource={getFilteredSenateVotes()}
+                  rowKey="key"
+                  size="small"
+                  pagination={{ pageSize: 50, showSizeChanger: true, showTotal: (t) => `${t} votes` }}
+                  rowSelection={{
+                    selectedRowKeys: Array.from(senateSelected),
+                    onChange: (keys) => setSenateSelected(new Set(keys as string[])),
+                  }}
+                  columns={[
+                    { title: "#", dataIndex: "voteNumber", key: "num", width: 60 },
+                    { title: "Date", dataIndex: "voteDate", key: "date", width: 70 },
+                    { title: "Issue", dataIndex: "issue", key: "issue", width: 90 },
+                    { title: "Question", dataIndex: "question", key: "q", width: 130, ellipsis: true },
+                    {
+                      title: "Result",
+                      dataIndex: "result",
+                      key: "result",
+                      width: 80,
+                      render: (r: string) => {
+                        const color = r === "Passed" || r === "Agreed to" ? "green" : r === "Rejected" ? "red" : "default";
+                        return <Tag color={color}>{r}</Tag>;
+                      },
+                    },
+                    { title: "Title", dataIndex: "title", key: "title", ellipsis: true },
+                    {
+                      title: "Tally",
+                      key: "tally",
+                      width: 80,
+                      render: (_: any, r: SenateVoteListItem) => (
+                        <Text style={{ fontSize: 12 }}>{r.yeas}-{r.nays}</Text>
+                      ),
+                    },
+                  ]}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {senateImportStep === "loading" && !senateDetailPasteMode && (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 16 }}>
+              <Text>
+                Importing vote {senateImportProgress.current} of {senateImportProgress.total}...
+              </Text>
+            </div>
+          </div>
+        )}
+
+        {senateImportStep === "loading" && senateDetailPasteMode && (
+          <div>
+            <Alert
+              type="info"
+              showIcon
+              message={`Paste vote detail XML (${senateDetailPasteIdx + 1} of ${senateDetailPasteQueue.length})`}
+              description={
+                <>
+                  Open{" "}
+                  <a
+                    href={buildVoteDetailUrl(senateCongress, senateSession, senateDetailPasteQueue[senateDetailPasteIdx])}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Vote #{senateDetailPasteQueue[senateDetailPasteIdx]}
+                  </a>
+                  {" "}in your browser, select all, copy, and paste below.
+                </>
+              }
+              style={{ marginBottom: 12 }}
+            />
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Progress: {senateImportProgress.current} done — {senateImportProgress.imported} imported, {senateImportProgress.skipped} skipped, {senateImportProgress.failed} failed
+              </Text>
+            </div>
+            <TextArea
+              rows={8}
+              placeholder="Paste the individual vote XML here..."
+              value={senateDetailPasteText}
+              onChange={(e) => setSenateDetailPasteText(e.target.value)}
+            />
+            <Space style={{ marginTop: 8 }}>
+              <Button
+                type="primary"
+                disabled={!senateDetailPasteText.trim()}
+                onClick={handleSenateDetailPaste}
+              >
+                Import & Next
+              </Button>
+              <Button onClick={() => {
+                // Skip this vote
+                const voteNum = senateDetailPasteQueue[senateDetailPasteIdx];
+                const listItem = senateVoteList.find((v) => v.voteNumber === voteNum);
+                setSenateImportResults((prev) => [...prev, { voteNumber: voteNum, billName: listItem?.title ?? voteNum, status: "skipped", reason: "Skipped by user" }]);
+                setSenateImportProgress((prev) => ({ ...prev, current: prev.current + 1, skipped: prev.skipped + 1 }));
+                setSenateDetailPasteText("");
+                if (senateDetailPasteIdx + 1 >= senateDetailPasteQueue.length) {
+                  setSenateDetailPasteMode(false);
+                  setSenateImportStep("done");
+                  loadBills();
+                } else {
+                  setSenateDetailPasteIdx(senateDetailPasteIdx + 1);
+                }
+              }}>
+                Skip
+              </Button>
+            </Space>
+
+            {/* Show already-imported results */}
+            {senateImportResults.length > 0 && (
+              <div style={{ marginTop: 16, maxHeight: 200, overflowY: "auto" }}>
+                <Divider style={{ margin: "8px 0" }} />
+                {senateImportResults.map((r) => (
+                  <div key={r.voteNumber} style={{ fontSize: 12, padding: "2px 0" }}>
+                    <Tag color={r.status === "imported" ? "green" : r.status === "skipped" ? "orange" : "red"} style={{ fontSize: 11 }}>
+                      {r.status}
+                    </Tag>
+                    {r.billName}
+                    {r.reason && <Text type="secondary" style={{ fontSize: 11 }}> — {r.reason}</Text>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {senateImportStep === "done" && (
+          <div>
+            <Alert
+              type="success"
+              showIcon
+              message="Import Complete"
+              description={`${senateImportProgress.imported} imported, ${senateImportProgress.skipped} skipped, ${senateImportProgress.failed} failed`}
+              style={{ marginBottom: 16 }}
+            />
+
+            <div style={{ maxHeight: 400, overflowY: "auto" }}>
+              {senateImportResults.map((r) => (
+                <div key={r.voteNumber} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: "1px solid #f0f0f0" }}>
+                  <Tag color={r.status === "imported" ? "green" : r.status === "skipped" ? "orange" : "red"}>
+                    {r.status}
+                  </Tag>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>{r.billName}</div>
+                    {r.reason && <Text type="secondary" style={{ fontSize: 12 }}>{r.reason}</Text>}
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>#{r.voteNumber}</Text>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+              <Button onClick={resetSenateImport}>Import More</Button>
+              <Button onClick={() => { setSenateDrawerOpen(false); resetSenateImport(); }}>Close</Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       {/* Topics Drawer */}
       <Drawer

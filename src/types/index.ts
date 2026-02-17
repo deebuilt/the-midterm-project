@@ -202,6 +202,7 @@ export interface VotingRecord {
   topic: string | null;
   summary: string | null;
   sourceUrl: string | null;
+  result: string | null;
 }
 
 export interface IncumbentCard {

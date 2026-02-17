@@ -154,6 +154,7 @@ export interface DbVote {
   topic_id: number | null;
   summary: string | null;
   source_url: string | null;
+  result: string | null;
   created_at: string;
   updated_at: string;
 }
