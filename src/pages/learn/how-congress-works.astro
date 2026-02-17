@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
 ---
 
 <Layout title="How Congress Works" description="A beginner's guide to the U.S. Congress: the Senate and the House of Representatives.">
@@ -8,6 +9,10 @@ import Layout from "../../layouts/Layout.astro";
       <a href="/learn" class="text-dem hover:underline">Learn</a>
     </p>
     <h1 class="text-3xl md:text-4xl font-bold mb-6">How Congress Works</h1>
+
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/how-congress-works.mp3" />
+    </div>
 
     <div class="prose prose-slate max-w-none space-y-8">
       <p class="text-lg text-slate-600">
@@ -58,6 +63,61 @@ import Layout from "../../layouts/Layout.astro";
       <p class="text-slate-600">
         In midterm elections, voters choose who fills these seats. The party that controls Congress controls what bills get voted on, which judges get confirmed, and how the federal budget is spent. A single seat can shift the balance of power.
       </p>
+
+      <h2 class="text-2xl font-bold">Don't Confuse Congress With Your State Legislature</h2>
+      <p class="text-slate-600">
+        This trips up a lot of people. Every state has its <em>own</em> legislature with its own senators and representatives, completely separate from the U.S. Congress. When someone says &ldquo;my senator,&rdquo; they could mean two very different things.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold"></th>
+              <th class="px-4 py-3 font-semibold">U.S. Congress</th>
+              <th class="px-4 py-3 font-semibold">State Legislature</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Works in</td>
+              <td class="px-4 py-3 text-slate-600">Washington, D.C.</td>
+              <td class="px-4 py-3 text-slate-600">Your state capital</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Senators</td>
+              <td class="px-4 py-3 text-slate-600">100 total (2 per state)</td>
+              <td class="px-4 py-3 text-slate-600">Varies (e.g., CA has 40, PA has 50, NY has 63)</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Representatives</td>
+              <td class="px-4 py-3 text-slate-600">435 total (based on population)</td>
+              <td class="px-4 py-3 text-slate-600">Varies (e.g., NH has 400, CA has 80)</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Makes laws about</td>
+              <td class="px-4 py-3 text-slate-600">Federal issues: military, immigration, Supreme Court, federal budget</td>
+              <td class="px-4 py-3 text-slate-600">State issues: schools, roads, state taxes, local police, zoning</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Represents</td>
+              <td class="px-4 py-3 text-slate-600">Your entire state (senators) or congressional district (reps)</td>
+              <td class="px-4 py-3 text-slate-600">A district within your state</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-slate-600">
+        Both levels matter. Your state legislature decides things that directly affect your daily life&mdash;how your schools are funded, what your roads look like, whether your state expands Medicaid, what your voting rules are. But state legislative races get far less attention, and turnout is much lower. Many state legislators run unopposed.
+      </p>
+
+      <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 not-prose">
+        <h4 class="font-bold text-navy mb-2">Quick check</h4>
+        <p class="text-sm text-slate-600">
+          Right now, you are represented by <strong>two U.S. Senators</strong>, <strong>one U.S. Representative</strong>, <strong>one state senator</strong>, and <strong>one state representative</strong> (at minimum). That's at least five legislators making laws on your behalf at the federal and state level&mdash;and most people can't name more than one or two of them.
+        </p>
+      </div>
 
       <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
         <p class="text-sm font-medium text-tossup">
