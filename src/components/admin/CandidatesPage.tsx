@@ -20,6 +20,7 @@ import {
   message,
   Spin,
   Alert,
+  Card,
 } from "antd";
 import {
   PlusOutlined,
@@ -31,6 +32,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
 import type { Party, Stance, CandidateStatus } from "../../lib/database.types";
 
 const { Text } = Typography;
@@ -162,6 +164,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [form] = Form.useForm();
   const [positionForm] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const loadCandidates = useCallback(async () => {
     setLoading(true);
@@ -764,6 +767,71 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     },
   ];
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {candidates.map((c) => (
+        <Card key={c.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+              {c.photo_url ? (
+                <img src={c.photo_url} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#999" }}>
+                  {c.first_name[0]}{c.last_name[0]}
+                </div>
+              )}
+              <div>
+                <a onClick={() => openDetailDrawer(c)} style={{ fontWeight: 600, fontSize: 14 }}>
+                  {c.first_name} {c.last_name}
+                </a>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 2 }}>
+                  <Tag color={partyColors[c.party] ?? "default"} style={{ margin: 0, fontSize: 10 }}>{c.party}</Tag>
+                  {c.is_incumbent && <Tag color="green" style={{ margin: 0, fontSize: 10 }}>Incumbent</Tag>}
+                </div>
+              </div>
+            </div>
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "edit",
+                    icon: <EditOutlined />,
+                    label: "Edit",
+                    onClick: () => openEditModal(c),
+                  },
+                  {
+                    key: "delete",
+                    icon: <DeleteOutlined />,
+                    label: "Delete",
+                    danger: true,
+                    onClick: () => {
+                      Modal.confirm({
+                        title: "Delete this candidate?",
+                        content: "This will also remove their positions and race assignments.",
+                        okText: "Delete",
+                        okType: "danger",
+                        onOk: () => handleDelete(c.id),
+                      });
+                    },
+                  },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <Button type="text" size="small" icon={<MoreOutlined />} />
+            </Dropdown>
+          </div>
+          {c.role_title && (
+            <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 2 }}>{c.role_title}</Text>
+          )}
+          {c.race_label && (
+            <Text type="secondary" style={{ fontSize: 12 }}>Race: {c.race_label}</Text>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: 80 }}>
@@ -790,8 +858,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             background: "#f0f5ff",
             borderRadius: 8,
             display: "flex",
+            flexWrap: "wrap",
             alignItems: "center",
-            gap: 12,
+            gap: isMobile ? 8 : 12,
             border: "1px solid #d6e4ff",
           }}
         >
@@ -824,18 +893,20 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         </div>
       )}
 
-      <Table
-        dataSource={candidates}
-        columns={columns}
-        rowKey="id"
-        rowSelection={{
-          selectedRowKeys,
-          onChange: setSelectedRowKeys,
-          columnWidth: 40,
-        }}
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-        pagination={{ pageSize: 20, showSizeChanger: true }}
-      />
+      {isMobile ? mobileCards : (
+        <Table
+          dataSource={candidates}
+          columns={columns}
+          rowKey="id"
+          rowSelection={{
+            selectedRowKeys,
+            onChange: setSelectedRowKeys,
+            columnWidth: 40,
+          }}
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+          pagination={{ pageSize: 20, showSizeChanger: true }}
+        />
+      )}
 
       {/* Create / Edit Modal */}
       <Modal
@@ -847,10 +918,11 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           setPhotoPreview("");
         }}
         footer={null}
-        width={600}
+        width={isMobile ? "100vw" : 600}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16 }}>
             <Form.Item
               name="first_name"
               label="First Name"
@@ -939,7 +1011,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             </div>
           )}
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16 }}>
             <Form.Item name="website" label="Website" style={{ flex: 1 }}>
               <Input placeholder="https://..." />
             </Form.Item>
@@ -956,7 +1028,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             <TextArea rows={3} placeholder="Brief biography..." />
           </Form.Item>
 
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16, alignItems: "flex-start" }}>
             <Form.Item
               name="bioguide_id"
               label={
@@ -1026,7 +1098,8 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         okText="Assign"
         okButtonProps={{ disabled: !bulkAssignRaceId, loading: bulkAssignLoading }}
         onOk={handleBulkAssign}
-        width={600}
+        width={isMobile ? "100vw" : 600}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary" style={{ fontSize: 13 }}>
@@ -1054,7 +1127,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           />
         </div>
 
-        <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16, marginBottom: 16 }}>
           <div style={{ flex: 1 }}>
             <Text strong style={{ display: "block", marginBottom: 6, fontSize: 13 }}>Status</Text>
             <Select
@@ -1071,7 +1144,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               ]}
             />
           </div>
-          <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "flex-end", paddingBottom: isMobile ? 0 : 4 }}>
             <Checkbox
               checked={bulkAssignIncumbent}
               onChange={(e) => setBulkAssignIncumbent(e.target.checked)}
@@ -1106,7 +1179,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         }
         open={!!detailCandidate}
         onClose={() => { setDetailCandidate(null); setEditingPositionId(null); }}
-        width={drawerWidth}
+        width={isMobile ? "100%" : drawerWidth}
         styles={{ body: { overflowX: "hidden" } }}
       >
         {/* Resize handle */}
@@ -1225,7 +1298,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                           layout="vertical"
                           size="small"
                         >
-                          <div style={{ display: "flex", gap: 8 }}>
+                          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8 }}>
                             <Form.Item
                               name="topic_id"
                               rules={[{ required: true, message: "Required" }]}
@@ -1242,7 +1315,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                             <Form.Item
                               name="stance"
                               rules={[{ required: true, message: "Required" }]}
-                              style={{ width: 110, marginBottom: 8 }}
+                              style={{ width: isMobile ? "100%" : 110, marginBottom: 8 }}
                             >
                               <Select
                                 placeholder="Stance"
@@ -1257,14 +1330,15 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                           >
                             <Input placeholder="Position summary (shown on public site)" />
                           </Form.Item>
-                          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                            <Form.Item name="source_url" style={{ flex: 1, marginBottom: 0 }}>
+                          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, alignItems: "flex-start" }}>
+                            <Form.Item name="source_url" style={{ flex: 1, marginBottom: isMobile ? 8 : 0, width: isMobile ? "100%" : undefined }}>
                               <Input placeholder="Source URL (optional)" />
                             </Form.Item>
                             <Button
                               type="primary"
                               htmlType="submit"
                               icon={<PlusOutlined />}
+                              block={isMobile}
                             >
                               Add
                             </Button>
@@ -1386,7 +1460,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                         <Text strong style={{ fontSize: 12, display: "block", marginBottom: 8 }}>
                           Assign to Race
                         </Text>
-                        <div style={{ display: "flex", gap: 8 }}>
+                        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8 }}>
                           <Select
                             showSearch
                             size="small"
@@ -1398,7 +1472,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                             options={raceSelectOptions.filter(
                               (r) => !races.some((existing) => existing.race_id === r.value)
                             )}
-                            style={{ flex: 1 }}
+                            style={{ flex: 1, width: isMobile ? "100%" : undefined }}
                             onSelect={(raceId: number) => handleDrawerAddRace(raceId)}
                           />
                         </div>

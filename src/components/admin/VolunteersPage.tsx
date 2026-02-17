@@ -12,16 +12,18 @@ import {
   Space,
   Drawer,
   Descriptions,
+  Card,
   message,
   Spin,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import {
   VOLUNTEER_ROLE_LABELS,
   type VolunteerRole,
   type VolunteerStatus,
 } from "../../lib/database.types";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 
@@ -73,11 +75,10 @@ export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
-  const [detailVolunteer, setDetailVolunteer] = useState<VolunteerRow | null>(
-    null
-  );
+  const [detailVolunteer, setDetailVolunteer] = useState<VolunteerRow | null>(null);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -278,17 +279,71 @@ export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps
     );
   }
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {volunteers.map((v) => (
+        <Card
+          key={v.id}
+          size="small"
+          style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+            <a
+              onClick={() => setDetailVolunteer(v)}
+              style={{ fontWeight: 600, fontSize: 14 }}
+            >
+              {v.name}
+            </a>
+            <Tag color={statusColors[v.status]}>{v.status}</Tag>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+            <Select
+              value={v.state_id}
+              onChange={(val) => handleStateChange(v.id, val)}
+              placeholder="State..."
+              allowClear
+              size="small"
+              style={{ width: 90 }}
+              options={states.map((s) => ({
+                value: s.id,
+                label: s.abbr,
+              }))}
+            />
+            <Select
+              value={v.status}
+              onChange={(val) => handleStatusChange(v.id, val)}
+              size="small"
+              style={{ width: 100 }}
+              options={[
+                { value: "active", label: "Active" },
+                { value: "pending", label: "Pending" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+            />
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {new Date(v.created_at).toLocaleDateString()}
+            </Text>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
 
-      <Table
-        dataSource={volunteers}
-        columns={columns}
-        rowKey="id"
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-        pagination={{ pageSize: 20, showSizeChanger: true }}
-      />
+      {isMobile ? (
+        mobileCards
+      ) : (
+        <Table
+          dataSource={volunteers}
+          columns={columns}
+          rowKey="id"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+          pagination={{ pageSize: 20, showSizeChanger: true }}
+        />
+      )}
 
       {/* Invite Modal */}
       <Modal
@@ -299,6 +354,8 @@ export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps
           form.resetFields();
         }}
         footer={null}
+        width={isMobile ? "100vw" : undefined}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleInvite}>
           <Form.Item
@@ -359,7 +416,7 @@ export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps
         title={detailVolunteer?.name ?? "Volunteer Details"}
         open={!!detailVolunteer}
         onClose={() => setDetailVolunteer(null)}
-        width={480}
+        width={isMobile ? "100%" : 480}
       >
         {detailVolunteer && (
           <Descriptions column={1} bordered size="small">

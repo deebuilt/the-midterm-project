@@ -19,6 +19,7 @@ import {
 import { PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 
@@ -57,6 +58,7 @@ export default function CyclesPage({ setHeaderActions }: CyclesPageProps) {
   const [modalLoading, setModalLoading] = useState(false);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -188,23 +190,57 @@ export default function CyclesPage({ setHeaderActions }: CyclesPageProps) {
     );
   }
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {cycles.map((c) => (
+        <Card key={c.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+            <Text strong style={{ fontSize: 14 }}>{c.name}</Text>
+            {c.is_active ? (
+              <Badge status="success" text="Active" />
+            ) : (
+              <Badge status="default" text="Inactive" />
+            )}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>{c.year}</Text>
+            <Tag color={typeColors[c.type] ?? "default"}>{c.type}</Tag>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {new Date(c.election_date).toLocaleDateString()}
+            </Text>
+            <Text style={{ fontSize: 12 }}>{raceCounts[c.id] ?? 0} races</Text>
+          </div>
+          {c.description && (
+            <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 4 }}>
+              {c.description}
+            </Text>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
 
-      <Card style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-        <Table
-          dataSource={cycles}
-          columns={columns}
-          rowKey="id"
-          pagination={false}
-          expandable={{
-            expandedRowRender: (record) => (
-              <CycleDetail cycleId={record.id} description={record.description} />
-            ),
-          }}
-        />
-      </Card>
+      {isMobile ? (
+        mobileCards
+      ) : (
+        <Card style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+          <Table
+            dataSource={cycles}
+            columns={columns}
+            rowKey="id"
+            pagination={false}
+            expandable={{
+              expandedRowRender: (record) => (
+                <CycleDetail cycleId={record.id} description={record.description} />
+              ),
+            }}
+          />
+        </Card>
+      )}
 
       {/* Create Modal */}
       <Modal
@@ -215,7 +251,8 @@ export default function CyclesPage({ setHeaderActions }: CyclesPageProps) {
           form.resetFields();
         }}
         footer={null}
-        width={520}
+        width={isMobile ? "100vw" : 520}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
           <Form.Item
@@ -226,7 +263,7 @@ export default function CyclesPage({ setHeaderActions }: CyclesPageProps) {
             <Input placeholder="e.g., 2026 Midterm Elections" />
           </Form.Item>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="year"
               label="Year"

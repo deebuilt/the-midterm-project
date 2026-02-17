@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import type { AdminRoute } from "./AdminDashboard";
+import { useIsMobile } from "./useIsMobile";
 
 interface DashboardStats {
   volunteerTotal: number;
@@ -29,44 +30,50 @@ interface DashboardPageProps {
   navigate: (route: AdminRoute) => void;
 }
 
-function StatCard({ icon, label, value, sub, onClick }: {
+function StatCard({ icon, label, value, sub, onClick, isMobile }: {
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
   sub?: React.ReactNode;
   onClick: () => void;
+  isMobile?: boolean;
 }) {
   return (
     <Card
       hoverable
       onClick={onClick}
-      style={{ borderRadius: 8, minWidth: 200, flex: "0 0 auto" }}
-      styles={{ body: { padding: "14px 16px" } }}
+      style={{
+        borderRadius: 8,
+        minWidth: isMobile ? undefined : 200,
+        flex: isMobile ? undefined : "0 0 auto",
+      }}
+      styles={{ body: { padding: isMobile ? "10px 12px" : "14px 16px" } }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
         <div
           style={{
-            width: 36,
-            height: 36,
+            width: isMobile ? 28 : 36,
+            height: isMobile ? 28 : 36,
             borderRadius: 8,
             background: "#f1f5f9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 16,
+            fontSize: isMobile ? 14 : 16,
             color: "#475569",
+            flexShrink: 0,
           }}
         >
           {icon}
         </div>
-        <div>
-          <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: isMobile ? 11 : 12, color: "#64748b", lineHeight: 1 }}>
             {label}
           </div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
+          <div style={{ fontSize: isMobile ? 16 : 20, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>
             {value}
             {sub && (
-              <span style={{ fontSize: 12, fontWeight: 400, color: "#F59E0B", marginLeft: 6 }}>
+              <span style={{ fontSize: isMobile ? 10 : 12, fontWeight: 400, color: "#F59E0B", marginLeft: 4 }}>
                 {sub}
               </span>
             )}
@@ -83,6 +90,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const isMobile = useIsMobile();
 
   function checkScroll() {
     const el = scrollRef.current;
@@ -144,6 +152,74 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
 
   const missingGov = (stats?.totalStates ?? 0) - (stats?.statesWithGov ?? 0);
 
+  const cards = [
+    <StatCard
+      key="vol"
+      icon={<TeamOutlined />}
+      label="Volunteers"
+      value={stats?.volunteerTotal ?? 0}
+      sub={stats?.volunteerPending ? `${stats.volunteerPending} pending` : undefined}
+      onClick={() => navigate("volunteers")}
+      isMobile={isMobile}
+    />,
+    <StatCard
+      key="races"
+      icon={<FlagOutlined />}
+      label="Races"
+      value={stats?.raceCount ?? 0}
+      onClick={() => navigate("races")}
+      isMobile={isMobile}
+    />,
+    <StatCard
+      key="fec"
+      icon={<FileSearchOutlined />}
+      label="FEC Filings"
+      value={stats?.filingsTotal ?? 0}
+      sub={stats?.filingsUnpromoted ? `${stats.filingsUnpromoted} unpromoted` : undefined}
+      onClick={() => navigate("fec")}
+      isMobile={isMobile}
+    />,
+    <StatCard
+      key="cycle"
+      icon={<CalendarOutlined />}
+      label="Active Cycle"
+      value={<span style={{ fontSize: isMobile ? 13 : 16, fontWeight: 600 }}>{stats?.activeCycleName ?? "—"}</span>}
+      onClick={() => navigate("cycles")}
+      isMobile={isMobile}
+    />,
+    <StatCard
+      key="states"
+      icon={<EnvironmentOutlined />}
+      label="States"
+      value={stats?.totalStates ?? 0}
+      sub={missingGov > 0 ? `${missingGov} missing gov` : undefined}
+      onClick={() => navigate("states")}
+      isMobile={isMobile}
+    />,
+    <StatCard
+      key="sync"
+      icon={<SyncOutlined />}
+      label="Last FEC Sync"
+      value={
+        <span style={{ fontSize: isMobile ? 12 : 14, fontWeight: 600 }}>
+          {stats?.lastSyncAt
+            ? new Date(stats.lastSyncAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            : "Never"}
+        </span>
+      }
+      onClick={() => navigate("automation")}
+      isMobile={isMobile}
+    />,
+  ];
+
+  if (isMobile) {
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {cards}
+      </div>
+    );
+  }
+
   return (
     <div style={{ position: "relative" }}>
       {canScrollLeft && (
@@ -198,51 +274,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
           padding: "2px 0",
         }}
       >
-        <StatCard
-          icon={<TeamOutlined />}
-          label="Volunteers"
-          value={stats?.volunteerTotal ?? 0}
-          sub={stats?.volunteerPending ? `${stats.volunteerPending} pending` : undefined}
-          onClick={() => navigate("volunteers")}
-        />
-        <StatCard
-          icon={<FlagOutlined />}
-          label="Races"
-          value={stats?.raceCount ?? 0}
-          onClick={() => navigate("races")}
-        />
-        <StatCard
-          icon={<FileSearchOutlined />}
-          label="FEC Filings"
-          value={stats?.filingsTotal ?? 0}
-          sub={stats?.filingsUnpromoted ? `${stats.filingsUnpromoted} unpromoted` : undefined}
-          onClick={() => navigate("fec")}
-        />
-        <StatCard
-          icon={<CalendarOutlined />}
-          label="Active Cycle"
-          value={<span style={{ fontSize: 16, fontWeight: 600 }}>{stats?.activeCycleName ?? "—"}</span>}
-          onClick={() => navigate("cycles")}
-        />
-        <StatCard
-          icon={<EnvironmentOutlined />}
-          label="States"
-          value={stats?.totalStates ?? 0}
-          sub={missingGov > 0 ? `${missingGov} missing gov` : undefined}
-          onClick={() => navigate("states")}
-        />
-        <StatCard
-          icon={<SyncOutlined />}
-          label="Last FEC Sync"
-          value={
-            <span style={{ fontSize: 14, fontWeight: 600 }}>
-              {stats?.lastSyncAt
-                ? new Date(stats.lastSyncAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                : "Never"}
-            </span>
-          }
-          onClick={() => navigate("automation")}
-        />
+        {cards}
       </div>
     </div>
   );

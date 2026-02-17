@@ -18,6 +18,7 @@ import {
   Tooltip,
   message,
   Spin,
+  Card,
 } from "antd";
 import {
   PlusOutlined,
@@ -32,6 +33,7 @@ import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
 import type { RaceRating, CandidateStatus } from "../../lib/database.types";
 import RacePreview from "./RacePreview";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -164,6 +166,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
   const [selectedStateId, setSelectedStateId] = useState<number | null>(null);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -572,6 +575,53 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
     );
   }
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {filteredRaces.map((r) => {
+        const d = r.district as any;
+        return (
+          <Card key={r.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+              <div>
+                <Text strong style={{ fontSize: 14 }}>{d.state.name}</Text>
+                <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>{d.name}</Text>
+              </div>
+              <Dropdown
+                trigger={["click"]}
+                menu={{
+                  items: [
+                    { key: "preview", label: "Preview", icon: <EyeOutlined />, onClick: () => setPreviewRace(r) },
+                    { key: "edit", label: "Edit", icon: <EditOutlined />, onClick: () => openEditModal(r) },
+                    { type: "divider" },
+                    { key: "delete", label: "Delete", icon: <DeleteOutlined />, danger: true, onClick: () => Modal.confirm({ title: "Delete this race?", content: "This will also remove all candidate assignments.", okText: "Delete", okType: "danger", onOk: () => handleDelete(r.id) }) },
+                  ],
+                }}
+              >
+                <Button type="text" size="small" icon={<MoreOutlined />} />
+              </Dropdown>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              {r.rating && (
+                <span style={{ background: RATING_COLORS[r.rating] ?? "#6b7280", color: RATING_TEXT_COLORS[r.rating] ?? "#fff", padding: "1px 8px", borderRadius: 9999, fontSize: 11, fontWeight: 600 }}>
+                  {r.rating}
+                </span>
+              )}
+              {r.is_special_election && <Tag color="purple" style={{ margin: 0 }}>Special</Tag>}
+              {r.is_open_seat && <Tag color="orange" style={{ margin: 0 }}>Open</Tag>}
+              <Space size={4}>
+                {r.race_candidates.map((rc) => (
+                  <Tooltip key={rc.id} title={`${rc.candidate.first_name} ${rc.candidate.last_name} (${rc.candidate.party})`}>
+                    <span style={{ width: 10, height: 10, borderRadius: "50%", background: PARTY_DOTS[rc.candidate.party] ?? "#6b7280", display: "inline-block" }} />
+                  </Tooltip>
+                ))}
+              </Space>
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
@@ -585,15 +635,17 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
       <div
         style={{
           display: "flex",
-          gap: 16,
+          gap: isMobile ? 8 : 16,
           marginBottom: 16,
           flexWrap: "wrap",
           alignItems: "center",
+          flexDirection: isMobile ? "column" : "row",
         }}
       >
         <Segmented
           value={filterBody}
           onChange={(val) => setFilterBody(val as string)}
+          style={{ width: isMobile ? "100%" : undefined }}
           options={[
             { value: "all", label: "All" },
             { value: "us-senate", label: "Senate" },
@@ -604,7 +656,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         <Select
           value={activeCycleId}
           onChange={handleCycleChange}
-          style={{ width: 200 }}
+          style={{ width: isMobile ? "100%" : 200 }}
           size="small"
           options={cycles.map((c) => ({
             value: c.id,
@@ -614,7 +666,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         <Select
           value={filterRating}
           onChange={setFilterRating}
-          style={{ width: 140 }}
+          style={{ width: isMobile ? "100%" : 140 }}
           size="small"
           options={[
             { value: "all", label: "All Ratings" },
@@ -623,14 +675,18 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         />
       </div>
 
-      {/* Table */}
-      <Table
-        dataSource={filteredRaces}
-        columns={columns}
-        rowKey="id"
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-        pagination={{ pageSize: 20, showSizeChanger: true }}
-      />
+      {/* Table / Mobile Cards */}
+      {isMobile ? (
+        mobileCards
+      ) : (
+        <Table
+          dataSource={filteredRaces}
+          columns={columns}
+          rowKey="id"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+          pagination={{ pageSize: 20, showSizeChanger: true }}
+        />
+      )}
 
       {/* Create / Edit Modal */}
       <Modal
@@ -641,7 +697,8 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
           form.resetFields();
         }}
         footer={null}
-        width={600}
+        width={isMobile ? "100vw" : 600}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
           {!editingRace && (
@@ -714,7 +771,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
             />
           </Form.Item>
 
-          <div style={{ display: "flex", gap: 24 }}>
+          <div style={{ display: "flex", gap: isMobile ? 12 : 24, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="is_special_election"
               label="Special Election"
@@ -727,7 +784,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
             </Form.Item>
           </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item name="primary_date" label="Primary Date" style={{ flex: 1 }}>
               <DatePicker style={{ width: "100%" }} />
             </Form.Item>
@@ -767,7 +824,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         }
         open={!!previewRace}
         onClose={() => setPreviewRace(null)}
-        width={480}
+        width={isMobile ? "100%" : 480}
       >
         {previewRace && (
           <>

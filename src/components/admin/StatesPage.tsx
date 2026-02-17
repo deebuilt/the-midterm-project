@@ -5,6 +5,7 @@ import {
   Select,
   Input,
   Button,
+  Card,
   Typography,
   message,
   Spin,
@@ -12,6 +13,7 @@ import {
 import { SaveOutlined } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import type { Party } from "../../lib/database.types";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 
@@ -53,6 +55,7 @@ export default function StatesPage({ setHeaderActions }: StatesPageProps) {
   const [editValues, setEditValues] = useState<Partial<StateRow>>({});
   const [saving, setSaving] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const loadStates = useCallback(async () => {
     setLoading(true);
@@ -259,23 +262,124 @@ export default function StatesPage({ setHeaderActions }: StatesPageProps) {
     );
   }
 
+  function renderPersonWithParty(name: string | null, party: Party | null, label: string) {
+    if (!name) return null;
+    return (
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Text type="secondary" style={{ fontSize: 11 }}>{label}</Text>
+        <div>
+          <span style={{ fontSize: 13 }}>{name}</span>
+          {party && (
+            <Tag color={partyColors[party]} style={{ marginLeft: 4 }}>
+              {party.charAt(0)}
+            </Tag>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {states.map((s) => {
+        const editing = isEditing(s);
+        return (
+          <Card key={s.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <Text strong style={{ fontSize: 14 }}>{s.name} ({s.abbr})</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>{s.house_districts} districts</Text>
+            </div>
+
+            {editing ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11 }}>Governor</Text>
+                  <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                    <Input
+                      size="small"
+                      placeholder="Name"
+                      value={editValues.current_governor ?? ""}
+                      onChange={(e) => setEditValues((v) => ({ ...v, current_governor: e.target.value }))}
+                      style={{ flex: 1 }}
+                    />
+                    <Select
+                      size="small"
+                      allowClear
+                      placeholder="Party"
+                      value={editValues.current_governor_party}
+                      onChange={(val) => setEditValues((v) => ({ ...v, current_governor_party: val ?? null }))}
+                      options={partyOptions}
+                      style={{ width: 100 }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 11 }}>Senator (not 2026)</Text>
+                  <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                    <Input
+                      size="small"
+                      placeholder="Name"
+                      value={editValues.other_senator ?? ""}
+                      onChange={(e) => setEditValues((v) => ({ ...v, other_senator: e.target.value }))}
+                      style={{ flex: 1 }}
+                    />
+                    <Select
+                      size="small"
+                      allowClear
+                      placeholder="Party"
+                      value={editValues.other_senator_party}
+                      onChange={(val) => setEditValues((v) => ({ ...v, other_senator_party: val ?? null }))}
+                      options={partyOptions}
+                      style={{ width: 100 }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                  <Button size="small" onClick={cancelEdit}>Cancel</Button>
+                  <Button size="small" type="primary" icon={<SaveOutlined />} loading={saving} onClick={saveEdit}>
+                    Save
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {renderPersonWithParty(s.current_governor, s.current_governor_party, "Governor")}
+                {renderPersonWithParty(s.other_senator, s.other_senator_party, "Senator")}
+                {!s.current_governor && !s.other_senator && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>No data entered</Text>
+                )}
+                <Button size="small" type="link" onClick={() => startEdit(s)} style={{ alignSelf: "flex-end", padding: 0 }}>
+                  Edit
+                </Button>
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
 
       <Text type="secondary" style={{ display: "block", marginBottom: 16, fontSize: 13 }}>
         Manage state-level data: current governor and the senator whose seat is NOT up this cycle.
-        Click Edit to modify a row inline.
+        {isMobile ? " Tap Edit to modify." : " Click Edit to modify a row inline."}
       </Text>
 
-      <Table
-        dataSource={states}
-        columns={columns}
-        rowKey="id"
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-        pagination={{ pageSize: 25, showSizeChanger: true }}
-        size="small"
-      />
+      {isMobile ? (
+        mobileCards
+      ) : (
+        <Table
+          dataSource={states}
+          columns={columns}
+          rowKey="id"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+          pagination={{ pageSize: 25, showSizeChanger: true }}
+          size="small"
+        />
+      )}
     </div>
   );
 }

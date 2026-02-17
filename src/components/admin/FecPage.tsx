@@ -44,6 +44,7 @@ import {
   slugifyName,
   type FecCandidate,
 } from "../../lib/openfec";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -176,6 +177,7 @@ function formatMoney(n: number): string {
 export default function FecPage({ setHeaderActions }: FecPageProps) {
   const [tab, setTab] = useState<"filings" | "sync">("filings");
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setHeaderActions(null);
@@ -196,11 +198,12 @@ export default function FecPage({ setHeaderActions }: FecPageProps) {
       />
 
       {tab === "filings" ? (
-        <FilingsTab messageApi={messageApi} />
+        <FilingsTab messageApi={messageApi} isMobile={isMobile} />
       ) : (
         <SyncTab
           messageApi={messageApi}
           onSyncComplete={() => setTab("filings")}
+          isMobile={isMobile}
         />
       )}
     </div>
@@ -211,7 +214,7 @@ export default function FecPage({ setHeaderActions }: FecPageProps) {
 // Filings Tab
 // ═══════════════════════════════════════════
 
-function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useMessage>[0] }) {
+function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof message.useMessage>[0]; isMobile: boolean }) {
   const [filings, setFilings] = useState<DbFecFiling[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCycleId, setActiveCycleId] = useState<number | null>(null);
@@ -775,6 +778,49 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
     },
   ];
 
+  const mobileFilingCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {filteredFilings.map((f) => {
+        const partyColors: Record<string, string> = { Democrat: "blue", Republican: "red", Independent: "purple" };
+        return (
+          <Card key={f.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div>
+                  <Tag color={partyColors[f.party] ?? "default"} style={{ fontSize: 10, fontWeight: "bold", marginRight: 4 }}>
+                    {f.party.charAt(0)}
+                  </Tag>
+                  <Text strong>{f.first_name} {f.last_name}</Text>
+                  {f.is_incumbent && <Tag color="green" style={{ marginLeft: 4, fontSize: 10 }}>Inc</Tag>}
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>{f.state?.abbr} · {f.office === "S" ? "Senate" : `House ${f.district_number ?? ""}`}</Text>
+              </div>
+              <Dropdown
+                menu={{
+                  items: [
+                    { key: "promote", icon: <SendOutlined />, label: "Promote", disabled: !!f.promoted_to_candidate_id, onClick: () => handlePromoteClick(f) },
+                    { key: "delete", icon: <DeleteOutlined />, label: "Delete", danger: true, onClick: () => handleDelete(f) },
+                  ],
+                }}
+                trigger={["click"]}
+              >
+                <Button type="text" size="small" icon={<MoreOutlined />} />
+              </Dropdown>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              <Text style={{ fontFamily: "monospace", fontSize: 12 }}>{formatMoney(f.funds_raised)}</Text>
+              {f.promoted_to_candidate_id ? (
+                <Tag color="green" icon={<CheckCircleOutlined />} style={{ margin: 0 }}>Promoted</Tag>
+              ) : (
+                <Tag style={{ margin: 0 }}>Staging</Tag>
+              )}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -828,10 +874,10 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
         <Select
           placeholder="All states"
-          style={{ width: 180 }}
+          style={{ width: isMobile ? "100%" : 180 }}
           allowClear
           showSearch
           value={stateFilter}
@@ -847,44 +893,46 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
           ))}
         </Select>
 
-        <Select placeholder="Body" style={{ width: 140 }} value={bodyFilter} onChange={setBodyFilter}>
+        <Select placeholder="Body" style={{ width: isMobile ? "100%" : 140 }} value={bodyFilter} onChange={setBodyFilter}>
           <Select.Option value="all">All Bodies</Select.Option>
           <Select.Option value="senate">Senate</Select.Option>
           <Select.Option value="house">House</Select.Option>
           <Select.Option value="governor">Governor</Select.Option>
         </Select>
 
-        <Select placeholder="Party" style={{ width: 140 }} value={partyFilter} onChange={setPartyFilter}>
+        <Select placeholder="Party" style={{ width: isMobile ? "100%" : 140 }} value={partyFilter} onChange={setPartyFilter}>
           <Select.Option value="all">All Parties</Select.Option>
           <Select.Option value="Democrat">Democrat</Select.Option>
           <Select.Option value="Republican">Republican</Select.Option>
           <Select.Option value="Independent">Independent</Select.Option>
         </Select>
 
-        <Select placeholder="Status" style={{ width: 140 }} value={statusFilter} onChange={setStatusFilter}>
+        <Select placeholder="Status" style={{ width: isMobile ? "100%" : 140 }} value={statusFilter} onChange={setStatusFilter}>
           <Select.Option value="all">All Status</Select.Option>
           <Select.Option value="not_promoted">Staging</Select.Option>
           <Select.Option value="promoted">Promoted</Select.Option>
         </Select>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={filteredFilings}
-        rowKey="id"
-        loading={loading}
-        size="small"
-        rowSelection={{
-          selectedRowKeys,
-          onChange: setSelectedRowKeys,
-          columnWidth: 40,
-        }}
-        pagination={{
-          pageSize: 50,
-          showSizeChanger: true,
-          showTotal: (total) => `${total} filings`,
-        }}
-      />
+      {isMobile ? mobileFilingCards : (
+        <Table
+          columns={columns}
+          dataSource={filteredFilings}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          rowSelection={{
+            selectedRowKeys,
+            onChange: setSelectedRowKeys,
+            columnWidth: 40,
+          }}
+          pagination={{
+            pageSize: 50,
+            showSizeChanger: true,
+            showTotal: (total) => `${total} filings`,
+          }}
+        />
+      )}
 
       <Modal
         title="Promote Filing to Candidate"
@@ -892,7 +940,8 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
         onCancel={() => setPromoteModalVisible(false)}
         onOk={handlePromote}
         confirmLoading={promoting}
-        width={600}
+        width={isMobile ? "100vw" : 600}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
         okText="Promote"
       >
         {selectedFiling && (
@@ -958,7 +1007,8 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
         okText="Promote All"
         okButtonProps={{ loading: bulkPromoting }}
         onOk={handleBulkPromote}
-        width={600}
+        width={isMobile ? "100vw" : 600}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary" style={{ fontSize: 13 }}>
@@ -991,9 +1041,11 @@ function FilingsTab({ messageApi }: { messageApi: ReturnType<typeof message.useM
 function SyncTab({
   messageApi,
   onSyncComplete,
+  isMobile,
 }: {
   messageApi: ReturnType<typeof message.useMessage>[0];
   onSyncComplete: () => void;
+  isMobile: boolean;
 }) {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) ?? "");
   const [step, setStep] = useState<ImportStep>("connect");
@@ -1310,14 +1362,14 @@ function SyncTab({
       {/* Fetch & Filter */}
       {connectionStatus === "ok" && (
         <Card title={<Space><CloudDownloadOutlined /><span>Fetch Candidates</span></Space>} size="small" style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12, alignItems: "flex-end", flexDirection: isMobile ? "column" : "row" }}>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Cycle</Text>
-              <Select value={cycle} onChange={setCycle} style={{ width: 100 }} options={[{ value: 2026, label: "2026" }, { value: 2024, label: "2024" }, { value: 2028, label: "2028" }]} />
+              <Select value={cycle} onChange={setCycle} style={{ width: isMobile ? "100%" : 100 }} options={[{ value: 2026, label: "2026" }, { value: 2024, label: "2024" }, { value: 2028, label: "2028" }]} />
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>Office</Text>
-              <Select value={officeFilter} onChange={setOfficeFilter} style={{ width: 140 }} options={[{ value: "S", label: "Senate only" }, { value: "H", label: "House only" }, { value: "both", label: "Senate + House" }]} />
+              <Select value={officeFilter} onChange={setOfficeFilter} style={{ width: isMobile ? "100%" : 140 }} options={[{ value: "S", label: "Senate only" }, { value: "H", label: "House only" }, { value: "both", label: "Senate + House" }]} />
             </div>
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>State</Text>
@@ -1327,7 +1379,7 @@ function SyncTab({
                 onChange={(val) => setStateFilter(val ?? "")}
                 allowClear
                 showSearch
-                style={{ width: 140 }}
+                style={{ width: isMobile ? "100%" : 140 }}
                 options={[
                   { value: "AL", label: "AL — Alabama" }, { value: "AK", label: "AK — Alaska" }, { value: "AZ", label: "AZ — Arizona" },
                   { value: "AR", label: "AR — Arkansas" }, { value: "CA", label: "CA — California" }, { value: "CO", label: "CO — Colorado" },
@@ -1382,7 +1434,7 @@ function SyncTab({
           size="small"
           style={{ marginBottom: 16 }}
           extra={
-            <Space>
+            <Space size="small" wrap>
               <Text type="secondary" style={{ fontSize: 12 }}>{selectedCount} selected</Text>
               <Button size="small" onClick={() => toggleAll(true)}>All</Button>
               <Button size="small" onClick={() => toggleAll(false)}>None</Button>
@@ -1468,9 +1520,9 @@ function SyncTab({
       {step === "done" && importResult && (
         <Card title="Sync Complete" style={{ marginBottom: 16 }}>
           <Row gutter={16} style={{ marginBottom: 20 }}>
-            <Col span={8}><Statistic title="Created" value={importResult.created} valueStyle={{ color: "#52c41a" }} prefix={<CheckCircleOutlined />} /></Col>
-            <Col span={8}><Statistic title="Updated" value={importResult.updated} valueStyle={{ color: "#1890ff" }} prefix={<SyncOutlined />} /></Col>
-            <Col span={8}><Statistic title="Skipped" value={importResult.skipped} /></Col>
+            <Col span={isMobile ? 12 : 8}><Statistic title="Created" value={importResult.created} valueStyle={{ color: "#52c41a" }} prefix={<CheckCircleOutlined />} /></Col>
+            <Col span={isMobile ? 12 : 8}><Statistic title="Updated" value={importResult.updated} valueStyle={{ color: "#1890ff" }} prefix={<SyncOutlined />} /></Col>
+            <Col span={isMobile ? 12 : 8}><Statistic title="Skipped" value={importResult.skipped} /></Col>
           </Row>
           {importResult.errors.length > 0 && (
             <Alert

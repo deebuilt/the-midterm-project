@@ -15,6 +15,7 @@ import {
   Popconfirm,
   Tooltip,
   Dropdown,
+  Card,
   message,
   Spin,
 } from "antd";
@@ -34,6 +35,7 @@ import {
   type BallotMeasureStatus,
   type BallotMeasureCategory,
 } from "../../lib/database.types";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -167,6 +169,7 @@ function parseCsvLine(line: string): string[] {
 }
 
 export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresPageProps) {
+  const isMobile = useIsMobile();
   const [measures, setMeasures] = useState<BallotMeasureRow[]>([]);
   const [states, setStates] = useState<StateOption[]>([]);
   const [cycles, setCycles] = useState<CycleOption[]>([]);
@@ -487,6 +490,44 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
     },
   ];
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {filteredMeasures.map((m) => (
+        <Card key={m.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <a onClick={() => setPreviewMeasure(m)} style={{ fontWeight: 600, fontSize: 14 }}>{m.title}</a>
+              {m.short_title && (
+                <div style={{ fontSize: 12, color: "#6b7280" }}>{m.short_title}</div>
+              )}
+            </div>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "preview", icon: <EyeOutlined />, label: "Preview", onClick: () => setPreviewMeasure(m) },
+                  { key: "edit", icon: <EditOutlined />, label: "Edit", onClick: () => openEditModal(m) },
+                  { key: "delete", icon: <DeleteOutlined />, label: "Delete", danger: true, onClick: () => { Modal.confirm({ title: "Delete this ballot measure?", okText: "Delete", okType: "danger", onOk: () => handleDelete(m.id) }); } },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <Button type="text" size="small" icon={<MoreOutlined />} />
+            </Dropdown>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+            <Tag>{(m.state as any).abbr}</Tag>
+            <Tag color={categoryColors[m.category] ?? "default"}>
+              {BALLOT_MEASURE_CATEGORY_LABELS[m.category] ?? m.category}
+            </Tag>
+            <Tag color={statusColors[m.status] ?? "default"}>
+              {BALLOT_MEASURE_STATUS_LABELS[m.status] ?? m.status}
+            </Tag>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: 80 }}>
@@ -512,12 +553,13 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
           marginBottom: 16,
           flexWrap: "wrap",
           alignItems: "center",
+          flexDirection: isMobile ? "column" : "row",
         }}
       >
         <Select
           value={filterState}
           onChange={setFilterState}
-          style={{ width: 160 }}
+          style={{ width: isMobile ? "100%" : 160 }}
           size="small"
           showSearch
           filterOption={(input, option) =>
@@ -531,7 +573,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
         <Select
           value={filterStatus}
           onChange={setFilterStatus}
-          style={{ width: 140 }}
+          style={{ width: isMobile ? "100%" : 140 }}
           size="small"
           options={[
             { value: "all", label: "All Statuses" },
@@ -543,14 +585,16 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
         </Text>
       </div>
 
-      {/* Table */}
-      <Table
-        dataSource={filteredMeasures}
-        columns={columns}
-        rowKey="id"
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-        pagination={{ pageSize: 20, showSizeChanger: true }}
-      />
+      {/* Table / Mobile Cards */}
+      {isMobile ? mobileCards : (
+        <Table
+          dataSource={filteredMeasures}
+          columns={columns}
+          rowKey="id"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
+          pagination={{ pageSize: 20, showSizeChanger: true }}
+        />
+      )}
 
       {/* Create / Edit Modal */}
       <Modal
@@ -561,10 +605,11 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
           form.resetFields();
         }}
         footer={null}
-        width={640}
+        width={isMobile ? "100vw" : 640}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="state_id"
               label="State"
@@ -619,7 +664,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
             />
           </Form.Item>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="slug"
               label={
@@ -640,7 +685,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
             </Form.Item>
           </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item name="category" label="Category" rules={[{ required: true }]} style={{ flex: 1 }}>
               <Select options={categoryOptions} />
             </Form.Item>
@@ -657,7 +702,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
             <TextArea rows={3} placeholder="What this measure does..." />
           </Form.Item>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item name="yes_means" label="A YES vote means..." style={{ flex: 1 }}>
               <TextArea rows={2} placeholder="What happens if voters approve" />
             </Form.Item>
@@ -666,11 +711,11 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
             </Form.Item>
           </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: isMobile ? 0 : 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item name="source_url" label="Source URL" style={{ flex: 1 }}>
               <Input placeholder="https://ballotpedia.org/..." />
             </Form.Item>
-            <Form.Item name="sort_order" label="Sort Order" style={{ width: 100 }}>
+            <Form.Item name="sort_order" label="Sort Order" style={{ width: isMobile ? undefined : 100, flex: isMobile ? 1 : undefined }}>
               <InputNumber min={0} />
             </Form.Item>
           </div>
@@ -703,7 +748,8 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
             </Space>
           ) : null
         }
-        width={700}
+        width={isMobile ? "100vw" : 700}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <div style={{ marginBottom: 16 }}>
           <Text>
@@ -760,7 +806,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
         title={previewMeasure?.title ?? "Ballot Measure Preview"}
         open={!!previewMeasure}
         onClose={() => setPreviewMeasure(null)}
-        width={480}
+        width={isMobile ? "100%" : 480}
       >
         {previewMeasure && (
           <div>
@@ -817,7 +863,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
 
               {/* Yes / No cards */}
               {(previewMeasure.yes_means || previewMeasure.no_means) && (
-                <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 12, marginBottom: 16, flexDirection: isMobile ? "column" : "row" }}>
                   {previewMeasure.yes_means && (
                     <div
                       style={{

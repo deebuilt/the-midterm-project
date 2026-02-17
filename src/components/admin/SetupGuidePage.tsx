@@ -17,6 +17,7 @@ import {
   ArrowRightOutlined,
 } from "@ant-design/icons";
 import type { AdminRoute } from "./AdminDashboard";
+import { useIsMobile } from "./useIsMobile";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -34,6 +35,7 @@ type GuidePage =
 
 interface Props {
   navigate: (route: AdminRoute) => void;
+  isMobile?: boolean;
 }
 
 // -- Colors -------------------------------------------------------------------
@@ -86,7 +88,26 @@ function FlowArrow() {
 }
 
 /** Visual mapping row: "What you see → Where it comes from → How to change it" */
-function MappingRow({ see, from, how, navigate }: { see: React.ReactNode; from: React.ReactNode; how: React.ReactNode; navigate: (r: AdminRoute) => void }) {
+function MappingRow({ see, from, how, navigate, isMobile }: { see: React.ReactNode; from: React.ReactNode; how: React.ReactNode; navigate: (r: AdminRoute) => void; isMobile?: boolean }) {
+  if (isMobile) {
+    return (
+      <div style={{ borderBottom: "1px solid #F1F5F9", padding: "14px 0" }}>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: BLUE, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>What you see</div>
+          <div style={{ fontSize: 14, color: NAVY, lineHeight: 1.6 }}>{see}</div>
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: GREEN, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Where it comes from</div>
+          <div style={{ fontSize: 14, color: NAVY, lineHeight: 1.6 }}>{from}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: PURPLE, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>How to change it</div>
+          <div style={{ fontSize: 14, color: NAVY, lineHeight: 1.6 }}>{how}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #F1F5F9", padding: "14px 0", alignItems: "flex-start" }}>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -108,7 +129,7 @@ function MappingRow({ see, from, how, navigate }: { see: React.ReactNode; from: 
 // ---------------------------------------------------------------------------
 // HOMEPAGE GUIDE
 // ---------------------------------------------------------------------------
-function GuideHomepage({ navigate }: Props) {
+function GuideHomepage({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<HomeOutlined />} iconBg="#DBEAFE" iconColor={BLUE} title="Homepage" url="/" />
@@ -118,27 +139,27 @@ function GuideHomepage({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>Page Sections (top to bottom)</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"Know your ballot. Own your vote."</strong><br />Hero section with countdown timer showing days until Nov 3, 2026</>}
         from={<>Countdown date is hardcoded in the component. No database.</>}
         how={<>Edit <code>src/components/ui/Countdown.tsx</code> to change the target date.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"WHERE WE ARE"</strong><br />Election Tracker — 5-phase stepper showing Filing → Primaries → Campaign → Election Day → Results</>}
         from={<>Current phase is detected automatically by today's date (client-side). No database.</>}
         how={<>Phase dates are defined inside <code>ElectionTracker.tsx</code>. The tracker updates itself.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"WHAT'S AT STAKE"</strong><br />Two side-by-side cards — "The Senate" and "The House" — showing current D/R split, seats up, and seats needed for majority</>}
         from={<><code>cycle_stats</code> table — one row for Senate, one for House, each with current split and extra data</>}
         how={<>Go to <AdminTag route="cycles" label="Election Cycles" navigate={navigate} color="blue" /> → click "Edit Stats" on the active cycle → update the numbers for Senate or House (current Dem/GOP count, seats up, retirements, battlegrounds)</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"LATEST HEADLINES"</strong><br />3 news items from ProPublica, PBS NewsHour, The Guardian</>}
         from={<>External RSS feeds fetched at build time. No database.</>}
         how={<>Headlines refresh automatically on each Vercel deploy. No admin action needed.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"THE BASICS"</strong><br />4 cards linking to learn pages: How Congress Works, Senate 101, House 101, What Are Midterms?</>}
         from={<>Hardcoded links in the Astro template. No database.</>}
         how={<>Edit <code>src/pages/index.astro</code> to change the cards or links.</>}
@@ -150,7 +171,7 @@ function GuideHomepage({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // MAP GUIDE
 // ---------------------------------------------------------------------------
-function GuideMap({ navigate }: Props) {
+function GuideMap({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<EnvironmentOutlined />} iconBg="#DCFCE7" iconColor={GREEN} title="Interactive Map" url="/map" />
@@ -163,7 +184,7 @@ function GuideMap({ navigate }: Props) {
       </Callout>
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>The Map Itself</div>
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>State colors</strong> on the map (red/blue/amber/gray)</>}
         from={<><code>races</code> table → <code>rating</code> field (e.g., "Lean R", "Toss-up", "Safe D")</>}
         how={<>Go to <AdminTag route="races" label="Races" navigate={navigate} color="red" /> → find the state's Senate race → change the <strong>rating</strong> dropdown</>}
@@ -174,7 +195,7 @@ function GuideMap({ navigate }: Props) {
 
       <div style={{ background: NAVY, color: "white", padding: "8px 14px", borderRadius: "8px 8px 0 0", fontWeight: 700, fontSize: 13, letterSpacing: 0.5, marginTop: 16 }}>FEDERAL OFFICES</div>
       <div style={{ border: "1px solid #E2E8F0", borderTop: "none", padding: 16, borderRadius: "0 0 8px 8px", marginBottom: 16 }}>
-        <MappingRow navigate={navigate}
+        <MappingRow navigate={navigate} isMobile={isMobile}
           see={<><strong>"United States Senator"</strong><br />Candidate names with party bubbles (tappable). Rating badge. "VOTE FOR ONE" label.</>}
           from={<><code>races</code> table (the race entry for this state) + <code>candidates</code> table (linked via <code>race_candidates</code> join table)</>}
           how={<>
@@ -182,7 +203,7 @@ function GuideMap({ navigate }: Props) {
             <strong>To change the rating badge:</strong> Go to <AdminTag route="races" label="Races" navigate={navigate} color="red" /> and change the rating dropdown.
           </>}
         />
-        <MappingRow navigate={navigate}
+        <MappingRow navigate={navigate} isMobile={isMobile}
           see={<><strong>"United States Representative"</strong><br />Shows explanatory text about districts. No candidates listed yet.</>}
           from={<>House races exist in the <code>races</code> + <code>districts</code> tables (body = us-house) but this section doesn't render individual candidates yet.</>}
           how={<>House candidate display is not yet built. The schema is ready — the public page needs a future update.</>}
@@ -191,7 +212,7 @@ function GuideMap({ navigate }: Props) {
 
       <div style={{ background: NAVY, color: "white", padding: "8px 14px", borderRadius: "8px 8px 0 0", fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>STATE OFFICES</div>
       <div style={{ border: "1px solid #E2E8F0", borderTop: "none", padding: 16, borderRadius: "0 0 8px 8px", marginBottom: 16 }}>
-        <MappingRow navigate={navigate}
+        <MappingRow navigate={navigate} isMobile={isMobile}
           see={<><strong>"Governor"</strong><br />Shows current governor name. "VOTE FOR ONE" or "NOT THIS YEAR" depending on whether the seat is up in 2026.</>}
           from={<><code>states</code> table → <code>current_governor</code> column. Whether the seat is up comes from a hardcoded list in <code>queries.ts</code>.</>}
           how={<>Go to <AdminTag route="states" label="States" navigate={navigate} color="green" /> → edit the state → update the <strong>Governor</strong> field.</>}
@@ -200,7 +221,7 @@ function GuideMap({ navigate }: Props) {
 
       <div style={{ background: NAVY, color: "white", padding: "8px 14px", borderRadius: "8px 8px 0 0", fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>BALLOT MEASURES</div>
       <div style={{ border: "1px solid #E2E8F0", borderTop: "none", padding: 16, borderRadius: "0 0 8px 8px", marginBottom: 16 }}>
-        <MappingRow navigate={navigate}
+        <MappingRow navigate={navigate} isMobile={isMobile}
           see={<><strong>Ballot measure rows</strong><br />Each measure has a title, description, status badge, and expandable Yes/No explanation with tappable bubbles.</>}
           from={<><code>ballot_measures</code> table — only measures with status <strong>"qualified"</strong> appear on the public ballot.</>}
           how={<>Go to <AdminTag route="ballot-measures" label="Ballot Measures" navigate={navigate} color="orange" /> → create a measure for the state → set status to <strong>"qualified"</strong>. Fill in the title, description, yes_means, and no_means fields.</>}
@@ -217,7 +238,7 @@ function GuideMap({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // SENATE GUIDE
 // ---------------------------------------------------------------------------
-function GuideSenate({ navigate }: Props) {
+function GuideSenate({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<FlagOutlined />} iconBg="#FEE2E2" iconColor={RED} title="Senate Races" url="/senate" />
@@ -231,37 +252,37 @@ function GuideSenate({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>Page Sections (top to bottom)</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Senate Guide wizard</strong><br />"New to Senate elections? Take a 2-minute walkthrough..." — expandable 5-step tutorial covering The Big Picture, Regular vs Special, Current Score, Race Ratings, and Follow the Seats</>}
         from={<>Mostly hardcoded educational content inside <code>SenateGuide.tsx</code>. The "Current Score" step uses <code>cycle_stats</code> data (current D/R split).</>}
         how={<>The split numbers come from <AdminTag route="cycles" label="Election Cycles" navigate={navigate} color="blue" /> → edit the active cycle → Senate stats. The educational text is in the component code.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Path to Majority</strong><br />Visual bar showing current D/R split + cards saying "Dems need to flip X seats" / "GOP can lose X seats"</>}
         from={<><code>cycle_stats</code> table → Senate row → <code>current_dem</code>, <code>current_gop</code>, and <code>extra_data</code> JSON field</>}
         how={<>Go to <AdminTag route="cycles" label="Election Cycles" navigate={navigate} color="blue" /> → edit the active cycle → update the Senate current split and path-to-majority numbers</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"Toss-up Races"</strong><br />Grid of race cards for races rated "Toss-up"</>}
         from={<><code>races</code> table where <code>rating = 'Toss-up'</code></>}
         how={<>A race appears here when you set its rating to "Toss-up" in <AdminTag route="races" label="Races" navigate={navigate} color="red" /></>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"Competitive Races"</strong><br />Grid of race cards for races rated "Lean R" or "Lean D"</>}
         from={<><code>races</code> table where rating is "Lean R" or "Lean D"</>}
         how={<>Set a race's rating to "Lean R" or "Lean D" in <AdminTag route="races" label="Races" navigate={navigate} color="red" /> to move it here</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"Special Elections"</strong><br />Cards for Ohio and Florida (Class III seats with appointed senators)</>}
         from={<><code>races</code> table where <code>is_special_election = true</code></>}
         how={<>Toggle <code>is_special_election</code> on a race in <AdminTag route="races" label="Races" navigate={navigate} color="red" /></>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"Senate Retirements"</strong><br />Cards for senators not running again (Tuberville, Tillis, Peters, etc.)</>}
         from={<><code>races</code> table where <code>is_open_seat = true</code> + candidate data showing no incumbent running</>}
         how={<>Mark a race as <code>is_open_seat</code> in <AdminTag route="races" label="Races" navigate={navigate} color="red" /></>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>"All 33 Senate Seats Up in 2026"</strong><br />Two grids: Republican-held seats and Democrat-held seats, showing every Class II race</>}
         from={<>All <code>races</code> with Senate districts (Class II), split by incumbent party</>}
         how={<>These are all the Senate races in the system. Each card shows the candidate name and "why competitive" text if set. Edit the race in <AdminTag route="races" label="Races" navigate={navigate} color="red" /> to add or update the <strong>why_competitive</strong> field.</>}
@@ -283,7 +304,7 @@ function GuideSenate({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // HOUSE GUIDE
 // ---------------------------------------------------------------------------
-function GuideHouse({ navigate }: Props) {
+function GuideHouse({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<BankOutlined />} iconBg="#E0E7FF" iconColor="#4F46E5" title="House Overview" url="/house" />
@@ -293,7 +314,7 @@ function GuideHouse({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>What's on This Page</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Current D/R split</strong>, number of retirements, number of battleground districts</>}
         from={<><code>cycle_stats</code> table → House row → <code>current_dem</code>, <code>current_gop</code>, and <code>extra_data</code> JSON (retirements, battlegrounds)</>}
         how={<>Go to <AdminTag route="cycles" label="Election Cycles" navigate={navigate} color="blue" /> → edit the active cycle → update House stats: current Dem/GOP count, retirements number, and battleground district count</>}
@@ -309,7 +330,7 @@ function GuideHouse({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // EXPLORE GUIDE
 // ---------------------------------------------------------------------------
-function GuideExplore({ navigate }: Props) {
+function GuideExplore({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<SwapOutlined />} iconBg="#FEF3C7" iconColor={AMBER} title="Explore (Swipe Cards)" url="/explore" />
@@ -323,12 +344,12 @@ function GuideExplore({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>What Each Swipe Card Shows</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>State name and race rating badge</strong></>}
         from={<><code>races</code> table → state name from joined <code>districts</code>/<code>states</code>, rating from the race</>}
         how={<>Change the rating in <AdminTag route="races" label="Races" navigate={navigate} color="red" /> — set to Toss-up, Lean R, or Lean D to include, anything else to exclude</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Candidate photos, names, party labels, and key issue positions</strong></>}
         from={<><code>candidates</code> table (name, party, photo URL) + <code>candidate_positions</code> table (issue stances linked to <code>topics</code>)</>}
         how={<>Go to <AdminTag route="candidates" label="Candidates" navigate={navigate} color="purple" /> → add a photo URL, write a bio, and add issue positions in the Positions tab of the candidate drawer</>}
@@ -340,7 +361,7 @@ function GuideExplore({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // CALENDAR GUIDE
 // ---------------------------------------------------------------------------
-function GuideCalendar({ navigate }: Props) {
+function GuideCalendar({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<ScheduleOutlined />} iconBg="#D1FAE5" iconColor={GREEN} title="Election Calendar" url="/calendar" />
@@ -350,12 +371,12 @@ function GuideCalendar({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>How It Works</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Colored dots on calendar dates</strong><br />Each dot color = a different event type. Blue = primary, red = filing deadline, green = early voting, etc.</>}
         from={<><code>calendar_events</code> table. Each event has a <code>state_id</code>, <code>event_type</code> (primary, runoff, filing_deadline, registration_deadline, early_voting_start, early_voting_end, general, other), and <code>event_date</code>.</>}
         how={<>Go to <AdminTag route="calendar-events" label="Calendar Events" navigate={navigate} color="green" /> → add events by selecting the state, event type, and date. The color is determined by the event type automatically.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>State filter dropdown</strong> + <strong>date detail panel</strong> (click a date to see events)</>}
         from={<>Same <code>calendar_events</code> table — the state filter narrows the query, the detail panel shows all events for the clicked date</>}
         how={<>Same admin page. Add more events to make dates richer.</>}
@@ -371,7 +392,7 @@ function GuideCalendar({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // WHO'S RUNNING GUIDE
 // ---------------------------------------------------------------------------
-function GuideWhosRunning({ navigate }: Props) {
+function GuideWhosRunning({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<FileSearchOutlined />} iconBg="#EDE9FE" iconColor={PURPLE} title="Who's Running" url="/whos-running" />
@@ -381,12 +402,12 @@ function GuideWhosRunning({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>What Visitors See</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Filter bar</strong><br />State dropdown, sort options (by primary date, state name, or most candidates), expand/collapse all</>}
         from={<>Client-side filtering over the <code>fec_filings</code> data. The state list and primary dates come from joined <code>states</code> + <code>calendar_events</code> tables.</>}
         how={<>State names come from <AdminTag route="states" label="States" navigate={navigate} color="green" /> and primary dates come from <AdminTag route="calendar-events" label="Calendar Events" navigate={navigate} color="green" /></>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Collapsible state cards</strong><br />Each card shows the state name, primary date, urgency badge ("14d away"), and candidate count. Expanded view shows each candidate with name, party, and fundraising bar graph (raised / spent / cash on hand).</>}
         from={<><code>fec_filings</code> staging table. Only filings where <code>promoted_to_candidate_id IS NULL</code> appear here (unpromoted ones).</>}
         how={<>Go to <AdminTag route="fec" label="FEC" navigate={navigate} color="purple" /> (described below)</>}
@@ -440,7 +461,7 @@ function GuideWhosRunning({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // VOLUNTEER GUIDE
 // ---------------------------------------------------------------------------
-function GuideVolunteer({ navigate }: Props) {
+function GuideVolunteer({ navigate, isMobile }: Props) {
   return (
     <div>
       <PageHeader icon={<TeamOutlined />} iconBg="#FCE7F3" iconColor="#DB2777" title="Volunteer Form" />
@@ -450,12 +471,12 @@ function GuideVolunteer({ navigate }: Props) {
 
       <div style={{ fontSize: 16, fontWeight: 700, color: NAVY, marginBottom: 12, marginTop: 28 }}>How It Works</div>
 
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><strong>Footer signup form</strong><br />Fields: name, email, role interests (checkboxes), experience, availability</>}
         from={<>Submits directly to the <code>volunteers</code> table in Supabase. Status = "pending", no auth_id (anonymous submission).</>}
         how={<>The form itself is in <code>src/components/ui/VolunteerForm.tsx</code>. To change the form fields, edit that component.</>}
       />
-      <MappingRow navigate={navigate}
+      <MappingRow navigate={navigate} isMobile={isMobile}
         see={<><em>(Not visible to public)</em> — volunteer submissions waiting for review</>}
         from={<><code>volunteers</code> table with all submissions</>}
         how={<>Go to <AdminTag route="volunteers" label="Volunteers" navigate={navigate} color="cyan" /> → review pending applications → change status to <strong>"active"</strong> (approved) or <strong>"inactive"</strong> (declined). You can also add internal notes.</>}
@@ -467,7 +488,7 @@ function GuideVolunteer({ navigate }: Props) {
 // ---------------------------------------------------------------------------
 // STATIC PAGES GUIDE
 // ---------------------------------------------------------------------------
-function GuideStatic() {
+function GuideStatic({ isMobile }: { isMobile?: boolean }) {
   return (
     <div>
       <PageHeader icon={<FileTextOutlined />} iconBg="#F1F5F9" iconColor={SLATE} title="Static Pages" />
@@ -488,10 +509,10 @@ function GuideStatic() {
           { url: "/learn/what-are-midterms", name: "What Are Midterms?", desc: "Midterm elections explained", file: "src/pages/learn/what-are-midterms.astro" },
           { url: "/learn/how-to-run", name: "How to Run", desc: "Guide to running for office", file: "src/pages/learn/how-to-run.astro" },
         ].map((p) => (
-          <div key={p.url} style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "10px 0", borderBottom: "1px solid #F1F5F9" }}>
-            <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, fontSize: 14, color: BLUE, minWidth: 180, textDecoration: "none" }}>{p.name}</a>
-            <span style={{ fontSize: 14, color: NAVY, flex: 1 }}>{p.desc}</span>
-            <code style={{ fontSize: 11, color: SLATE, whiteSpace: "nowrap" }}>{p.file}</code>
+          <div key={p.url} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "baseline", gap: isMobile ? 4 : 12, padding: "10px 0", borderBottom: "1px solid #F1F5F9" }}>
+            <a href={p.url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600, fontSize: 14, color: BLUE, minWidth: isMobile ? undefined : 180, textDecoration: "none" }}>{p.name}</a>
+            <span style={{ fontSize: 14, color: NAVY, flex: isMobile ? undefined : 1 }}>{p.desc}</span>
+            <code style={{ fontSize: 11, color: SLATE, whiteSpace: isMobile ? "normal" : "nowrap", wordBreak: isMobile ? "break-all" : undefined }}>{p.file}</code>
           </div>
         ))}
       </div>
@@ -535,7 +556,7 @@ const SCHEMA_TABLES = [
   { table: "volunteers", desc: "Volunteer signups from footer form (name, email, roles, status)", color: "cyan" },
 ];
 
-function GuideLanding({ onNavigate }: { onNavigate: (page: GuidePage) => void }) {
+function GuideLanding({ onNavigate, isMobile }: { onNavigate: (page: GuidePage) => void; isMobile?: boolean }) {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
@@ -574,8 +595,8 @@ function GuideLanding({ onNavigate }: { onNavigate: (page: GuidePage) => void })
       <Paragraph style={{ fontSize: 14, color: SLATE, marginBottom: 16 }}>All tables in our Supabase database:</Paragraph>
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         {SCHEMA_TABLES.map((s) => (
-          <div key={s.table} style={{ display: "flex", alignItems: "baseline", gap: 12, padding: "8px 0", borderBottom: "1px solid #F8FAFC" }}>
-            <Tag color={s.color} style={{ fontFamily: "monospace", fontSize: 13, minWidth: 160 }}>{s.table}</Tag>
+          <div key={s.table} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "baseline", gap: isMobile ? 4 : 12, padding: "8px 0", borderBottom: "1px solid #F8FAFC" }}>
+            <Tag color={s.color} style={{ fontFamily: "monospace", fontSize: 13, minWidth: isMobile ? undefined : 160 }}>{s.table}</Tag>
             <span style={{ fontSize: 14, color: NAVY }}>{s.desc}</span>
           </div>
         ))}
@@ -606,6 +627,7 @@ function GuideLanding({ onNavigate }: { onNavigate: (page: GuidePage) => void })
 
 export default function SetupGuidePage({ navigate }: Props) {
   const [guidePage, setGuidePage] = useState<GuidePage>("landing");
+  const isMobile = useIsMobile();
 
   return (
     <div style={{ maxWidth: 820 }}>
@@ -618,16 +640,16 @@ export default function SetupGuidePage({ navigate }: Props) {
         </a>
       )}
 
-      {guidePage === "landing" && <GuideLanding onNavigate={setGuidePage} />}
-      {guidePage === "homepage" && <GuideHomepage navigate={navigate} />}
-      {guidePage === "map" && <GuideMap navigate={navigate} />}
-      {guidePage === "senate" && <GuideSenate navigate={navigate} />}
-      {guidePage === "house" && <GuideHouse navigate={navigate} />}
-      {guidePage === "explore" && <GuideExplore navigate={navigate} />}
-      {guidePage === "calendar" && <GuideCalendar navigate={navigate} />}
-      {guidePage === "whos-running" && <GuideWhosRunning navigate={navigate} />}
-      {guidePage === "volunteer" && <GuideVolunteer navigate={navigate} />}
-      {guidePage === "static" && <GuideStatic />}
+      {guidePage === "landing" && <GuideLanding onNavigate={setGuidePage} isMobile={isMobile} />}
+      {guidePage === "homepage" && <GuideHomepage navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "map" && <GuideMap navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "senate" && <GuideSenate navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "house" && <GuideHouse navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "explore" && <GuideExplore navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "calendar" && <GuideCalendar navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "whos-running" && <GuideWhosRunning navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "volunteer" && <GuideVolunteer navigate={navigate} isMobile={isMobile} />}
+      {guidePage === "static" && <GuideStatic isMobile={isMobile} />}
     </div>
   );
 }

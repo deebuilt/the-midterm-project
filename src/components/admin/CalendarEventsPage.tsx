@@ -13,10 +13,14 @@ import {
   message,
   Popconfirm,
   Dropdown,
+  Typography,
 } from "antd";
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
+
+const { Text } = Typography;
 
 interface CalendarEventRow {
   id: number;
@@ -82,6 +86,7 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
   const [filterState, setFilterState] = useState<string>("all");
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -295,12 +300,20 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
       {contextHolder}
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          marginBottom: 16,
+          flexWrap: "wrap",
+          flexDirection: isMobile ? "column" : "row",
+        }}
+      >
         <Select
           value={filterState}
           onChange={setFilterState}
           options={stateFilterOptions}
-          style={{ width: 200 }}
+          style={{ width: isMobile ? "100%" : 200 }}
           showSearch
           filterOption={(input, option) =>
             (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -310,22 +323,52 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
           value={filterType}
           onChange={setFilterType}
           options={typeFilterOptions}
-          style={{ width: 180 }}
+          style={{ width: isMobile ? "100%" : 180 }}
         />
         <span style={{ fontSize: 13, color: "#94A3B8", lineHeight: "32px" }}>
           {filteredEvents.length} event{filteredEvents.length !== 1 ? "s" : ""}
         </span>
       </div>
 
-      <Card style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-        <Table
-          dataSource={filteredEvents}
-          columns={columns}
-          rowKey="id"
-          pagination={{ pageSize: 25, showSizeChanger: true }}
-          size="small"
-        />
-      </Card>
+      {isMobile ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {filteredEvents.map((ev) => (
+            <Card key={ev.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  <Tag>{(ev.state as any)?.abbr ?? "?"}</Tag>
+                  <Text style={{ fontSize: 12 }}>{dayjs(ev.event_date).format("MMM D, YYYY")}</Text>
+                </div>
+                <Dropdown
+                  menu={{
+                    items: [
+                      { key: "edit", icon: <EditOutlined />, label: "Edit", onClick: () => openEdit(ev) },
+                      { key: "delete", icon: <DeleteOutlined />, label: "Delete", danger: true, onClick: () => handleDelete(ev.id) },
+                    ],
+                  }}
+                  trigger={["click"]}
+                >
+                  <Button type="text" size="small" icon={<MoreOutlined />} />
+                </Dropdown>
+              </div>
+              <Tag color={eventTypeColors[ev.event_type] ?? "default"} style={{ marginBottom: 4 }}>
+                {eventTypeOptions.find((o) => o.value === ev.event_type)?.label ?? ev.event_type}
+              </Tag>
+              <div style={{ fontSize: 13 }}>{ev.title}</div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+          <Table
+            dataSource={filteredEvents}
+            columns={columns}
+            rowKey="id"
+            pagination={{ pageSize: 25, showSizeChanger: true }}
+            size="small"
+          />
+        </Card>
+      )}
 
       {/* Create / Edit Modal */}
       <Modal
@@ -337,10 +380,11 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
           form.resetFields();
         }}
         footer={null}
-        width={520}
+        width={isMobile ? "100vw" : 520}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
       >
         <Form form={form} layout="vertical" onFinish={handleSave}>
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="state_id"
               label="State"
@@ -369,7 +413,7 @@ export default function CalendarEventsPage({ setHeaderActions }: CalendarEventsP
             </Form.Item>
           </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: 16, flexDirection: isMobile ? "column" : "row" }}>
             <Form.Item
               name="event_date"
               label="Date"

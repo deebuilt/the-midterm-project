@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Layout, Menu, Button, Typography, Popover, theme } from "antd";
+import { Layout, Menu, Button, Typography, Popover, Drawer, theme } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -14,10 +14,12 @@ import {
   BookOutlined,
   RobotOutlined,
   AuditOutlined,
+  EllipsisOutlined,
 } from "@ant-design/icons";
 import type { User } from "@supabase/supabase-js";
 import type { AdminRoute } from "./AdminDashboard";
 import { signOut } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
 import DashboardPage from "./DashboardPage";
 import VolunteersPage from "./VolunteersPage";
 import CyclesPage from "./CyclesPage";
@@ -69,6 +71,17 @@ const ROUTE_TITLES: Record<AdminRoute, string> = {
   "setup-guide": "Setup Guide",
 };
 
+// Bottom nav: 5 priority items + More
+const BOTTOM_NAV_ITEMS: { key: AdminRoute; icon: ReactNode; label: string }[] = [
+  { key: "dashboard", icon: <DashboardOutlined />, label: "Home" },
+  { key: "candidates", icon: <UserOutlined />, label: "Candidates" },
+  { key: "votes", icon: <AuditOutlined />, label: "Votes" },
+  { key: "races", icon: <TrophyOutlined />, label: "Races" },
+  { key: "calendar-events", icon: <ScheduleOutlined />, label: "Calendar" },
+];
+
+const BOTTOM_NAV_KEYS = new Set(BOTTOM_NAV_ITEMS.map((i) => i.key));
+
 /** CSS-only animated hamburger/arrow toggle */
 function SidebarToggle({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) {
   const barStyle = (i: number): React.CSSProperties => {
@@ -114,151 +127,169 @@ function SidebarToggle({ collapsed, onClick }: { collapsed: boolean; onClick: ()
 export default function AdminLayout({ route, navigate, user }: AdminLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [headerActions, setHeaderActions] = useState<ReactNode>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const isMobile = useIsMobile();
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const handleNavClick = (key: AdminRoute) => {
+    navigate(key);
+    setMoreOpen(false);
+  };
+
+  // Items that go in the "More" drawer on mobile
+  const moreMenuItems = menuItems.filter((item) => !BOTTOM_NAV_KEYS.has(item.key as AdminRoute));
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        trigger={null}
-        breakpoint="lg"
-        collapsedWidth={80}
-        style={{
-          background: "#1E293B",
-          overflow: "auto",
-          height: "100vh",
-          position: "fixed",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: 10,
-        }}
-      >
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* Desktop sidebar */}
+      {!isMobile && (
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          trigger={null}
+          breakpoint="lg"
+          collapsedWidth={80}
           style={{
-            display: "block",
-            padding: collapsed ? "16px 8px" : "16px",
-            textAlign: "center",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
-            textDecoration: "none",
-          }}
-          title="Open main site in new tab"
-        >
-          <Text
-            strong
-            style={{ color: "white", fontSize: collapsed ? 12 : 14 }}
-          >
-            {collapsed ? "TMP" : "The Midterm Project"}
-          </Text>
-          {!collapsed && (
-            <div>
-              <Text style={{ color: "#F59E0B", fontSize: 11 }}>Admin</Text>
-            </div>
-          )}
-        </a>
-
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[route]}
-          items={menuItems}
-          onClick={({ key }) => navigate(key as AdminRoute)}
-          style={{ background: "transparent", borderRight: "none" }}
-        />
-
-        <div
-          style={{
-            position: "absolute",
+            background: "#1E293B",
+            overflow: "auto",
+            height: "100vh",
+            position: "fixed",
+            left: 0,
+            top: 0,
             bottom: 0,
-            width: "100%",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            zIndex: 10,
           }}
         >
-          <Popover
-            placement="topLeft"
-            trigger="click"
-            arrow={false}
-            content={
-              <div style={{ minWidth: 180 }}>
-                <div style={{ padding: "4px 0 8px", borderBottom: "1px solid #f0f0f0", marginBottom: 8 }}>
-                  <Text style={{ fontSize: 12, color: "#64748b" }}>{user.email}</Text>
-                </div>
-                <Button
-                  type="text"
-                  icon={<BookOutlined />}
-                  onClick={() => navigate("setup-guide")}
-                  style={{ width: "100%", textAlign: "left", marginBottom: 4 }}
-                  size="small"
-                >
-                  Setup Guide
-                </Button>
-                <Button
-                  type="text"
-                  danger
-                  icon={<LogoutOutlined />}
-                  onClick={() => signOut()}
-                  style={{ width: "100%", textAlign: "left" }}
-                  size="small"
-                >
-                  Sign Out
-                </Button>
-              </div>
-            }
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              padding: collapsed ? "16px 8px" : "16px",
+              textAlign: "center",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              textDecoration: "none",
+            }}
+            title="Open main site in new tab"
           >
-            <div
-              style={{
-                padding: collapsed ? "12px 8px" : "12px 16px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
+            <Text
+              strong
+              style={{ color: "white", fontSize: collapsed ? 12 : 14 }}
+            >
+              {collapsed ? "TMP" : "The Midterm Project"}
+            </Text>
+            {!collapsed && (
+              <div>
+                <Text style={{ color: "#F59E0B", fontSize: 11 }}>Admin</Text>
+              </div>
+            )}
+          </a>
+
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={[route]}
+            items={menuItems}
+            onClick={({ key }) => navigate(key as AdminRoute)}
+            style={{ background: "transparent", borderRight: "none" }}
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <Popover
+              placement="topLeft"
+              trigger="click"
+              arrow={false}
+              content={
+                <div style={{ minWidth: 180 }}>
+                  <div style={{ padding: "4px 0 8px", borderBottom: "1px solid #f0f0f0", marginBottom: 8 }}>
+                    <Text style={{ fontSize: 12, color: "#64748b" }}>{user.email}</Text>
+                  </div>
+                  <Button
+                    type="text"
+                    icon={<BookOutlined />}
+                    onClick={() => navigate("setup-guide")}
+                    style={{ width: "100%", textAlign: "left", marginBottom: 4 }}
+                    size="small"
+                  >
+                    Setup Guide
+                  </Button>
+                  <Button
+                    type="text"
+                    danger
+                    icon={<LogoutOutlined />}
+                    onClick={() => signOut()}
+                    style={{ width: "100%", textAlign: "left" }}
+                    size="small"
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              }
             >
               <div
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.15)",
+                  padding: collapsed ? "12px 8px" : "12px 16px",
+                  cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  color: "white",
-                  flexShrink: 0,
+                  gap: 8,
                 }}
               >
-                {(user.email?.[0] ?? "A").toUpperCase()}
-              </div>
-              {!collapsed && (
-                <Text
+                <div
                   style={{
-                    color: "rgba(255,255,255,0.6)",
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     fontSize: 12,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    color: "white",
+                    flexShrink: 0,
                   }}
                 >
-                  {user.email}
-                </Text>
-              )}
-            </div>
-          </Popover>
-        </div>
-      </Sider>
+                  {(user.email?.[0] ?? "A").toUpperCase()}
+                </div>
+                {!collapsed && (
+                  <Text
+                    style={{
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: 12,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {user.email}
+                  </Text>
+                )}
+              </div>
+            </Popover>
+          </div>
+        </Sider>
+      )}
 
-      <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: "margin-left 0.2s" }}>
+      <Layout
+        style={{
+          marginLeft: isMobile ? 0 : collapsed ? 80 : 200,
+          transition: "margin-left 0.2s",
+        }}
+      >
         <Header
           style={{
-            padding: "0 20px",
+            padding: isMobile ? "0 12px" : "0 20px",
             background: colorBgContainer,
             display: "flex",
             alignItems: "center",
@@ -269,7 +300,9 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <SidebarToggle collapsed={collapsed} onClick={() => setCollapsed(!collapsed)} />
+            {!isMobile && (
+              <SidebarToggle collapsed={collapsed} onClick={() => setCollapsed(!collapsed)} />
+            )}
             <span style={{ fontSize: 14, fontWeight: 600, color: "#1E293B" }}>
               {ROUTE_TITLES[route]}
             </span>
@@ -278,7 +311,13 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
             {headerActions}
           </div>
         </Header>
-        <Content style={{ margin: 20, minHeight: 280 }}>
+        <Content
+          style={{
+            margin: isMobile ? 12 : 20,
+            minHeight: 280,
+            paddingBottom: isMobile ? 64 : 0,
+          }}
+        >
           {route === "dashboard" && <DashboardPage navigate={navigate} />}
           {route === "volunteers" && <VolunteersPage setHeaderActions={setHeaderActions} />}
           {route === "cycles" && <CyclesPage setHeaderActions={setHeaderActions} />}
@@ -293,6 +332,132 @@ export default function AdminLayout({ route, navigate, user }: AdminLayoutProps)
           {route === "setup-guide" && <SetupGuidePage navigate={navigate} />}
         </Content>
       </Layout>
+
+      {/* Mobile bottom nav */}
+      {isMobile && (
+        <>
+          <nav
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              background: "#1E293B",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-around",
+              zIndex: 100,
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            {BOTTOM_NAV_ITEMS.map((item) => {
+              const isActive = route === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => handleNavClick(item.key)}
+                  aria-label={item.label}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: isActive ? "#F59E0B" : "rgba(255,255,255,0.5)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 2,
+                    padding: "6px 0",
+                    cursor: "pointer",
+                    fontSize: 18,
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  {item.icon}
+                  <span style={{ fontSize: 10, lineHeight: 1, whiteSpace: "nowrap" }}>
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setMoreOpen(true)}
+              aria-label="More"
+              style={{
+                border: "none",
+                background: "transparent",
+                color: !BOTTOM_NAV_KEYS.has(route) ? "#F59E0B" : "rgba(255,255,255,0.5)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+                padding: "6px 0",
+                cursor: "pointer",
+                fontSize: 18,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              <EllipsisOutlined />
+              <span style={{ fontSize: 10, lineHeight: 1 }}>More</span>
+            </button>
+          </nav>
+
+          {/* More drawer */}
+          <Drawer
+            title="Menu"
+            placement="bottom"
+            open={moreOpen}
+            onClose={() => setMoreOpen(false)}
+            height="auto"
+            styles={{ body: { padding: 0 } }}
+          >
+            <Menu
+              mode="vertical"
+              selectedKeys={[route]}
+              items={[
+                ...moreMenuItems,
+                { type: "divider" as const },
+                { key: "setup-guide", icon: <BookOutlined />, label: "Setup Guide" },
+              ]}
+              onClick={({ key }) => handleNavClick(key as AdminRoute)}
+              style={{ border: "none" }}
+            />
+            <div style={{ padding: "8px 16px", borderTop: "1px solid #f0f0f0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    background: "#1E293B",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    color: "white",
+                    flexShrink: 0,
+                  }}
+                >
+                  {(user.email?.[0] ?? "A").toUpperCase()}
+                </div>
+                <Text style={{ fontSize: 12, color: "#64748b" }}>{user.email}</Text>
+              </div>
+              <Button
+                type="text"
+                danger
+                icon={<LogoutOutlined />}
+                onClick={() => signOut()}
+                size="small"
+                block
+                style={{ textAlign: "left" }}
+              >
+                Sign Out
+              </Button>
+            </div>
+          </Drawer>
+        </>
+      )}
     </Layout>
   );
 }

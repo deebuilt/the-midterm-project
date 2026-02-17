@@ -18,6 +18,7 @@ import {
   Checkbox,
   Upload,
   Alert,
+  Card,
 } from "antd";
 import {
   PlusOutlined,
@@ -29,6 +30,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -428,28 +430,33 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   // ─── Header Actions ───
 
   useEffect(() => {
     setHeaderActions(
-      <Space>
+      <Space size={isMobile ? 4 : 8}>
         <Button size="small" icon={<TagsOutlined />} onClick={() => setTopicsDrawerOpen(true)}>
           Topics
         </Button>
-        <Button size="small" icon={<CloudDownloadOutlined />} onClick={() => setSenateDrawerOpen(true)}>
-          Senate.gov
-        </Button>
-        <Button size="small" icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
-          Import CSV
-        </Button>
+        {!isMobile && (
+          <Button size="small" icon={<CloudDownloadOutlined />} onClick={() => setSenateDrawerOpen(true)}>
+            Senate.gov
+          </Button>
+        )}
+        {!isMobile && (
+          <Button size="small" icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
+            Import CSV
+          </Button>
+        )}
         <Button size="small" type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
           Add Bill
         </Button>
       </Space>
     );
     return () => setHeaderActions(null);
-  }, [setHeaderActions]);
+  }, [setHeaderActions, isMobile]);
 
   // ─── Data Loading ───
 
@@ -1162,16 +1169,54 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
   const assignedCount = senatorVotes.filter((sv) => sv.vote !== null).length;
 
+  const mobileCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {filteredBills.map((r) => {
+        const cvs = r.candidate_votes ?? [];
+        const yeaCount = cvs.filter((cv) => cv.vote === "yea").length;
+        const nayCount = cvs.filter((cv) => cv.vote === "nay").length;
+        return (
+          <Card key={r.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Text strong style={{ fontSize: 14 }}>{r.bill_name}</Text>
+                {r.bill_number && <Text type="secondary" style={{ fontSize: 12, display: "block" }}>{r.bill_number}</Text>}
+              </div>
+              <Space size="small">
+                <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openEditModal(r)} />
+                <Popconfirm title="Delete this bill and all its votes?" onConfirm={() => handleDelete(r.id)}>
+                  <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </Space>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              {r.vote_date && <Text type="secondary" style={{ fontSize: 12 }}>{dayjs(r.vote_date).format("MMM D, YYYY")}</Text>}
+              {r.topic?.name && <Tag style={{ margin: 0 }}>{r.topic.name}</Tag>}
+              {r.result && <Tag style={{ margin: 0 }}>{r.result}</Tag>}
+            </div>
+            {cvs.length > 0 && (
+              <div style={{ marginTop: 6, display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {yeaCount > 0 && <Tag color="green" style={{ margin: 0 }}>{yeaCount} Yea</Tag>}
+                {nayCount > 0 && <Tag color="red" style={{ margin: 0 }}>{nayCount} Nay</Tag>}
+                <Text type="secondary" style={{ fontSize: 12 }}>({cvs.length} total)</Text>
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
 
       {/* Filters */}
-      <div style={{ marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <div style={{ marginBottom: 16, display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, flexWrap: "wrap" }}>
         <Input.Search
           placeholder="Search by bill name..."
           allowClear
-          style={{ width: 260 }}
+          style={{ width: isMobile ? "100%" : 260 }}
           onSearch={(v) => setFilterBill(v)}
           onChange={(e) => {
             if (!e.target.value) setFilterBill("");
@@ -1180,7 +1225,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         <Select
           value={filterTopic}
           onChange={setFilterTopic}
-          style={{ width: 160 }}
+          style={{ width: isMobile ? "100%" : 160 }}
           options={[
             { value: "all", label: "All Topics" },
             ...topics.map((t) => ({ value: String(t.id), label: t.name })),
@@ -1192,35 +1237,37 @@ export default function VotesPage({ setHeaderActions }: Props) {
       </div>
 
       {/* Table */}
-      <Table
-        dataSource={filteredBills}
-        columns={columns as any}
-        rowKey="id"
-        size="small"
-        pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => `${t} bills` }}
-        expandable={{
-          expandedRowRender: (record: BillRow) => {
-            const cvs = record.candidate_votes ?? [];
-            if (cvs.length === 0) return <Text type="secondary">No senator votes assigned yet.</Text>;
-            return (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {cvs
-                  .sort((a, b) => (a.candidate?.last_name ?? "").localeCompare(b.candidate?.last_name ?? ""))
-                  .map((cv) => {
-                    const c = cv.candidate;
-                    if (!c) return null;
-                    return (
-                      <Tag key={cv.id} color={voteColors[cv.vote] ?? "default"}>
-                        {c.first_name} {c.last_name} ({c.party?.charAt(0)}-{c.state?.abbr}): {cv.vote.toUpperCase()}
-                      </Tag>
-                    );
-                  })}
-              </div>
-            );
-          },
-          rowExpandable: (record: BillRow) => (record.candidate_votes ?? []).length > 0,
-        }}
-      />
+      {isMobile ? mobileCards : (
+        <Table
+          dataSource={filteredBills}
+          columns={columns as any}
+          rowKey="id"
+          size="small"
+          pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => `${t} bills` }}
+          expandable={{
+            expandedRowRender: (record: BillRow) => {
+              const cvs = record.candidate_votes ?? [];
+              if (cvs.length === 0) return <Text type="secondary">No senator votes assigned yet.</Text>;
+              return (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {cvs
+                    .sort((a, b) => (a.candidate?.last_name ?? "").localeCompare(b.candidate?.last_name ?? ""))
+                    .map((cv) => {
+                      const c = cv.candidate;
+                      if (!c) return null;
+                      return (
+                        <Tag key={cv.id} color={voteColors[cv.vote] ?? "default"}>
+                          {c.first_name} {c.last_name} ({c.party?.charAt(0)}-{c.state?.abbr}): {cv.vote.toUpperCase()}
+                        </Tag>
+                      );
+                    })}
+                </div>
+              );
+            },
+            rowExpandable: (record: BillRow) => (record.candidate_votes ?? []).length > 0,
+          }}
+        />
+      )}
 
       {/* Create/Edit Bill Modal */}
       <Modal
@@ -1235,7 +1282,8 @@ export default function VotesPage({ setHeaderActions }: Props) {
         onOk={handleSave}
         confirmLoading={modalLoading}
         okText={editingBill ? "Update" : "Create"}
-        width={700}
+        width={isMobile ? "100vw" : 700}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
         destroyOnClose
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
@@ -1247,7 +1295,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
             <Input placeholder="e.g. SAVE Act" />
           </Form.Item>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
             <Form.Item name="bill_number" label="Bill Number">
               <Input placeholder="e.g. H.R.1234" />
             </Form.Item>
@@ -1257,7 +1305,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
             </Form.Item>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
             <Form.Item name="topic_id" label="Topic">
               <Select
                 allowClear
@@ -1289,7 +1337,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
             </Form.Item>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
             <Form.Item name="result" label="Result">
               <Select
                 allowClear
@@ -1380,7 +1428,8 @@ export default function VotesPage({ setHeaderActions }: Props) {
         onCancel={() => { setPasteModalOpen(false); setPasteText(""); }}
         onOk={handlePasteMatch}
         okText={`Assign as ${pasteVoteType.toUpperCase()}`}
-        width={500}
+        width={isMobile ? "100vw" : 500}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
         destroyOnClose
       >
         <div style={{ marginBottom: 12 }}>
@@ -1435,7 +1484,8 @@ export default function VotesPage({ setHeaderActions }: Props) {
               ]
             : null
         }
-        width={800}
+        width={isMobile ? "100vw" : 800}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
         destroyOnClose
       >
         {importCsvRows.length === 0 ? (
@@ -1471,7 +1521,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
             <Text strong style={{ display: "block", marginBottom: 8 }}>
               Map CSV columns to bill fields ({importCsvRows.length} rows found)
             </Text>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8, marginBottom: 16 }}>
               {importCsvHeaders.map((header) => (
                 <div key={header} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Text style={{ minWidth: 120, fontSize: 13 }} ellipsis>
@@ -1540,7 +1590,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         title="Import from Senate.gov"
         open={senateDrawerOpen}
         onClose={() => { setSenateDrawerOpen(false); resetSenateImport(); }}
-        width={780}
+        width={isMobile ? "100%" : 780}
         destroyOnClose
       >
         {senateImportStep === "list" && (
@@ -1852,7 +1902,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         title="Manage Topics"
         open={topicsDrawerOpen}
         onClose={() => setTopicsDrawerOpen(false)}
-        width={360}
+        width={isMobile ? "100%" : 360}
       >
         <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
           <Input

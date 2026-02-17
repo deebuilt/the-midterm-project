@@ -34,6 +34,7 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
+import { useIsMobile } from "./useIsMobile";
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -104,6 +105,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
   const [statesLoading, setStatesLoading] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setHeaderActions(null);
@@ -317,6 +319,63 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
   const edgeFunctionUrl = `${supabaseUrl}/functions/v1/fec-sync${config.webhook_secret ? `?secret=${config.webhook_secret}` : ""}`;
 
+  const mobileUpcomingCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {upcomingStates.map((s) => (
+        <Card key={s.stateAbbr} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Text strong>{s.stateAbbr}</Text>
+            {s.daysUntil < 0 ? (
+              <Tag color="default">{Math.abs(s.daysUntil)}d ago</Tag>
+            ) : s.daysUntil <= 14 ? (
+              <Tag color="red">{s.daysUntil}d</Tag>
+            ) : s.daysUntil <= 30 ? (
+              <Tag color="orange">{s.daysUntil}d</Tag>
+            ) : (
+              <Tag color="green">{s.daysUntil}d</Tag>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {new Date(s.primaryDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </Text>
+            <Text style={{ fontSize: 12 }}>{s.filingsCount} filings</Text>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const mobileSyncCards = isMobile && (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {syncLogs.map((log) => {
+        const statusColors: Record<string, string> = { success: "green", partial: "orange", error: "red", running: "blue" };
+        const duration = log.completed_at ? Math.round((new Date(log.completed_at).getTime() - new Date(log.started_at).getTime()) / 1000) : null;
+        return (
+          <Card key={log.id} size="small" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <Text style={{ fontSize: 12 }}>
+                {new Date(log.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              </Text>
+              <Tag color={statusColors[log.status] ?? "default"}>{log.status}</Tag>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+              <Tag>{log.sync_type === "fec_auto" ? "Auto" : "Manual"}</Tag>
+              {log.filings_created > 0 && <Text style={{ color: "#52c41a", fontSize: 12 }}>+{log.filings_created}</Text>}
+              {log.filings_updated > 0 && <Text style={{ color: "#1890ff", fontSize: 12 }}>~{log.filings_updated}</Text>}
+              {duration !== null && <Text type="secondary" style={{ fontSize: 12 }}>{duration}s</Text>}
+            </div>
+            {log.states_synced?.length ? (
+              <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+                {log.states_synced.join(", ")}
+              </Text>
+            ) : null}
+          </Card>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div>
       {contextHolder}
@@ -333,7 +392,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
 
       {/* Status bar */}
       <Row gutter={16} style={{ marginBottom: 20 }}>
-        <Col span={6}>
+        <Col span={isMobile ? 12 : 6}>
           <Card size="small">
             <Statistic
               title="Status"
@@ -343,7 +402,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={isMobile ? 12 : 6}>
           <Card size="small">
             <Statistic
               title="Last Sync"
@@ -353,7 +412,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={isMobile ? 12 : 6}>
           <Card size="small">
             <Statistic
               title="States in Window"
@@ -362,7 +421,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
             />
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={isMobile ? 12 : 6}>
           <Card size="small">
             <Statistic
               title="Total Syncs"
@@ -384,7 +443,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
           </Button>
         }
       >
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 }}>
           <div>
             <div style={{ marginBottom: 12 }}>
               <Text strong>Auto-Sync Enabled</Text>
@@ -411,7 +470,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
                   value={config.lookahead_days}
                   onChange={(val) => setConfig({ ...config, lookahead_days: val ?? 60 })}
                   addonAfter="days ahead"
-                  style={{ width: 200 }}
+                  style={{ width: isMobile ? "100%" : 200 }}
                 />
               </div>
             </div>
@@ -428,7 +487,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
                   value={config.lookback_days}
                   onChange={(val) => setConfig({ ...config, lookback_days: val ?? 30 })}
                   addonAfter="days back"
-                  style={{ width: 200 }}
+                  style={{ width: isMobile ? "100%" : 200 }}
                 />
               </div>
             </div>
@@ -443,7 +502,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
                   value={config.min_funds_raised}
                   onChange={(val) => setConfig({ ...config, min_funds_raised: val ?? 5000 })}
                   formatter={(val) => `$ ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                  style={{ width: 200 }}
+                  style={{ width: isMobile ? "100%" : 200 }}
                 />
               </div>
             </div>
@@ -559,7 +618,7 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
           <Spin />
         ) : upcomingStates.length === 0 ? (
           <Text type="secondary">No states with primaries in the current window. Adjust lookahead/lookback days above.</Text>
-        ) : (
+        ) : isMobile ? mobileUpcomingCards : (
           <Table
             dataSource={upcomingStates}
             rowKey="stateAbbr"
@@ -621,133 +680,135 @@ export default function AutomationPage({ setHeaderActions }: AutomationPageProps
         title={<Space><ClockCircleOutlined /><span>Sync History</span></Space>}
         size="small"
       >
-        <Table
-          dataSource={syncLogs}
-          rowKey="id"
-          size="small"
-          loading={logsLoading}
-          pagination={{
-            current: logPage,
-            total: logTotal,
-            pageSize: 20,
-            onChange: (page) => fetchLogs(page),
-            showTotal: (total) => `${total} syncs`,
-          }}
-          expandable={{
-            expandedRowRender: (record: SyncLog) => (
-              <div style={{ padding: "8px 0" }}>
-                {record.error_message && (
-                  <Alert
-                    type="warning"
-                    message="Errors"
-                    description={record.error_message}
-                    style={{ marginBottom: 8, fontSize: 12 }}
-                  />
-                )}
-                {record.details && (
-                  <pre style={{ fontSize: 11, background: "#f5f5f5", padding: 8, borderRadius: 4, maxHeight: 200, overflow: "auto" }}>
-                    {JSON.stringify(record.details, null, 2)}
-                  </pre>
-                )}
-              </div>
-            ),
-          }}
-          columns={[
-            {
-              title: "Date",
-              dataIndex: "started_at",
-              key: "date",
-              width: 140,
-              render: (d: string) =>
-                new Date(d).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                }),
-            },
-            {
-              title: "Type",
-              dataIndex: "sync_type",
-              key: "type",
-              width: 90,
-              render: (t: string) => (
-                <Tag>{t === "fec_auto" ? "Auto" : "Manual"}</Tag>
+        {isMobile ? mobileSyncCards : (
+          <Table
+            dataSource={syncLogs}
+            rowKey="id"
+            size="small"
+            loading={logsLoading}
+            pagination={{
+              current: logPage,
+              total: logTotal,
+              pageSize: 20,
+              onChange: (page) => fetchLogs(page),
+              showTotal: (total) => `${total} syncs`,
+            }}
+            expandable={{
+              expandedRowRender: (record: SyncLog) => (
+                <div style={{ padding: "8px 0" }}>
+                  {record.error_message && (
+                    <Alert
+                      type="warning"
+                      message="Errors"
+                      description={record.error_message}
+                      style={{ marginBottom: 8, fontSize: 12 }}
+                    />
+                  )}
+                  {record.details && (
+                    <pre style={{ fontSize: 11, background: "#f5f5f5", padding: 8, borderRadius: 4, maxHeight: 200, overflow: "auto" }}>
+                      {JSON.stringify(record.details, null, 2)}
+                    </pre>
+                  )}
+                </div>
               ),
-            },
-            {
-              title: "Status",
-              dataIndex: "status",
-              key: "status",
-              width: 90,
-              render: (s: string) => {
-                const colors: Record<string, string> = {
-                  success: "green",
-                  partial: "orange",
-                  error: "red",
-                  running: "blue",
-                };
-                return <Tag color={colors[s] ?? "default"}>{s}</Tag>;
+            }}
+            columns={[
+              {
+                title: "Date",
+                dataIndex: "started_at",
+                key: "date",
+                width: 140,
+                render: (d: string) =>
+                  new Date(d).toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  }),
               },
-            },
-            {
-              title: "States",
-              dataIndex: "states_synced",
-              key: "states",
-              render: (states: string[] | null) =>
-                states?.length ? (
-                  <Text style={{ fontSize: 12 }}>{states.join(", ")}</Text>
-                ) : (
-                  <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
+              {
+                title: "Type",
+                dataIndex: "sync_type",
+                key: "type",
+                width: 90,
+                render: (t: string) => (
+                  <Tag>{t === "fec_auto" ? "Auto" : "Manual"}</Tag>
                 ),
-            },
-            {
-              title: "Created",
-              dataIndex: "filings_created",
-              key: "created",
-              width: 70,
-              render: (n: number) => n > 0 ? <Text style={{ color: "#52c41a" }}>{n}</Text> : <Text type="secondary">0</Text>,
-            },
-            {
-              title: "Updated",
-              dataIndex: "filings_updated",
-              key: "updated",
-              width: 70,
-              render: (n: number) => n > 0 ? <Text style={{ color: "#1890ff" }}>{n}</Text> : <Text type="secondary">0</Text>,
-            },
-            {
-              title: "Deactivated",
-              dataIndex: "filings_deactivated",
-              key: "deactivated",
-              width: 90,
-              render: (n: number) => n > 0 ? <Text style={{ color: "#ff4d4f" }}>{n}</Text> : <Text type="secondary">0</Text>,
-            },
-            {
-              title: "API",
-              dataIndex: "api_requests",
-              key: "api",
-              width: 60,
-            },
-            {
-              title: "Rebuild",
-              dataIndex: "triggered_rebuild",
-              key: "rebuild",
-              width: 70,
-              render: (b: boolean) => b ? <Tag color="green">Yes</Tag> : <Tag>No</Tag>,
-            },
-            {
-              title: "Duration",
-              key: "duration",
-              width: 80,
-              render: (_: unknown, record: SyncLog) => {
-                if (!record.completed_at) return <Tag color="blue">Running</Tag>;
-                const ms = new Date(record.completed_at).getTime() - new Date(record.started_at).getTime();
-                const secs = Math.round(ms / 1000);
-                return <Text type="secondary" style={{ fontSize: 12 }}>{secs}s</Text>;
               },
-            },
-          ]}
-        />
+              {
+                title: "Status",
+                dataIndex: "status",
+                key: "status",
+                width: 90,
+                render: (s: string) => {
+                  const colors: Record<string, string> = {
+                    success: "green",
+                    partial: "orange",
+                    error: "red",
+                    running: "blue",
+                  };
+                  return <Tag color={colors[s] ?? "default"}>{s}</Tag>;
+                },
+              },
+              {
+                title: "States",
+                dataIndex: "states_synced",
+                key: "states",
+                render: (states: string[] | null) =>
+                  states?.length ? (
+                    <Text style={{ fontSize: 12 }}>{states.join(", ")}</Text>
+                  ) : (
+                    <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
+                  ),
+              },
+              {
+                title: "Created",
+                dataIndex: "filings_created",
+                key: "created",
+                width: 70,
+                render: (n: number) => n > 0 ? <Text style={{ color: "#52c41a" }}>{n}</Text> : <Text type="secondary">0</Text>,
+              },
+              {
+                title: "Updated",
+                dataIndex: "filings_updated",
+                key: "updated",
+                width: 70,
+                render: (n: number) => n > 0 ? <Text style={{ color: "#1890ff" }}>{n}</Text> : <Text type="secondary">0</Text>,
+              },
+              {
+                title: "Deactivated",
+                dataIndex: "filings_deactivated",
+                key: "deactivated",
+                width: 90,
+                render: (n: number) => n > 0 ? <Text style={{ color: "#ff4d4f" }}>{n}</Text> : <Text type="secondary">0</Text>,
+              },
+              {
+                title: "API",
+                dataIndex: "api_requests",
+                key: "api",
+                width: 60,
+              },
+              {
+                title: "Rebuild",
+                dataIndex: "triggered_rebuild",
+                key: "rebuild",
+                width: 70,
+                render: (b: boolean) => b ? <Tag color="green">Yes</Tag> : <Tag>No</Tag>,
+              },
+              {
+                title: "Duration",
+                key: "duration",
+                width: 80,
+                render: (_: unknown, record: SyncLog) => {
+                  if (!record.completed_at) return <Tag color="blue">Running</Tag>;
+                  const ms = new Date(record.completed_at).getTime() - new Date(record.started_at).getTime();
+                  const secs = Math.round(ms / 1000);
+                  return <Text type="secondary" style={{ fontSize: 12 }}>{secs}s</Text>;
+                },
+              },
+            ]}
+          />
+        )}
       </Card>
     </div>
   );
