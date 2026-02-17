@@ -56,6 +56,7 @@ export interface DbGovernmentBody {
   total_seats: number | null;
   majority_needed: number | null;
   term_years: number;
+  member_title: string | null;
   created_at: string;
 }
 
@@ -91,8 +92,10 @@ export interface DbCandidate {
   website: string | null;
   twitter: string | null;
   bio: string | null;
-  role_title: string | null;
+  body_id: number | null;
   is_incumbent: boolean;
+  is_retiring: boolean;
+  term_start_year: number | null;
   bioguide_id: string | null;
   fec_candidate_id: string | null;
   govtrack_url: string | null;

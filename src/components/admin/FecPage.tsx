@@ -82,7 +82,7 @@ interface PromoteFormData {
   website: string;
   twitter: string;
   bio: string;
-  roleTitle: string;
+  bodyId: number | null;
   raceStatus: "announced" | "primary_winner" | "runoff";
 }
 
@@ -231,10 +231,11 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
     website: "",
     twitter: "",
     bio: "",
-    roleTitle: "",
+    bodyId: null,
     raceStatus: "announced",
   });
   const [promoting, setPromoting] = useState(false);
+  const [bodyOptions, setBodyOptions] = useState<{ value: number; label: string; slug: string }[]>([]);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkPromoteOpen, setBulkPromoteOpen] = useState(false);
@@ -242,6 +243,10 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
 
   useEffect(() => {
     fetchActiveCycle();
+    // Load government bodies for promote form
+    supabase.from("government_bodies").select("id, name, slug, member_title").order("id").then(({ data }) => {
+      setBodyOptions((data ?? []).map((b: any) => ({ value: b.id, label: b.member_title ?? b.name, slug: b.slug })));
+    });
   }, []);
 
   useEffect(() => {
@@ -289,7 +294,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
       website: "",
       twitter: "",
       bio: "",
-      roleTitle: filing.office === "S" ? "U.S. Senator" : "U.S. Representative",
+      bodyId: bodyOptions.find((b) => b.slug === (filing.office === "S" ? "us-senate" : "us-house"))?.value ?? null,
       raceStatus: "announced",
     });
     setPromoteModalVisible(true);
@@ -316,7 +321,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           first_name: selectedFiling.first_name,
           last_name: selectedFiling.last_name,
           party: selectedFiling.party,
-          role_title: promoteForm.roleTitle,
+          body_id: promoteForm.bodyId,
           state_id: selectedFiling.state_id,
           photo_url: promoteForm.photoUrl || null,
           website: promoteForm.website || null,
@@ -466,7 +471,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
             first_name: filing.first_name,
             last_name: filing.last_name,
             party: filing.party,
-            role_title: filing.office === "S" ? "U.S. Senator" : "U.S. Representative",
+            body_id: bodyOptions.find((b) => b.slug === (filing.office === "S" ? "us-senate" : "us-house"))?.value ?? null,
             state_id: filing.state_id,
             photo_url: null,
             website: null,
@@ -974,8 +979,8 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
                   <Input placeholder="@candidate" value={promoteForm.twitter} onChange={(e) => setPromoteForm({ ...promoteForm, twitter: e.target.value })} />
                 </div>
                 <div>
-                  <Text>Role Title</Text>
-                  <Input placeholder="U.S. Senator" value={promoteForm.roleTitle} onChange={(e) => setPromoteForm({ ...promoteForm, roleTitle: e.target.value })} />
+                  <Text>Government Body</Text>
+                  <Select style={{ width: "100%" }} placeholder="Select body..." value={promoteForm.bodyId} onChange={(value) => setPromoteForm({ ...promoteForm, bodyId: value })} options={bodyOptions} />
                 </div>
                 <div>
                   <Text>Bio</Text>

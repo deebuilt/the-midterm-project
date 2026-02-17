@@ -31,7 +31,6 @@ const PARTY_COLORS: Record<string, string> = {
 interface PreviewCandidate {
   name: string;
   party: string;
-  roleTitle: string | null;
   isIncumbent: boolean;
 }
 
@@ -210,11 +209,6 @@ export default function RacePreview({
                         }}
                       >
                         INCUMBENT
-                      </span>
-                    )}
-                    {c.roleTitle && (
-                      <span style={{ fontSize: 12, color: "#9ca3af" }}>
-                        {c.roleTitle}
                       </span>
                     )}
                   </div>

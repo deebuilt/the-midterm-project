@@ -61,7 +61,6 @@ export async function fetchStates(): Promise<StateInfo[]> {
           photo_url,
           website,
           twitter,
-          role_title,
           is_incumbent,
           bioguide_id
         )
@@ -187,7 +186,6 @@ export async function fetchSenateRaces(): Promise<SenateRace[]> {
           photo_url,
           website,
           twitter,
-          role_title,
           is_incumbent,
           bioguide_id,
           fec_candidate_id,
@@ -560,9 +558,17 @@ export async function fetchSwipeCards(): Promise<SwipeCard[]> {
 // ─── Re-elect or Reject ───
 
 export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
-  // Query incumbent candidates directly via state_id (migration 016)
-  // Do NOT use race_candidates — that table is empty
-  const { data: candidates, error: candErr } = await supabase
+  // Look up the senate body_id for filtering
+  const { data: senateBody } = await supabase
+    .from("government_bodies")
+    .select("id, member_title")
+    .eq("slug", "us-senate")
+    .single();
+
+  if (!senateBody) throw new Error("Senate government body not found");
+
+  // Query incumbent senators directly via body_id + state_id (migrations 016, 020)
+  const { data: senators, error: candErr } = await supabase
     .from("candidates")
     .select(`
       id,
@@ -574,21 +580,16 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
       website,
       twitter,
       bio,
-      role_title,
       is_incumbent,
+      is_retiring,
       govtrack_url,
       state:states!inner(id, name, abbr)
     `)
     .eq("is_incumbent", true)
+    .eq("body_id", senateBody.id)
     .not("state_id", "is", null);
 
   if (candErr) throw new Error(`Failed to fetch incumbents: ${candErr.message}`);
-
-  // Filter to only senators (role_title contains "Senator")
-  const senators = (candidates ?? []).filter((c: any) => {
-    const role = (c.role_title ?? "") as string;
-    return role.toLowerCase().includes("senator");
-  });
 
   // Get race ratings for these states (senate races only)
   const { data: cycle } = await supabase
@@ -625,7 +626,7 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
   }
 
   // Get votes for all incumbent senators via candidate_votes join table (may be empty)
-  const candidateIds = senators.map((c: any) => c.id);
+  const candidateIds = (senators ?? []).map((c: any) => c.id);
   let votesByCandidate = new Map<number, VotingRecord[]>();
 
   if (candidateIds.length > 0) {
@@ -674,12 +675,10 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
   }
 
   // Transform to IncumbentCard[] sorted by state name
-  const cards: IncumbentCard[] = senators
+  const cards: IncumbentCard[] = (senators ?? [])
     .map((c: any) => {
       const state = c.state as any;
       const raceInfo = ratingByStateId.get(state.id);
-      const roleTitle = (c.role_title ?? "") as string;
-      const isRetiring = roleTitle.toLowerCase().includes("retiring");
 
       return {
         id: c.slug,
@@ -689,9 +688,9 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
         photo: c.photo_url ?? "",
         state: state.name,
         stateAbbr: state.abbr,
-        currentRole: roleTitle,
+        memberTitle: senateBody.member_title ?? "U.S. Senator",
         isSpecialElection: raceInfo?.isSpecial ?? false,
-        isRetiring,
+        isRetiring: c.is_retiring ?? false,
         rating: raceInfo?.rating ?? null,
         website: c.website ?? undefined,
         twitter: c.twitter ?? undefined,
@@ -800,7 +799,6 @@ function dbCandidateToCandidate(dbCandidate: any): Candidate {
     party: dbCandidate.party as Candidate["party"],
     photo: dbCandidate.photo_url ?? "",
     isIncumbent: dbCandidate.is_incumbent,
-    currentRole: dbCandidate.role_title ?? undefined,
     keyIssues: keyIssues.length > 0 ? keyIssues : [],
     positions: positions.length > 0 ? positions : undefined,
     website: dbCandidate.website ?? undefined,
@@ -1006,7 +1004,6 @@ export async function fetchHouseRaces(): Promise<HouseRace[]> {
             photo_url,
             website,
             twitter,
-            role_title,
             is_incumbent,
             bioguide_id,
             fec_candidate_id,
@@ -1118,7 +1115,6 @@ export async function fetchGovernorRaces(): Promise<GovernorRace[]> {
             photo_url,
             website,
             twitter,
-            role_title,
             is_incumbent,
             bioguide_id,
             fec_candidate_id,

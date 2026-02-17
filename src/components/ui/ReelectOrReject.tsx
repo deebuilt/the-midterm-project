@@ -114,7 +114,7 @@ function CardContent({
           <h2 className="text-xl font-bold text-slate-900">{incumbent.name}</h2>
         )}
         <p className="text-sm text-slate-500 mt-0.5">
-          {incumbent.state} &middot; {incumbent.currentRole}
+          {incumbent.state} &middot; {incumbent.memberTitle}
         </p>
 
         {/* Badges */}
@@ -228,7 +228,7 @@ function SenatorDetailSheet({
                   <h3 className="text-lg font-bold text-slate-900">{incumbent.name}</h3>
                 )}
                 <p className="text-sm text-slate-500">
-                  {incumbent.state} &middot; {incumbent.currentRole}
+                  {incumbent.state} &middot; {incumbent.memberTitle}
                 </p>
                 <div className="flex gap-1.5 mt-1">
                   <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${partyColors[incumbent.party] ?? ""}`}>

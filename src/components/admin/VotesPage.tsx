@@ -484,21 +484,23 @@ export default function VotesPage({ setHeaderActions }: Props) {
   }
 
   async function loadCandidates() {
+    // Look up senate body_id for filtering
+    const { data: senateBody } = await supabase
+      .from("government_bodies")
+      .select("id")
+      .eq("slug", "us-senate")
+      .single();
+
     const { data } = await supabase
       .from("candidates")
-      .select("id, first_name, last_name, party, is_incumbent, role_title, state:states(abbr)")
+      .select("id, first_name, last_name, party, is_incumbent, state:states(abbr)")
       .eq("is_incumbent", true)
+      .eq("body_id", senateBody?.id ?? 0)
       .not("state_id", "is", null)
       .order("last_name");
 
-    // Filter to senators only
-    const senators = (data ?? []).filter((c: any) => {
-      const role = (c.role_title ?? "") as string;
-      return role.toLowerCase().includes("senator");
-    });
-
     setCandidates(
-      senators.map((c: any) => ({
+      (data ?? []).map((c: any) => ({
         id: c.id,
         label: `${c.last_name}, ${c.first_name} (${c.party?.charAt(0)}-${c.state?.abbr ?? "?"})`,
         party: c.party,

@@ -215,9 +215,6 @@ function CandidateCard({ card }: { card: SwipeCard }) {
             {race.state} Senate {race.isSpecialElection ? "(Special)" : "2026"}
           </p>
         )}
-        {candidate.currentRole && (
-          <p className="text-xs text-slate-600 mb-1">{candidate.currentRole}</p>
-        )}
         {candidate.twitter && (
           <a
             href={`https://x.com/${candidate.twitter}`}

@@ -48,8 +48,10 @@ interface CandidateRow {
   website: string | null;
   twitter: string | null;
   bio: string | null;
-  role_title: string | null;
+  body_id: number | null;
   is_incumbent: boolean;
+  is_retiring: boolean;
+  term_start_year: number | null;
   bioguide_id: string | null;
   fec_candidate_id: string | null;
   govtrack_url: string | null;
@@ -61,6 +63,8 @@ interface CandidateRow {
   updated_at: string;
   // Loaded separately and merged in
   state_abbr?: string | null;
+  body_name?: string | null;
+  body_member_title?: string | null;
   race_id?: number | null;
   race_label?: string | null;
 }
@@ -159,6 +163,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
   const [bulkAssignLoading, setBulkAssignLoading] = useState(false);
   const [allRaces, setAllRaces] = useState<RaceOption[]>([]);
+  const [bodyOptions, setBodyOptions] = useState<{ value: number; label: string }[]>([]);
   const [racesLoading, setRacesLoading] = useState(false);
   const [bulkAssignRaceId, setBulkAssignRaceId] = useState<number | null>(null);
   const [bulkAssignStatus, setBulkAssignStatus] = useState<CandidateStatus>("announced");
@@ -172,7 +177,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const loadCandidates = useCallback(async () => {
     setLoading(true);
     const [candidatesRes, assignmentsRes] = await Promise.all([
-      supabase.from("candidates").select("*, state:states!candidates_state_id_fkey(abbr)").order("last_name"),
+      supabase.from("candidates").select("*, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name, member_title)").order("last_name"),
       supabase.from("race_candidates").select(`
         candidate_id, race_id,
         race:races!inner(
@@ -203,6 +208,8 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       return {
         ...c,
         state_abbr: c.state?.abbr ?? null,
+        body_name: c.body?.name ?? null,
+        body_member_title: c.body?.member_title ?? null,
         race_id: assignment?.race_id ?? null,
         race_label: assignment?.label ?? null,
       } as CandidateRow;
@@ -245,11 +252,25 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     setRacesLoading(false);
   }, []);
 
+  const loadBodies = useCallback(async () => {
+    const { data } = await supabase
+      .from("government_bodies")
+      .select("id, name, member_title")
+      .order("id");
+    setBodyOptions(
+      (data ?? []).map((b: any) => ({
+        value: b.id,
+        label: b.member_title ?? b.name,
+      }))
+    );
+  }, []);
+
   useEffect(() => {
     loadCandidates();
     loadTopics();
     loadRaces();
-  }, [loadCandidates, loadTopics, loadRaces]);
+    loadBodies();
+  }, [loadCandidates, loadTopics, loadRaces, loadBodies]);
 
   useEffect(() => {
     setHeaderActions(
@@ -330,8 +351,10 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       website: record.website ?? "",
       twitter: record.twitter ?? "",
       bio: record.bio ?? "",
-      role_title: record.role_title ?? "",
+      body_id: record.body_id ?? undefined,
       is_incumbent: record.is_incumbent,
+      is_retiring: record.is_retiring ?? false,
+      term_start_year: record.term_start_year ?? undefined,
       bioguide_id: record.bioguide_id ?? "",
       fec_candidate_id: record.fec_candidate_id ?? "",
       govtrack_url: record.govtrack_url ?? "",
@@ -359,8 +382,10 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       website: values.website || null,
       twitter: values.twitter || null,
       bio: values.bio || null,
-      role_title: values.role_title || null,
+      body_id: values.body_id || null,
       is_incumbent: values.is_incumbent ?? false,
+      is_retiring: values.is_retiring ?? false,
+      term_start_year: values.term_start_year || null,
       bioguide_id: values.bioguide_id || null,
       fec_candidate_id: values.fec_candidate_id || null,
       govtrack_url: values.govtrack_url || null,
@@ -637,13 +662,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
 
   /** Build smart-filtered race options for a given candidate */
   function getSmartRaceOptions(record: CandidateRow) {
-    if (!record.state_abbr && !record.role_title) return raceSelectOptions;
-
-    const role = (record.role_title ?? "").toLowerCase();
-    let bodyMatch: string | null = null;
-    if (role.includes("senator")) bodyMatch = "US Senate";
-    else if (role.includes("representative") || role.includes("rep.")) bodyMatch = "US House";
-    else if (role.includes("governor")) bodyMatch = "Governor";
+    if (!record.state_abbr && !record.body_name) return raceSelectOptions;
 
     // Split into matching and non-matching races
     const matching: typeof raceSelectOptions = [];
@@ -654,7 +673,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       if (!race) { rest.push(opt); continue; }
 
       const stateMatch = !record.state_abbr || race.state_abbr === record.state_abbr;
-      const bodyOk = !bodyMatch || race.body_name === bodyMatch;
+      const bodyOk = !record.body_name || race.body_name === record.body_name;
 
       if (stateMatch && bodyOk) matching.push(opt);
       else rest.push(opt);
@@ -692,9 +711,11 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       filters: [
         ...partyOptions.map((p) => ({ text: p.label, value: p.value })),
         { text: "Incumbent", value: "__incumbent__" },
+        { text: "Retiring", value: "__retiring__" },
       ],
       onFilter: (value: unknown, record: CandidateRow) => {
         if (value === "__incumbent__") return record.is_incumbent;
+        if (value === "__retiring__") return record.is_retiring;
         return record.party === value;
       },
       render: (_: unknown, record: CandidateRow) => (
@@ -710,6 +731,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           </Tag>
           {record.is_incumbent && (
             <Tag color="green" style={{ fontSize: 10, lineHeight: "16px", padding: "0 3px" }}>Inc</Tag>
+          )}
+          {record.is_retiring && (
+            <Tag color="orange" style={{ fontSize: 10, lineHeight: "16px", padding: "0 3px" }}>Ret</Tag>
           )}
         </span>
       ),
@@ -728,14 +752,14 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         ),
     },
     {
-      title: "Role",
-      dataIndex: "role_title",
-      key: "role_title",
+      title: "Body",
+      dataIndex: "body_member_title",
+      key: "body",
       width: 150,
       responsive: ["lg"] as ("lg")[],
       ellipsis: true,
-      render: (role: string | null) =>
-        role || <Text type="secondary">—</Text>,
+      render: (_: any, record: CandidateRow) =>
+        record.body_member_title || <Text type="secondary">—</Text>,
     },
     {
       title: "Race",
@@ -835,6 +859,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 2 }}>
                   <Tag color={partyColors[c.party] ?? "default"} style={{ margin: 0, fontSize: 10 }}>{c.party}</Tag>
                   {c.is_incumbent && <Tag color="green" style={{ margin: 0, fontSize: 10 }}>Inc</Tag>}
+                  {c.is_retiring && <Tag color="orange" style={{ margin: 0, fontSize: 10 }}>Ret</Tag>}
                   {c.state_abbr && <Tag style={{ margin: 0, fontSize: 10 }}>{c.state_abbr}</Tag>}
                 </div>
               </div>
@@ -870,8 +895,8 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               <Button type="text" size="small" icon={<MoreOutlined />} />
             </Dropdown>
           </div>
-          {c.role_title && (
-            <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 2 }}>{c.role_title}</Text>
+          {c.body_member_title && (
+            <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 2 }}>{c.body_member_title}</Text>
           )}
           {c.race_label && (
             <Text type="secondary" style={{ fontSize: 12 }}>Race: {c.race_label}</Text>
@@ -1069,8 +1094,17 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             </Form.Item>
           </div>
 
-          <Form.Item name="role_title" label="Current Role">
-            <Input placeholder="e.g., Governor of Maine, U.S. Senator" />
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16, alignItems: "flex-start" }}>
+            <Form.Item name="body_id" label="Government Body" style={{ flex: 1 }}>
+              <Select allowClear placeholder="Select body..." options={bodyOptions} />
+            </Form.Item>
+            <Form.Item name="term_start_year" label="Term Start Year" style={{ flex: 1 }}>
+              <Input type="number" placeholder="e.g., 2021" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="is_retiring" valuePropName="checked">
+            <Checkbox>Retiring / Not seeking re-election</Checkbox>
           </Form.Item>
 
           <Form.Item name="bio" label="Bio">
@@ -1301,9 +1335,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                     <Tag color="green">Incumbent</Tag>
                   )}
                 </div>
-                {detailCandidate.role_title && (
+                {detailCandidate.body_member_title && (
                   <Text type="secondary" style={{ fontSize: 13 }}>
-                    {detailCandidate.role_title}
+                    {detailCandidate.body_member_title}
                   </Text>
                 )}
                 {(detailCandidate.website || detailCandidate.twitter) && (

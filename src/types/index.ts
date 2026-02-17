@@ -4,7 +4,6 @@ export interface Candidate {
   party: "Democrat" | "Republican" | "Independent";
   photo: string;
   isIncumbent: boolean;
-  currentRole?: string;
   previousRoles?: string[];
   keyIssues: string[];
   positions?: string[];
@@ -213,7 +212,7 @@ export interface IncumbentCard {
   photo: string;
   state: string;
   stateAbbr: string;
-  currentRole: string;
+  memberTitle: string;
   isSpecialElection: boolean;
   isRetiring: boolean;
   rating: string | null;

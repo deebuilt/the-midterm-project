@@ -42,7 +42,7 @@ interface PromoteFormData {
   website: string;
   twitter: string;
   bio: string;
-  roleTitle: string;
+  bodyId: number | null;
   raceStatus: "announced" | "primary_winner" | "runoff";
 }
 
@@ -123,9 +123,10 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
     website: "",
     twitter: "",
     bio: "",
-    roleTitle: "",
+    bodyId: null,
     raceStatus: "announced",
   });
+  const [bodyOptions, setBodyOptions] = useState<{ value: number; label: string; slug: string }[]>([]);
   const [promoting, setPromoting] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichedFrom, setEnrichedFrom] = useState<string | null>(null);
@@ -136,6 +137,10 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
 
   useEffect(() => {
     fetchActiveCycle();
+    // Load government bodies for promote form
+    supabase.from("government_bodies").select("id, name, slug, member_title").order("id").then(({ data }) => {
+      setBodyOptions((data ?? []).map((b: any) => ({ value: b.id, label: b.member_title ?? b.name, slug: b.slug })));
+    });
   }, []);
 
   useEffect(() => {
@@ -185,12 +190,14 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
     setSelectedFiling(filing);
     setEnrichedFrom(null);
 
+    const targetSlug = filing.office === "S" ? "us-senate" : "us-house";
+    const matchedBody = bodyOptions.find((b) => b.slug === targetSlug);
     const defaultForm: PromoteFormData = {
       photoUrl: "",
       website: "",
       twitter: "",
       bio: "",
-      roleTitle: filing.office === "S" ? "U.S. Senator" : "U.S. Representative",
+      bodyId: matchedBody?.value ?? null,
       raceStatus: "announced",
     };
 
@@ -251,7 +258,7 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
           first_name: selectedFiling.first_name,
           last_name: selectedFiling.last_name,
           party: selectedFiling.party,
-          role_title: promoteForm.roleTitle,
+          body_id: promoteForm.bodyId,
           state_id: selectedFiling.state_id,
           photo_url: promoteForm.photoUrl || null,
           website: promoteForm.website || null,
@@ -745,13 +752,15 @@ export default function FilingsPage({ setHeaderActions }: FilingsPageProps) {
                 </div>
 
                 <div>
-                  <Text>Role Title</Text>
-                  <Input
-                    placeholder="U.S. Senator"
-                    value={promoteForm.roleTitle}
-                    onChange={(e) =>
-                      setPromoteForm({ ...promoteForm, roleTitle: e.target.value })
+                  <Text>Government Body</Text>
+                  <Select
+                    style={{ width: "100%" }}
+                    placeholder="Select body..."
+                    value={promoteForm.bodyId}
+                    onChange={(value) =>
+                      setPromoteForm({ ...promoteForm, bodyId: value })
                     }
+                    options={bodyOptions}
                   />
                 </div>
 

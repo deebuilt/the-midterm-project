@@ -70,7 +70,7 @@ interface RaceCandidateRow {
     last_name: string;
     party: string;
     photo_url: string | null;
-    role_title: string | null;
+    body_id: number | null;
   };
 }
 
@@ -206,7 +206,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         race_candidates(
           id, candidate_id, status, is_incumbent,
           candidate:candidates!inner(
-            id, slug, first_name, last_name, party, photo_url, role_title
+            id, slug, first_name, last_name, party, photo_url
           )
         )
       `)
@@ -839,7 +839,6 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
               candidates={previewRace.race_candidates.map((rc) => ({
                 name: `${rc.candidate.first_name} ${rc.candidate.last_name}`,
                 party: rc.candidate.party,
-                roleTitle: rc.candidate.role_title,
                 isIncumbent: rc.is_incumbent,
               }))}
             />
