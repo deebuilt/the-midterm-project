@@ -1083,10 +1083,11 @@ export default function VotesPage({ setHeaderActions }: Props) {
     {
       title: "Bill",
       key: "bill",
-      width: 240,
+      width: 220,
+      ellipsis: true,
       render: (_: any, r: BillRow) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{r.bill_name}</div>
+        <div style={{ overflow: "hidden" }}>
+          <div style={{ fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.bill_name}</div>
           {r.bill_number && <Text type="secondary" style={{ fontSize: 12 }}>{r.bill_number}</Text>}
         </div>
       ),
@@ -1116,21 +1117,20 @@ export default function VotesPage({ setHeaderActions }: Props) {
     {
       title: "Votes",
       key: "votes",
-      width: 200,
+      width: 160,
       render: (_: any, r: BillRow) => {
         const cvs = r.candidate_votes ?? [];
-        if (cvs.length === 0) return <Text type="secondary">No votes assigned</Text>;
+        if (cvs.length === 0) return <Text type="secondary">No votes</Text>;
 
         const yeaCount = cvs.filter((cv) => cv.vote === "yea").length;
         const nayCount = cvs.filter((cv) => cv.vote === "nay").length;
         const otherCount = cvs.length - yeaCount - nayCount;
 
         return (
-          <Space size={4}>
-            {yeaCount > 0 && <Tag color="green">{yeaCount} Yea</Tag>}
-            {nayCount > 0 && <Tag color="red">{nayCount} Nay</Tag>}
-            {otherCount > 0 && <Tag>{otherCount} Other</Tag>}
-            <Text type="secondary" style={{ fontSize: 12 }}>({cvs.length} total)</Text>
+          <Space size={4} wrap={false}>
+            {yeaCount > 0 && <Tag color="green" style={{ margin: 0 }}>{yeaCount} Y</Tag>}
+            {nayCount > 0 && <Tag color="red" style={{ margin: 0 }}>{nayCount} N</Tag>}
+            {otherCount > 0 && <Tag style={{ margin: 0 }}>{otherCount} Other</Tag>}
           </Space>
         );
       },
@@ -1139,6 +1139,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
       title: "Summary",
       dataIndex: "summary",
       key: "summary",
+      width: 200,
       ellipsis: true,
       render: (s: string | null) => s ?? <Text type="secondary">—</Text>,
     },
