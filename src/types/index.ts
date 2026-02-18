@@ -220,6 +220,7 @@ export interface IncumbentCard {
   twitter?: string;
   bio?: string;
   govtrackUrl?: string;
+  termStartYear?: number;
   votes: VotingRecord[];
 }
 

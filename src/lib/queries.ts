@@ -583,6 +583,7 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
       is_incumbent,
       is_retiring,
       govtrack_url,
+      term_start_year,
       state:states!inner(id, name, abbr)
     `)
     .eq("is_incumbent", true)
@@ -696,6 +697,7 @@ export async function fetchIncumbentsWithVotes(): Promise<IncumbentCard[]> {
         twitter: c.twitter ?? undefined,
         bio: c.bio ?? undefined,
         govtrackUrl: c.govtrack_url ?? undefined,
+        termStartYear: c.term_start_year ?? undefined,
         votes: votesByCandidate.get(c.id) ?? [],
       };
     })
