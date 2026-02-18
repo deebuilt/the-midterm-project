@@ -321,8 +321,8 @@ function parseVoteDetailXml(xmlText: string): SenateVoteDetail {
 /** Map Senate.gov vote_cast to our vote_enum */
 function mapVoteCast(voteCast: string): "yea" | "nay" | "abstain" | "not_voting" {
   const v = voteCast.toLowerCase();
-  if (v === "yea") return "yea";
-  if (v === "nay") return "nay";
+  if (v === "yea" || v === "guilty") return "yea";
+  if (v === "nay" || v === "not guilty") return "nay";
   if (v === "not voting") return "not_voting";
   if (v === "present") return "abstain";
   return "not_voting";
@@ -1649,12 +1649,16 @@ export default function VotesPage({ setHeaderActions }: Props) {
                     value={senateCongress}
                     onChange={(v) => {
                       setSenateCongress(v);
-                      setSenateCongressYear(v === 119 ? 2025 : v === 118 ? 2023 : 2025);
+                      setSenateCongressYear(
+                        v === 119 ? 2025 : v === 118 ? 2023 : v === 117 ? 2021 : v === 116 ? 2019 : 2025
+                      );
                     }}
-                    style={{ width: 140 }}
+                    style={{ width: 160 }}
                     options={[
-                      { value: 119, label: "119th Congress" },
-                      { value: 118, label: "118th Congress" },
+                      { value: 119, label: "119th (2025-26)" },
+                      { value: 118, label: "118th (2023-24)" },
+                      { value: 117, label: "117th (2021-22)" },
+                      { value: 116, label: "116th (2019-20)" },
                     ]}
                   />
                   <Select
