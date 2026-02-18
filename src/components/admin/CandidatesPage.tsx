@@ -173,6 +173,10 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [bulkAssignRaceId, setBulkAssignRaceId] = useState<number | null>(null);
   const [bulkAssignStatus, setBulkAssignStatus] = useState<CandidateStatus>("announced");
   const [bulkAssignIncumbent, setBulkAssignIncumbent] = useState(false);
+  // Controlled table filter/sorter state — survives data reloads
+  const [tableFilters, setTableFilters] = useState<Record<string, any[] | null>>({});
+  const [tableSorter, setTableSorter] = useState<{ field?: string; order?: "ascend" | "descend" } | null>(null);
+  const [tablePagination, setTablePagination] = useState<{ current: number; pageSize: number }>({ current: 1, pageSize: 20 });
   // Drawer edit form (separate from modal form)
   const [drawerForm] = Form.useForm();
   const [drawerFormDirty, setDrawerFormDirty] = useState(false);
@@ -844,11 +848,13 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       width: 200,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         a.last_name.localeCompare(b.last_name),
+      sortOrder: tableSorter?.field === "name" ? tableSorter.order : undefined,
       filters: [
         ...partyOptions.map((p) => ({ text: p.label, value: p.value })),
         { text: "Incumbent", value: "__incumbent__" },
         { text: "Retiring", value: "__retiring__" },
       ],
+      filteredValue: tableFilters.name ?? null,
       onFilter: (value: unknown, record: CandidateRow) => {
         if (value === "__incumbent__") return record.is_incumbent;
         if (value === "__retiring__") return record.is_retiring;
@@ -880,6 +886,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       width: 60,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         (a.state_abbr ?? "").localeCompare(b.state_abbr ?? ""),
+      sortOrder: tableSorter?.field === "state" ? tableSorter.order : undefined,
       render: (_: unknown, record: CandidateRow) =>
         record.state_abbr ? (
           <Text style={{ fontSize: 12 }}>{record.state_abbr}</Text>
@@ -896,10 +903,12 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       ellipsis: true,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         (a.body_member_title ?? "").localeCompare(b.body_member_title ?? ""),
+      sortOrder: tableSorter?.field === "body_member_title" ? tableSorter.order : undefined,
       filters: [
         ...bodyOptions.map((b) => ({ text: b.label, value: b.value })),
         { text: "None", value: "__none__" },
       ],
+      filteredValue: tableFilters.body ?? null,
       onFilter: (value: unknown, record: CandidateRow) => {
         if (value === "__none__") return !record.body_id;
         return record.body_id === value;
@@ -937,6 +946,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         { text: "Linked", value: true },
         { text: "No FEC", value: false },
       ],
+      filteredValue: tableFilters.fec ?? null,
       onFilter: (value: unknown, record: CandidateRow) =>
         (!!record.fec_candidate_id) === value,
       render: (_: unknown, record: CandidateRow) =>
@@ -954,6 +964,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         { text: "Linked", value: true },
         { text: "No GT", value: false },
       ],
+      filteredValue: tableFilters.govtrack ?? null,
       onFilter: (value: unknown, record: CandidateRow) =>
         (!!record.govtrack_url) === value,
       render: (_: unknown, record: CandidateRow) =>
@@ -1140,11 +1151,15 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             onChange: setSelectedRowKeys,
             columnWidth: 40,
           }}
-          onChange={(_pagination, _filters, _sorter, extra) => {
+          onChange={(pagination, filters, sorter, extra) => {
+            setTableFilters(filters as Record<string, any[] | null>);
+            const s = Array.isArray(sorter) ? sorter[0] : sorter;
+            setTableSorter(s?.order ? { field: s.field as string, order: s.order } : null);
+            setTablePagination({ current: pagination.current ?? 1, pageSize: pagination.pageSize ?? 20 });
             setDisplayedCandidates(extra.currentDataSource as CandidateRow[]);
           }}
           style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-          pagination={{ pageSize: 20, showSizeChanger: true }}
+          pagination={{ ...tablePagination, showSizeChanger: true }}
         />
       )}
 
