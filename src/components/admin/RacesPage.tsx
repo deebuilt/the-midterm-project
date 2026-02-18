@@ -824,7 +824,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         }
         open={!!previewRace}
         onClose={() => setPreviewRace(null)}
-        width={isMobile ? "100%" : 480}
+        size={isMobile ? "100%" : 480}
       >
         {previewRace && (
           <>

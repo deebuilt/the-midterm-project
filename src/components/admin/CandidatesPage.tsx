@@ -10,7 +10,6 @@ import {
   Checkbox,
   Typography,
   Space,
-  Drawer,
   Tabs,
   Avatar,
   Popconfirm,
@@ -33,6 +32,7 @@ import {
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import { useIsMobile } from "./useIsMobile";
+import { ResizableDrawer } from "./ResizableDrawer";
 import type { Party, Stance, CandidateStatus } from "../../lib/database.types";
 
 const { Text } = Typography;
@@ -157,7 +157,6 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [photoError, setPhotoError] = useState(false);
-  const [drawerWidth, setDrawerWidth] = useState(560);
   const [editingPositionId, setEditingPositionId] = useState<number | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
@@ -630,21 +629,6 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     }
   }
 
-  function handleDrawerResize(e: React.MouseEvent) {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = drawerWidth;
-    function onMove(ev: MouseEvent) {
-      const newWidth = Math.max(400, Math.min(900, startWidth + (startX - ev.clientX)));
-      setDrawerWidth(newWidth);
-    }
-    function onUp() {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    }
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  }
 
   const raceSelectOptions = allRaces.map((r) => ({
     value: r.id,
@@ -1272,7 +1256,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       </Modal>
 
       {/* Detail Drawer */}
-      <Drawer
+      <ResizableDrawer
         title={
           detailCandidate
             ? `${detailCandidate.first_name} ${detailCandidate.last_name}`
@@ -1280,24 +1264,12 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         }
         open={!!detailCandidate}
         onClose={() => { setDetailCandidate(null); setEditingPositionId(null); }}
-        width={isMobile ? "100%" : drawerWidth}
-        styles={{ body: { overflowX: "hidden" } }}
+        defaultWidth={560}
+        minWidth={400}
+        maxWidth={900}
+        storageKey="candidate-detail"
+        drawerProps={{ styles: { body: { overflowX: "hidden" } } }}
       >
-        {/* Resize handle */}
-        <div
-          onMouseDown={handleDrawerResize}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 4,
-            cursor: "col-resize",
-            zIndex: 10,
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "#1E293B20")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-        />
         {detailCandidate && (
           <>
             {/* Header card */}
@@ -1651,7 +1623,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             />
           </>
         )}
-      </Drawer>
+      </ResizableDrawer>
     </div>
   );
 }

@@ -806,7 +806,7 @@ export default function BallotMeasuresPage({ setHeaderActions }: BallotMeasuresP
         title={previewMeasure?.title ?? "Ballot Measure Preview"}
         open={!!previewMeasure}
         onClose={() => setPreviewMeasure(null)}
-        width={isMobile ? "100%" : 480}
+        size={isMobile ? "100%" : 480}
       >
         {previewMeasure && (
           <div>

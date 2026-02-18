@@ -12,6 +12,7 @@ import {
   Tag,
   Popconfirm,
   Drawer,
+  Descriptions,
   Divider,
   message,
   Spin,
@@ -31,6 +32,7 @@ import {
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
 import { useIsMobile } from "./useIsMobile";
+import { MultiLevelDrawer } from "./ResizableDrawer";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -423,6 +425,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
   const [senateDetailPasteText, setSenateDetailPasteText] = useState("");
   const [senateDetailPasteIdx, setSenateDetailPasteIdx] = useState(0);
   const [senateImportResults, setSenateImportResults] = useState<{ voteNumber: string; billName: string; status: "imported" | "skipped" | "failed"; reason?: string }[]>([]);
+  const [senateDetailItem, setSenateDetailItem] = useState<SenateVoteListItem | null>(null);
 
   // Filters
   const [filterBill, setFilterBill] = useState("");
@@ -1588,12 +1591,48 @@ export default function VotesPage({ setHeaderActions }: Props) {
       </Modal>
 
       {/* Senate.gov Import Drawer */}
-      <Drawer
+      <MultiLevelDrawer
         title="Import from Senate.gov"
         open={senateDrawerOpen}
         onClose={() => { setSenateDrawerOpen(false); resetSenateImport(); }}
-        width={isMobile ? "100%" : 780}
-        destroyOnClose
+        defaultWidth={780}
+        minWidth={500}
+        maxWidth={1200}
+        storageKey="senate-import"
+        destroyOnHidden
+        secondLevelProps={{
+          open: !!senateDetailItem,
+          onClose: () => setSenateDetailItem(null),
+          title: senateDetailItem ? `Vote #${senateDetailItem.voteNumber}` : "Vote Detail",
+          defaultWidth: 480,
+          minWidth: 360,
+          maxWidth: 800,
+          storageKey: "senate-vote-detail",
+          children: senateDetailItem ? (
+            <div>
+              <Descriptions column={1} size="small" bordered>
+                <Descriptions.Item label="Vote #">{senateDetailItem.voteNumber}</Descriptions.Item>
+                <Descriptions.Item label="Date">{senateDetailItem.voteDate}</Descriptions.Item>
+                <Descriptions.Item label="Issue">{senateDetailItem.issue}</Descriptions.Item>
+                <Descriptions.Item label="Question">{senateDetailItem.question}</Descriptions.Item>
+                <Descriptions.Item label="Result">
+                  <Tag color={senateDetailItem.result === "Passed" || senateDetailItem.result === "Agreed to" ? "green" : senateDetailItem.result === "Rejected" ? "red" : "default"}>
+                    {senateDetailItem.result}
+                  </Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Tally">
+                  <Space>
+                    <Text style={{ color: "green" }}>Yea: {senateDetailItem.yeas}</Text>
+                    <Text style={{ color: "red" }}>Nay: {senateDetailItem.nays}</Text>
+                  </Space>
+                </Descriptions.Item>
+              </Descriptions>
+              <Divider />
+              <Text strong>Full Title</Text>
+              <p style={{ whiteSpace: "pre-wrap", marginTop: 8 }}>{senateDetailItem.title}</p>
+            </div>
+          ) : null,
+        }}
       >
         {senateImportStep === "list" && (
           <>
@@ -1747,6 +1786,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
                     selectedRowKeys: Array.from(senateSelected),
                     onChange: (keys) => setSenateSelected(new Set(keys as string[])),
                   }}
+                  onRow={(record) => ({
+                    onClick: () => setSenateDetailItem(record),
+                    style: { cursor: "pointer" },
+                  })}
                   columns={[
                     { title: "#", dataIndex: "voteNumber", key: "num", width: 60 },
                     { title: "Date", dataIndex: "voteDate", key: "date", width: 70 },
@@ -1897,14 +1940,14 @@ export default function VotesPage({ setHeaderActions }: Props) {
             </div>
           </div>
         )}
-      </Drawer>
+      </MultiLevelDrawer>
 
       {/* Topics Drawer */}
       <Drawer
         title="Manage Topics"
         open={topicsDrawerOpen}
         onClose={() => setTopicsDrawerOpen(false)}
-        width={isMobile ? "100%" : 360}
+        size={isMobile ? "100%" : 360}
       >
         <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
           <Input

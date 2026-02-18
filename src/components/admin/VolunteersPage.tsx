@@ -416,7 +416,7 @@ export default function VolunteersPage({ setHeaderActions }: VolunteersPageProps
         title={detailVolunteer?.name ?? "Volunteer Details"}
         open={!!detailVolunteer}
         onClose={() => setDetailVolunteer(null)}
-        width={isMobile ? "100%" : 480}
+        size={isMobile ? "100%" : 480}
       >
         {detailVolunteer && (
           <Descriptions column={1} bordered size="small">
