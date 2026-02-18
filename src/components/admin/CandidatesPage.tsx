@@ -28,6 +28,7 @@ import {
   InfoCircleOutlined,
   LinkOutlined,
   MoreOutlined,
+  SearchOutlined,
   TeamOutlined,
   LeftOutlined,
   RightOutlined,
@@ -594,6 +595,8 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   }
 
   async function handleDelete(id: number) {
+    // Unlink any FEC filings pointing to this candidate first
+    await supabase.from("fec_filings").update({ promoted_to_candidate_id: null }).eq("promoted_to_candidate_id", id);
     const { error } = await supabase.from("candidates").delete().eq("id", id);
     if (error) {
       messageApi.error(error.message);
@@ -864,17 +867,65 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       sorter: (a: CandidateRow, b: CandidateRow) =>
         a.last_name.localeCompare(b.last_name),
       sortOrder: tableSorter?.field === "name" ? tableSorter.order : undefined,
-      filters: [
-        ...partyOptions.map((p) => ({ text: p.label, value: p.value })),
-        { text: "Incumbent", value: "__incumbent__" },
-        { text: "Retiring", value: "__retiring__" },
-      ],
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => {
+        const keys = (selectedKeys ?? []) as string[];
+        const searchVal = keys.find((k: string) => k.startsWith("__search__"))?.slice(10) ?? "";
+        const checkKeys = keys.filter((k: string) => !k.startsWith("__search__"));
+        const setKeys = (search: string, checks: string[]) => {
+          const next = [...checks];
+          if (search) next.push("__search__" + search);
+          setSelectedKeys(next);
+        };
+        const checkOptions = [
+          ...partyOptions.map((p) => ({ label: p.label, value: p.value })),
+          { label: "Incumbent", value: "__incumbent__" },
+          { label: "Retiring", value: "__retiring__" },
+        ];
+        return (
+          <div style={{ padding: 8, width: 220 }}>
+            <Input
+              placeholder="Search by name..."
+              prefix={<SearchOutlined />}
+              size="small"
+              value={searchVal}
+              onChange={(e) => setKeys(e.target.value, checkKeys)}
+              onPressEnter={() => confirm()}
+              style={{ marginBottom: 8 }}
+              allowClear
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 200, overflowY: "auto", marginBottom: 8 }}>
+              {checkOptions.map((opt) => (
+                <Checkbox
+                  key={opt.value}
+                  checked={checkKeys.includes(opt.value)}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...checkKeys, opt.value]
+                      : checkKeys.filter((k: string) => k !== opt.value);
+                    setKeys(searchVal, next);
+                  }}
+                >{opt.label}</Checkbox>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Button size="small" onClick={() => { clearFilters?.(); confirm(); }} type="link">Reset</Button>
+              <Button size="small" type="primary" onClick={() => confirm()}>OK</Button>
+            </div>
+          </div>
+        );
+      },
       filteredValue: tableFilters.name ?? null,
       onFilter: (value: unknown, record: CandidateRow) => {
-        if (value === "__incumbent__") return record.is_incumbent;
-        if (value === "__retiring__") return record.is_retiring;
-        return record.party === value;
+        const v = value as string;
+        if (v.startsWith("__search__")) {
+          const search = v.slice(10).toLowerCase();
+          return (`${record.first_name} ${record.last_name}`).toLowerCase().includes(search);
+        }
+        if (v === "__incumbent__") return record.is_incumbent;
+        if (v === "__retiring__") return record.is_retiring;
+        return record.party === v;
       },
+      filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />,
       render: (_: unknown, record: CandidateRow) => (
         <span>
           <a onClick={() => openDetailDrawer(record)}>
@@ -902,6 +953,12 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       sorter: (a: CandidateRow, b: CandidateRow) =>
         (a.state_abbr ?? "").localeCompare(b.state_abbr ?? ""),
       sortOrder: tableSorter?.field === "state" ? tableSorter.order : undefined,
+      filters: Array.from(new Set(candidates.map((c) => c.state_abbr).filter(Boolean)))
+        .sort()
+        .map((s) => ({ text: s!, value: s! })),
+      filterSearch: true,
+      filteredValue: tableFilters.state ?? null,
+      onFilter: (value: unknown, record: CandidateRow) => record.state_abbr === value,
       render: (_: unknown, record: CandidateRow) =>
         record.state_abbr ? (
           <Text style={{ fontSize: 12 }}>{record.state_abbr}</Text>
@@ -918,7 +975,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       ellipsis: true,
       sorter: (a: CandidateRow, b: CandidateRow) =>
         (a.body_member_title ?? "").localeCompare(b.body_member_title ?? ""),
-      sortOrder: tableSorter?.field === "body_member_title" ? tableSorter.order : undefined,
+      sortOrder: tableSorter?.field === "body" ? tableSorter.order : undefined,
       filters: [
         ...bodyOptions.map((b) => ({ text: b.label, value: b.value })),
         { text: "None", value: "__none__" },
@@ -935,6 +992,18 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       title: "Race",
       key: "race",
       width: 200,
+      filters: [
+        ...Array.from(new Set(candidates.map((c) => c.race_label).filter(Boolean)))
+          .sort()
+          .map((r) => ({ text: r!, value: r! })),
+        { text: "No race", value: "__none__" },
+      ],
+      filterSearch: true,
+      filteredValue: tableFilters.race ?? null,
+      onFilter: (value: unknown, record: CandidateRow) => {
+        if (value === "__none__") return !record.race_id;
+        return record.race_label === value;
+      },
       render: (_: unknown, record: CandidateRow) => (
         <Select
           size="small"
@@ -1169,7 +1238,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           onChange={(pagination, filters, sorter, extra) => {
             setTableFilters(filters as Record<string, any[] | null>);
             const s = Array.isArray(sorter) ? sorter[0] : sorter;
-            setTableSorter(s?.order ? { field: s.field as string, order: s.order } : null);
+            setTableSorter(s?.order ? { field: (s.columnKey ?? s.field) as string, order: s.order } : null);
             setTablePagination({ current: pagination.current ?? 1, pageSize: pagination.pageSize ?? 20 });
             setDisplayedCandidates(extra.currentDataSource as CandidateRow[]);
           }}
