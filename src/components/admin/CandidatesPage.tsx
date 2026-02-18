@@ -638,10 +638,11 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
 
   async function handleInlineRaceAssign(candidateId: number, raceId: number | null) {
     if (!raceId) return;
+    const candidate = candidates.find((c) => c.id === candidateId);
     const { error } = await supabase
       .from("race_candidates")
       .upsert(
-        { race_id: raceId, candidate_id: candidateId, status: "announced" as CandidateStatus, is_incumbent: false },
+        { race_id: raceId, candidate_id: candidateId, status: "announced" as CandidateStatus, is_incumbent: candidate?.is_incumbent ?? false },
         { onConflict: "race_id,candidate_id" }
       );
     if (error) {
@@ -690,6 +691,20 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     const { error } = await supabase
       .from("race_candidates")
       .update({ status })
+      .eq("race_id", raceId)
+      .eq("candidate_id", detailCandidate.id);
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      loadCandidateDetails(detailCandidate.id);
+    }
+  }
+
+  async function handleDrawerUpdateRaceIncumbent(raceId: number, is_incumbent: boolean) {
+    if (!detailCandidate) return;
+    const { error } = await supabase
+      .from("race_candidates")
+      .update({ is_incumbent })
       .eq("race_id", raceId)
       .eq("candidate_id", detailCandidate.id);
     if (error) {
@@ -2003,6 +2018,17 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                                     { value: "won", label: "Won" },
                                     { value: "lost", label: "Lost" },
                                   ]}
+                                />
+                              ),
+                            },
+                            {
+                              title: "Inc.",
+                              key: "incumbent",
+                              width: 50,
+                              render: (_: unknown, r: CandidateRaceInfo) => (
+                                <Checkbox
+                                  checked={r.is_incumbent}
+                                  onChange={(e) => handleDrawerUpdateRaceIncumbent(r.race_id, e.target.checked)}
                                 />
                               ),
                             },

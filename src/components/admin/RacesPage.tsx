@@ -8,10 +8,11 @@ import {
   Input,
   Select,
   Switch,
+  Checkbox,
   DatePicker,
   Typography,
   Space,
-  Drawer,
+  Avatar,
   Dropdown,
   Segmented,
   Popconfirm,
@@ -28,11 +29,15 @@ import {
   CloseOutlined,
   InfoCircleOutlined,
   MoreOutlined,
+  LeftOutlined,
+  RightOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { supabase } from "../../lib/supabase";
 import type { RaceRating, CandidateStatus } from "../../lib/database.types";
 import RacePreview from "./RacePreview";
+import { MultiLevelDrawer } from "./ResizableDrawer";
 import { useIsMobile } from "./useIsMobile";
 
 const { Text } = Typography;
@@ -161,7 +166,12 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editingRace, setEditingRace] = useState<RaceRow | null>(null);
-  const [previewRace, setPreviewRace] = useState<RaceRow | null>(null);
+  // Drawer navigation
+  const [selectedRaceId, setSelectedRaceId] = useState<number | null>(null);
+  // Level-2 drawer: candidate detail
+  const [level2Candidate, setLevel2Candidate] = useState<RaceCandidateRow | null>(null);
+  const [level2Form] = Form.useForm();
+  const [level2Saving, setLevel2Saving] = useState(false);
   const [districts, setDistricts] = useState<DistrictOption[]>([]);
   const [selectedStateId, setSelectedStateId] = useState<number | null>(null);
   const [form] = Form.useForm();
@@ -332,11 +342,18 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
   }
 
   async function handleAddCandidate(raceId: number, candidateId: number) {
+    // Look up whether this candidate is an incumbent from the candidates table
+    const { data: candidateData } = await supabase
+      .from("candidates")
+      .select("is_incumbent")
+      .eq("id", candidateId)
+      .single();
+
     const { error } = await supabase.from("race_candidates").insert({
       race_id: raceId,
       candidate_id: candidateId,
       status: "announced" as CandidateStatus,
-      is_incumbent: false,
+      is_incumbent: candidateData?.is_incumbent ?? false,
     });
     if (error) {
       messageApi.error(error.message);
@@ -408,6 +425,65 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
     return true;
   });
 
+  // Drawer: derive race from selectedRaceId, compute index in filteredRaces for prev/next
+  const drawerRace = selectedRaceId !== null ? races.find((r) => r.id === selectedRaceId) ?? null : null;
+  const drawerIndex = selectedRaceId !== null ? filteredRaces.findIndex((r) => r.id === selectedRaceId) : -1;
+  const hasNext = drawerIndex >= 0 && drawerIndex < filteredRaces.length - 1;
+  const hasPrevious = drawerIndex > 0;
+
+  function openDrawer(race: RaceRow) {
+    setSelectedRaceId(race.id);
+    setLevel2Candidate(null);
+  }
+
+  function closeDrawer() {
+    setSelectedRaceId(null);
+    setLevel2Candidate(null);
+  }
+
+  function handleNavigate(direction: "next" | "previous") {
+    if (drawerIndex < 0) return;
+    const newIndex = direction === "next" ? drawerIndex + 1 : drawerIndex - 1;
+    if (newIndex < 0 || newIndex >= filteredRaces.length) return;
+    setSelectedRaceId(filteredRaces[newIndex].id);
+    setLevel2Candidate(null);
+  }
+
+  function openLevel2(rc: RaceCandidateRow) {
+    setLevel2Candidate(rc);
+    level2Form.setFieldsValue({
+      status: rc.status,
+      is_incumbent: rc.is_incumbent,
+    });
+  }
+
+  async function handleLevel2Save() {
+    if (!level2Candidate || !drawerRace) return;
+    setLevel2Saving(true);
+    const values = level2Form.getFieldsValue();
+    const { error } = await supabase
+      .from("race_candidates")
+      .update({ status: values.status, is_incumbent: values.is_incumbent })
+      .eq("id", level2Candidate.id);
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      messageApi.success("Updated");
+      setRaces((prev) =>
+        prev.map((r) => ({
+          ...r,
+          race_candidates: r.race_candidates.map((rc) =>
+            rc.id === level2Candidate.id
+              ? { ...rc, status: values.status, is_incumbent: values.is_incumbent }
+              : rc
+          ),
+        }))
+      );
+      setLevel2Candidate(null);
+    }
+    setLevel2Saving(false);
+  }
+
   const columns = [
     {
       title: "State",
@@ -416,7 +492,11 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         (a.district as any).state.name.localeCompare((b.district as any).state.name),
       render: (_: unknown, record: RaceRow) => {
         const d = record.district as any;
-        return `${d.state.name} (${d.state.abbr})`;
+        return (
+          <a onClick={() => openDrawer(record)}>
+            {d.state.name} ({d.state.abbr})
+          </a>
+        );
       },
     },
     {
@@ -535,7 +615,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                 key: "preview",
                 label: "Preview",
                 icon: <EyeOutlined />,
-                onClick: () => setPreviewRace(record),
+                onClick: () => openDrawer(record),
               },
               {
                 key: "edit",
@@ -590,7 +670,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                 trigger={["click"]}
                 menu={{
                   items: [
-                    { key: "preview", label: "Preview", icon: <EyeOutlined />, onClick: () => setPreviewRace(r) },
+                    { key: "preview", label: "Preview", icon: <EyeOutlined />, onClick: () => openDrawer(r) },
                     { key: "edit", label: "Edit", icon: <EditOutlined />, onClick: () => openEditModal(r) },
                     { type: "divider" },
                     { key: "delete", label: "Delete", icon: <DeleteOutlined />, danger: true, onClick: () => Modal.confirm({ title: "Delete this race?", content: "This will also remove all candidate assignments.", okText: "Delete", okType: "danger", onOk: () => handleDelete(r.id) }) },
@@ -815,28 +895,121 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
         </Form>
       </Modal>
 
-      {/* Preview + Candidate Management Drawer */}
-      <Drawer
+      {/* Race Detail + Candidate Management — MultiLevelDrawer */}
+      <MultiLevelDrawer
         title={
-          previewRace
-            ? `${(previewRace.district as any).state.name} — ${(previewRace.district as any).body.name}`
-            : "Race Preview"
+          drawerRace
+            ? `${(drawerRace.district as any).state.name} — ${(drawerRace.district as any).body.name}`
+            : "Race Details"
         }
-        open={!!previewRace}
-        onClose={() => setPreviewRace(null)}
-        size={isMobile ? "100%" : 480}
+        open={!!drawerRace}
+        onClose={closeDrawer}
+        extra={
+          <Space.Compact>
+            <Button
+              size="small"
+              icon={<LeftOutlined />}
+              onClick={() => handleNavigate("previous")}
+              disabled={!hasPrevious}
+              title="Previous race"
+            />
+            <Button
+              size="small"
+              icon={<RightOutlined />}
+              onClick={() => handleNavigate("next")}
+              disabled={!hasNext}
+              title="Next race"
+            />
+          </Space.Compact>
+        }
+        defaultWidth={520}
+        minWidth={400}
+        maxWidth={900}
+        storageKey="race-detail"
+        drawerProps={{ styles: { body: { overflowX: "hidden" } } }}
+        secondLevelProps={
+          level2Candidate
+            ? {
+                open: true,
+                onClose: () => setLevel2Candidate(null),
+                title: `${level2Candidate.candidate.first_name} ${level2Candidate.candidate.last_name}`,
+                defaultWidth: 400,
+                minWidth: 340,
+                maxWidth: 600,
+                storageKey: "race-candidate-detail",
+                children: (
+                  <div>
+                    {/* Candidate header */}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        padding: 16,
+                        background: "#fafafa",
+                        borderRadius: 8,
+                        marginBottom: 20,
+                      }}
+                    >
+                      <Avatar
+                        size={56}
+                        src={level2Candidate.candidate.photo_url || undefined}
+                        style={{
+                          backgroundColor: level2Candidate.candidate.photo_url ? undefined : "#1E293B",
+                          fontSize: 18,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {level2Candidate.candidate.first_name[0]}
+                        {level2Candidate.candidate.last_name[0]}
+                      </Avatar>
+                      <div>
+                        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
+                          {level2Candidate.candidate.first_name} {level2Candidate.candidate.last_name}
+                        </div>
+                        <Space size={4}>
+                          <Tag color={PARTY_DOTS[level2Candidate.candidate.party] ? undefined : "default"} style={{ borderColor: PARTY_DOTS[level2Candidate.candidate.party] }}>
+                            {level2Candidate.candidate.party}
+                          </Tag>
+                          {level2Candidate.is_incumbent && <Tag color="green">Incumbent</Tag>}
+                        </Space>
+                      </div>
+                    </div>
+
+                    {/* Edit race_candidate fields */}
+                    <Form form={level2Form} layout="vertical" size="small">
+                      <Form.Item name="status" label="Race Status">
+                        <Select options={statusOptions} />
+                      </Form.Item>
+                      <Form.Item name="is_incumbent" valuePropName="checked">
+                        <Checkbox>Incumbent in this race</Checkbox>
+                      </Form.Item>
+                      <Button
+                        type="primary"
+                        icon={<SaveOutlined />}
+                        loading={level2Saving}
+                        onClick={handleLevel2Save}
+                        block
+                      >
+                        Save Changes
+                      </Button>
+                    </Form>
+                  </div>
+                ),
+              }
+            : undefined
+        }
       >
-        {previewRace && (
+        {drawerRace && (
           <>
             <RacePreview
-              state={(previewRace.district as any).state.name}
-              stateAbbr={(previewRace.district as any).state.abbr}
-              rating={previewRace.rating}
-              isSpecialElection={previewRace.is_special_election}
-              isOpenSeat={previewRace.is_open_seat}
-              whyCompetitive={previewRace.why_competitive}
-              senateClass={(previewRace.district as any).senate_class}
-              candidates={previewRace.race_candidates.map((rc) => ({
+              state={(drawerRace.district as any).state.name}
+              stateAbbr={(drawerRace.district as any).state.abbr}
+              rating={drawerRace.rating}
+              isSpecialElection={drawerRace.is_special_election}
+              isOpenSeat={drawerRace.is_open_seat}
+              whyCompetitive={drawerRace.why_competitive}
+              senateClass={(drawerRace.district as any).senate_class}
+              candidates={drawerRace.race_candidates.map((rc) => ({
                 name: `${rc.candidate.first_name} ${rc.candidate.last_name}`,
                 party: rc.candidate.party,
                 isIncumbent: rc.is_incumbent,
@@ -847,13 +1020,13 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
             <div style={{ marginTop: 24 }}>
               <Text strong>Candidates in this Race</Text>
 
-              {previewRace.race_candidates.length === 0 ? (
+              {drawerRace.race_candidates.length === 0 ? (
                 <div style={{ marginTop: 8 }}>
                   <Text type="secondary">No candidates assigned yet.</Text>
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-                  {previewRace.race_candidates.map((rc) => (
+                  {drawerRace.race_candidates.map((rc) => (
                     <div
                       key={rc.id}
                       style={{
@@ -861,50 +1034,52 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                         alignItems: "center",
                         gap: 8,
                         padding: "8px 12px",
-                        background: "#fafafa",
+                        background: level2Candidate?.id === rc.id ? "#e6f4ff" : "#fafafa",
                         borderRadius: 8,
-                        border: "1px solid #f0f0f0",
+                        border: level2Candidate?.id === rc.id ? "1px solid #91caff" : "1px solid #f0f0f0",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
                       }}
+                      onClick={() => openLevel2(rc)}
                     >
-                      <span
+                      <Avatar
+                        size="small"
+                        src={rc.candidate.photo_url || undefined}
                         style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          background: PARTY_DOTS[rc.candidate.party] ?? "#6b7280",
+                          backgroundColor: rc.candidate.photo_url ? undefined : "#1E293B",
+                          fontSize: 10,
                           flexShrink: 0,
                         }}
-                      />
+                      >
+                        {rc.candidate.first_name[0]}{rc.candidate.last_name[0]}
+                      </Avatar>
                       <span style={{ fontWeight: 500, flex: 1 }}>
                         {rc.candidate.first_name} {rc.candidate.last_name}
                       </span>
+                      {rc.is_incumbent && (
+                        <Tag color="green" style={{ margin: 0, fontSize: 10, lineHeight: "16px", padding: "0 4px" }}>Inc</Tag>
+                      )}
                       <Select
                         value={rc.status}
-                        onChange={(val) =>
-                          handleCandidateStatusChange(rc.id, val)
-                        }
+                        onChange={(val) => {
+                          handleCandidateStatusChange(rc.id, val);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                         size="small"
                         style={{ width: 120 }}
                         options={statusOptions}
                       />
-                      <label
-                        style={{
-                          fontSize: 11,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                          cursor: "pointer",
-                        }}
-                      >
+                      <Tooltip title={rc.is_incumbent ? "Incumbent" : "Not incumbent"}>
                         <input
                           type="checkbox"
                           checked={rc.is_incumbent}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) =>
                             handleCandidateIncumbentChange(rc.id, e.target.checked)
                           }
+                          style={{ cursor: "pointer" }}
                         />
-                        Inc.
-                      </label>
+                      </Tooltip>
                       <Popconfirm
                         title="Remove from race?"
                         onConfirm={() => handleRemoveCandidate(rc.id)}
@@ -914,6 +1089,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                           size="small"
                           danger
                           icon={<CloseOutlined />}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </Popconfirm>
                     </div>
@@ -935,7 +1111,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                   options={allCandidates
                     .filter(
                       (c) =>
-                        !previewRace.race_candidates.some(
+                        !drawerRace.race_candidates.some(
                           (rc) => rc.candidate_id === c.id
                         )
                     )
@@ -944,7 +1120,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
                       label: `${c.first_name} ${c.last_name} (${c.party})`,
                     }))}
                   onSelect={(candidateId: number) => {
-                    handleAddCandidate(previewRace.id, candidateId);
+                    handleAddCandidate(drawerRace.id, candidateId);
                   }}
                   value={null as any}
                 />
@@ -952,7 +1128,7 @@ export default function RacesPage({ setHeaderActions }: RacesPageProps) {
             </div>
           </>
         )}
-      </Drawer>
+      </MultiLevelDrawer>
     </div>
   );
 }
