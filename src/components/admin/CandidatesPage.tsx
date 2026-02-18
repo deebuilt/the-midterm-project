@@ -29,6 +29,9 @@ import {
   LinkOutlined,
   MoreOutlined,
   TeamOutlined,
+  LeftOutlined,
+  RightOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import { useIsMobile } from "./useIsMobile";
@@ -146,12 +149,15 @@ function slugify(first: string, last: string): string {
 
 export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps) {
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);
+  const [displayedCandidates, setDisplayedCandidates] = useState<CandidateRow[]>([]);
   const [topics, setTopics] = useState<TopicOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<CandidateRow | null>(null);
-  const [detailCandidate, setDetailCandidate] = useState<CandidateRow | null>(null);
+  // Drawer navigation: index-based with ID tracking for stability across reloads
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [detailCandidateId, setDetailCandidateId] = useState<number | null>(null);
   const [positions, setPositions] = useState<CandidatePosition[]>([]);
   const [races, setRaces] = useState<CandidateRaceInfo[]>([]);
   const [drawerLoading, setDrawerLoading] = useState(false);
@@ -167,10 +173,21 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [bulkAssignRaceId, setBulkAssignRaceId] = useState<number | null>(null);
   const [bulkAssignStatus, setBulkAssignStatus] = useState<CandidateStatus>("announced");
   const [bulkAssignIncumbent, setBulkAssignIncumbent] = useState(false);
+  // Drawer edit form (separate from modal form)
+  const [drawerForm] = Form.useForm();
+  const [drawerFormDirty, setDrawerFormDirty] = useState(false);
+  const [drawerSaving, setDrawerSaving] = useState(false);
+  const [drawerPhotoPreview, setDrawerPhotoPreview] = useState<string>("");
+  const [drawerPhotoError, setDrawerPhotoError] = useState(false);
   const [editPositionForm] = Form.useForm();
   const [form] = Form.useForm();
   const [positionForm] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+
+  // Derived drawer state
+  const detailCandidate = selectedIndex !== null ? displayedCandidates[selectedIndex] ?? null : null;
+  const hasNext = selectedIndex !== null && selectedIndex < displayedCandidates.length - 1;
+  const hasPrevious = selectedIndex !== null && selectedIndex > 0;
   const isMobile = useIsMobile();
 
   const loadCandidates = useCallback(async () => {
@@ -280,6 +297,25 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     return () => setHeaderActions(null);
   }, [setHeaderActions]);
 
+  // Sync displayedCandidates when candidates reload
+  useEffect(() => {
+    setDisplayedCandidates(candidates);
+  }, [candidates]);
+
+  // Re-find selectedIndex by ID when displayedCandidates changes (e.g. after save + reload)
+  useEffect(() => {
+    if (detailCandidateId !== null) {
+      const idx = displayedCandidates.findIndex((c) => c.id === detailCandidateId);
+      if (idx >= 0) {
+        setSelectedIndex(idx);
+      } else {
+        // Candidate was deleted or filtered out
+        setSelectedIndex(null);
+        setDetailCandidateId(null);
+      }
+    }
+  }, [displayedCandidates, detailCandidateId]);
+
   async function loadCandidateDetails(candidateId: number) {
     setDrawerLoading(true);
 
@@ -364,15 +400,88 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     setModalOpen(true);
   }
 
-  function openDetailDrawer(record: CandidateRow) {
-    setDetailCandidate(record);
-    loadCandidateDetails(record.id);
+  function populateDrawerForm(record: CandidateRow) {
+    drawerForm.setFieldsValue({
+      first_name: record.first_name,
+      last_name: record.last_name,
+      slug: record.slug,
+      party: record.party,
+      photo_url: record.photo_url ?? "",
+      website: record.website ?? "",
+      twitter: record.twitter ?? "",
+      bio: record.bio ?? "",
+      body_id: record.body_id ?? undefined,
+      is_incumbent: record.is_incumbent,
+      is_retiring: record.is_retiring ?? false,
+      term_start_year: record.term_start_year ?? undefined,
+      bioguide_id: record.bioguide_id ?? "",
+      fec_candidate_id: record.fec_candidate_id ?? "",
+      govtrack_url: record.govtrack_url ?? "",
+      race_id: record.race_id ?? undefined,
+    });
+    setDrawerPhotoPreview(record.photo_url ?? "");
+    setDrawerPhotoError(false);
+    setDrawerFormDirty(false);
   }
 
-  async function handleSave(values: any) {
-    setModalLoading(true);
-    const raceId = values.race_id || null;
-    const payload = {
+  function openDetailDrawer(record: CandidateRow) {
+    const idx = displayedCandidates.findIndex((c) => c.id === record.id);
+    setSelectedIndex(idx >= 0 ? idx : null);
+    setDetailCandidateId(record.id);
+    loadCandidateDetails(record.id);
+    populateDrawerForm(record);
+  }
+
+  function closeDetailDrawer() {
+    if (drawerFormDirty) {
+      Modal.confirm({
+        title: "Unsaved changes",
+        content: "You have unsaved changes. Discard them?",
+        okText: "Discard",
+        cancelText: "Go back",
+        onOk: () => {
+          setSelectedIndex(null);
+          setDetailCandidateId(null);
+          setEditingPositionId(null);
+          setDrawerFormDirty(false);
+        },
+      });
+    } else {
+      setSelectedIndex(null);
+      setDetailCandidateId(null);
+      setEditingPositionId(null);
+    }
+  }
+
+  function handleNavigate(direction: "next" | "previous") {
+    if (selectedIndex === null) return;
+    const newIndex = direction === "next" ? selectedIndex + 1 : selectedIndex - 1;
+    if (newIndex < 0 || newIndex >= displayedCandidates.length) return;
+
+    const proceed = () => {
+      const newCandidate = displayedCandidates[newIndex];
+      setSelectedIndex(newIndex);
+      setDetailCandidateId(newCandidate.id);
+      loadCandidateDetails(newCandidate.id);
+      populateDrawerForm(newCandidate);
+      setEditingPositionId(null);
+    };
+
+    if (drawerFormDirty) {
+      Modal.confirm({
+        title: "Unsaved changes",
+        content: "You have unsaved changes. Discard them?",
+        okText: "Discard",
+        cancelText: "Go back",
+        onOk: proceed,
+      });
+    } else {
+      proceed();
+    }
+  }
+
+  function buildCandidatePayload(values: any) {
+    return {
       first_name: values.first_name,
       last_name: values.last_name,
       slug: values.slug,
@@ -389,6 +498,48 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       fec_candidate_id: values.fec_candidate_id || null,
       govtrack_url: values.govtrack_url || null,
     };
+  }
+
+  async function handleDrawerSave() {
+    try {
+      const values = await drawerForm.validateFields();
+      if (!detailCandidate) return;
+      setDrawerSaving(true);
+
+      const raceId = values.race_id || null;
+      const payload = buildCandidatePayload(values);
+
+      const { error } = await supabase
+        .from("candidates")
+        .update(payload)
+        .eq("id", detailCandidate.id);
+
+      if (error) {
+        messageApi.error(error.message);
+      } else {
+        if (raceId) {
+          await supabase
+            .from("race_candidates")
+            .upsert(
+              { race_id: raceId, candidate_id: detailCandidate.id, status: "announced" as CandidateStatus, is_incumbent: values.is_incumbent ?? false },
+              { onConflict: "race_id,candidate_id" }
+            );
+        }
+        messageApi.success("Candidate updated");
+        setDrawerFormDirty(false);
+        loadCandidates();
+      }
+    } catch {
+      // Validation failed — form shows errors inline
+    } finally {
+      setDrawerSaving(false);
+    }
+  }
+
+  async function handleSave(values: any) {
+    setModalLoading(true);
+    const raceId = values.race_id || null;
+    const payload = buildCandidatePayload(values);
 
     if (editingCandidate) {
       const { error } = await supabase
@@ -445,8 +596,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     } else {
       messageApi.success("Candidate deleted");
       loadCandidates();
-      if (detailCandidate?.id === id) {
-        setDetailCandidate(null);
+      if (detailCandidateId === id) {
+        setSelectedIndex(null);
+        setDetailCandidateId(null);
       }
     }
   }
@@ -742,6 +894,16 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       width: 150,
       responsive: ["lg"] as ("lg")[],
       ellipsis: true,
+      sorter: (a: CandidateRow, b: CandidateRow) =>
+        (a.body_member_title ?? "").localeCompare(b.body_member_title ?? ""),
+      filters: [
+        ...bodyOptions.map((b) => ({ text: b.label, value: b.value })),
+        { text: "None", value: "__none__" },
+      ],
+      onFilter: (value: unknown, record: CandidateRow) => {
+        if (value === "__none__") return !record.body_id;
+        return record.body_id === value;
+      },
       render: (_: any, record: CandidateRow) =>
         record.body_member_title || <Text type="secondary">—</Text>,
     },
@@ -781,6 +943,23 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         record.fec_candidate_id ? (
           <Tooltip title={record.fec_candidate_id}>
             <Tag color="cyan" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>FEC</Tag>
+          </Tooltip>
+        ) : <Text type="secondary" style={{ fontSize: 11 }}>—</Text>,
+    },
+    {
+      title: "GT",
+      key: "govtrack",
+      width: 44,
+      filters: [
+        { text: "Linked", value: true },
+        { text: "No GT", value: false },
+      ],
+      onFilter: (value: unknown, record: CandidateRow) =>
+        (!!record.govtrack_url) === value,
+      render: (_: unknown, record: CandidateRow) =>
+        record.govtrack_url ? (
+          <Tooltip title={record.govtrack_url}>
+            <Tag color="purple" style={{ fontSize: 10, padding: "0 3px", lineHeight: "16px" }}>GT</Tag>
           </Tooltip>
         ) : <Text type="secondary" style={{ fontSize: 11 }}>—</Text>,
     },
@@ -960,6 +1139,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
             selectedRowKeys,
             onChange: setSelectedRowKeys,
             columnWidth: 40,
+          }}
+          onChange={(_pagination, _filters, _sorter, extra) => {
+            setDisplayedCandidates(extra.currentDataSource as CandidateRow[]);
           }}
           style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
           pagination={{ pageSize: 20, showSizeChanger: true }}
@@ -1256,14 +1438,33 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       </Modal>
 
       {/* Detail Drawer */}
+      {/* Detail Drawer with edit form + prev/next navigation */}
       <ResizableDrawer
         title={
           detailCandidate
             ? `${detailCandidate.first_name} ${detailCandidate.last_name}`
             : "Candidate Details"
         }
-        open={!!detailCandidate}
-        onClose={() => { setDetailCandidate(null); setEditingPositionId(null); }}
+        open={selectedIndex !== null}
+        onClose={closeDetailDrawer}
+        extra={
+          <Space.Compact>
+            <Button
+              size="small"
+              icon={<LeftOutlined />}
+              onClick={() => handleNavigate("previous")}
+              disabled={!hasPrevious}
+              title="Previous candidate"
+            />
+            <Button
+              size="small"
+              icon={<RightOutlined />}
+              onClick={() => handleNavigate("next")}
+              disabled={!hasNext}
+              title="Next candidate"
+            />
+          </Space.Compact>
+        }
         defaultWidth={560}
         minWidth={400}
         maxWidth={900}
@@ -1335,15 +1536,207 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               </div>
             </div>
 
-            {detailCandidate.bio && (
-              <p style={{ color: "#666", fontSize: 13, marginBottom: 16 }}>{detailCandidate.bio}</p>
-            )}
-
             <Tabs
               items={[
                 {
+                  key: "details",
+                  label: (
+                    <span>
+                      Details
+                      {drawerFormDirty && <span style={{ color: "#faad14", marginLeft: 4 }}>*</span>}
+                    </span>
+                  ),
+                  children: (
+                    <Form
+                      form={drawerForm}
+                      layout="vertical"
+                      size="small"
+                      onValuesChange={() => setDrawerFormDirty(true)}
+                      onFinish={handleDrawerSave}
+                    >
+                      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12 }}>
+                        <Form.Item
+                          name="first_name"
+                          label="First Name"
+                          rules={[{ required: true, message: "Required" }]}
+                          style={{ flex: 1 }}
+                        >
+                          <Input />
+                        </Form.Item>
+                        <Form.Item
+                          name="last_name"
+                          label="Last Name"
+                          rules={[{ required: true, message: "Required" }]}
+                          style={{ flex: 1 }}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </div>
+
+                      <Form.Item
+                        name="slug"
+                        label={
+                          <span>
+                            Slug{" "}
+                            <Tooltip title="Used in URLs to identify this candidate.">
+                              <InfoCircleOutlined style={{ color: "#999" }} />
+                            </Tooltip>
+                          </span>
+                        }
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Input disabled />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="party"
+                        label="Party"
+                        rules={[{ required: true, message: "Required" }]}
+                      >
+                        <Select options={partyOptions} />
+                      </Form.Item>
+
+                      <Form.Item name="photo_url" label="Photo URL">
+                        <Input
+                          placeholder="https://..."
+                          onChange={(e) => {
+                            setDrawerPhotoPreview(e.target.value);
+                            setDrawerPhotoError(false);
+                          }}
+                        />
+                      </Form.Item>
+                      {drawerPhotoPreview && (
+                        <div
+                          style={{
+                            marginBottom: 16,
+                            border: "1px solid #d9d9d9",
+                            borderRadius: 8,
+                            padding: 8,
+                            textAlign: "center",
+                            background: "#fafafa",
+                          }}
+                        >
+                          {!drawerPhotoError ? (
+                            <img
+                              src={drawerPhotoPreview}
+                              alt="Preview"
+                              style={{ maxWidth: 120, maxHeight: 160, borderRadius: 4 }}
+                              onError={() => setDrawerPhotoError(true)}
+                            />
+                          ) : (
+                            <Text type="secondary">Image failed to load</Text>
+                          )}
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12 }}>
+                        <Form.Item name="website" label="Website" style={{ flex: 1 }}>
+                          <Input placeholder="https://..." />
+                        </Form.Item>
+                        <Form.Item name="twitter" label="Twitter / X" style={{ flex: 1 }}>
+                          <Input placeholder="handle (without @)" />
+                        </Form.Item>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, alignItems: "flex-start" }}>
+                        <Form.Item name="body_id" label="Government Body" style={{ flex: 1 }}>
+                          <Select allowClear placeholder="Select body..." options={bodyOptions} />
+                        </Form.Item>
+                        <Form.Item name="term_start_year" label="Term Start Year" style={{ flex: 1 }}>
+                          <Input type="number" placeholder="e.g., 2021" />
+                        </Form.Item>
+                      </div>
+
+                      <Form.Item name="is_retiring" valuePropName="checked">
+                        <Checkbox>Retiring / Not seeking re-election</Checkbox>
+                      </Form.Item>
+
+                      <Form.Item name="bio" label="Bio">
+                        <TextArea rows={3} placeholder="Brief biography..." />
+                      </Form.Item>
+
+                      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, alignItems: "flex-start" }}>
+                        <Form.Item
+                          name="bioguide_id"
+                          label={
+                            <span>
+                              Bioguide ID{" "}
+                              <Tooltip title="Congressional Biographical Directory ID (e.g., C001035).">
+                                <InfoCircleOutlined style={{ color: "#999" }} />
+                              </Tooltip>
+                            </span>
+                          }
+                          style={{ flex: 1 }}
+                        >
+                          <Input placeholder="e.g., C001035" />
+                        </Form.Item>
+                        <Form.Item
+                          name="fec_candidate_id"
+                          label={
+                            <span>
+                              FEC ID{" "}
+                              <Tooltip title="OpenFEC candidate ID (e.g., S8CA00502).">
+                                <InfoCircleOutlined style={{ color: "#999" }} />
+                              </Tooltip>
+                            </span>
+                          }
+                          style={{ flex: 1 }}
+                        >
+                          <Input placeholder="e.g., S8CA00502" />
+                        </Form.Item>
+                      </div>
+
+                      <Form.Item
+                        name="govtrack_url"
+                        label={
+                          <span>
+                            GovTrack URL{" "}
+                            <Tooltip title="Link to GovTrack.us profile. Shows voting records, bill sponsorships, and more.">
+                              <InfoCircleOutlined style={{ color: "#999" }} />
+                            </Tooltip>
+                          </span>
+                        }
+                      >
+                        <Input placeholder="https://www.govtrack.us/congress/members/..." />
+                      </Form.Item>
+
+                      <Form.Item name="is_incumbent" valuePropName="checked" style={{ marginBottom: 12 }}>
+                        <Checkbox>Incumbent</Checkbox>
+                      </Form.Item>
+
+                      <Form.Item
+                        name="race_id"
+                        label="Race Assignment"
+                        tooltip="Races are auto-filtered based on the candidate's state and role."
+                      >
+                        <Select
+                          showSearch
+                          allowClear
+                          loading={racesLoading}
+                          placeholder="Assign to a race (optional)..."
+                          filterOption={(input, option) =>
+                            !(option as any)?.disabled &&
+                            ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
+                          }
+                          options={detailCandidate ? getSmartRaceOptions(detailCandidate) : raceSelectOptions}
+                        />
+                      </Form.Item>
+
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        icon={<SaveOutlined />}
+                        loading={drawerSaving}
+                        block
+                      >
+                        Save Changes
+                      </Button>
+                    </Form>
+                  ),
+                },
+                {
                   key: "positions",
-                  label: `Policy Positions (${positions.length})`,
+                  label: `Positions (${positions.length})`,
                   children: drawerLoading ? (
                     <Spin />
                   ) : (
@@ -1515,7 +1908,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                 },
                 {
                   key: "races",
-                  label: `Race Assignments (${races.length})`,
+                  label: `Races (${races.length})`,
                   children: drawerLoading ? (
                     <Spin />
                   ) : (
