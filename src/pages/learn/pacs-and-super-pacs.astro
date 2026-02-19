@@ -1,0 +1,473 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="PACs & Super PACs"
+  description="What PACs and super PACs are, how they work, where the money goes, and why campaign finance is one of the most debated topics in American politics."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>PACs &amp; Super PACs</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">PACs &amp; Super PACs</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      What they are, where the money goes, and why campaign finance is one of the most debated topics in American politics.
+    </p>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        If you've ever heard someone say "just follow the money," campaign finance is what they're talking about. Running for office in the United States costs money&mdash;a lot of it. And the organizations that raise and spend that money have names you've probably heard tossed around: PACs, super PACs, dark money groups. But what do those terms actually mean? Here's the plain-English breakdown.
+      </p>
+
+      <!-- WHAT IS A PAC -->
+      <h2 class="text-2xl font-bold">What Is a PAC?</h2>
+      <p class="text-slate-600">
+        A <strong>political action committee (PAC)</strong> is an organization that collects money from individuals and donates it to political candidates, parties, or other committees. PACs have been around since 1944, when the Congress of Industrial Organizations (CIO) created one to raise money for President Roosevelt's re-election.
+      </p>
+      <p class="text-slate-600">
+        PACs are regulated by the <a href="https://www.fec.gov/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Election Commission (FEC)</a> and must follow strict rules:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>Individuals can donate up to <strong>$5,000 per year</strong> to a PAC</li>
+        <li>A PAC can donate up to <strong>$5,000 per candidate per election</strong> (primary and general count separately)</li>
+        <li>A PAC can donate up to <strong>$15,000 per year</strong> to a national party committee</li>
+        <li>All donors and expenditures must be <strong>publicly disclosed</strong> to the FEC</li>
+        <li>Corporations and unions <strong>cannot</strong> donate directly to traditional PACs from their general treasuries</li>
+      </ul>
+      <p class="text-slate-600">
+        Most PACs are created by corporations, trade associations, unions, or issue-advocacy groups. They pool small contributions from members or employees and distribute them to candidates who align with the group's interests. Think of them as a way for like-minded people to combine their political giving into something bigger than any one person could contribute alone.
+      </p>
+
+      <!-- WHAT IS A SUPER PAC -->
+      <h2 class="text-2xl font-bold">What Is a Super PAC?</h2>
+      <p class="text-slate-600">
+        A <strong>super PAC</strong> (officially called an "independent expenditure-only committee") is a newer type of political committee created after two landmark court decisions in 2010:
+        <a href="https://supreme.justia.com/cases/federal/us/558/310/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline"><em>Citizens United v. FEC</em></a>
+        and a D.C. Circuit Court case called
+        <a href="https://law.justia.com/cases/federal/appellate-courts/cadc/08-5223/08-5223-2010-03-26-1.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline"><em>SpeechNow.org v. FEC</em></a>.
+      </p>
+      <p class="text-slate-600">
+        Super PACs follow very different rules from traditional PACs:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>They can raise <strong>unlimited amounts</strong> from individuals, corporations, unions, and other organizations</li>
+        <li>They can spend <strong>unlimited amounts</strong> on ads, mailers, and other political activity</li>
+        <li>They <strong>cannot</strong> donate directly to a candidate or coordinate with a candidate's campaign</li>
+        <li>All donors and spending must be <strong>publicly disclosed</strong> to the FEC</li>
+      </ul>
+      <p class="text-slate-600">
+        The key distinction: a super PAC can run a $50 million ad campaign supporting (or attacking) a candidate, but it's not allowed to work <em>with</em> that candidate on the messaging, timing, or strategy. That separation&mdash;called the "no coordination" rule&mdash;is central to the legal framework. It's also one of the most debated aspects of the system, which we'll get to.
+      </p>
+
+      <!-- SIDE BY SIDE -->
+      <h2 class="text-2xl font-bold">PAC vs. Super PAC: What's the Difference?</h2>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold"></th>
+              <th class="px-4 py-3 font-semibold">Traditional PAC</th>
+              <th class="px-4 py-3 font-semibold">Super PAC</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Contribution limits</td>
+              <td class="px-4 py-3 text-slate-600">$5,000/year per individual</td>
+              <td class="px-4 py-3 text-slate-600">No limits</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Who can donate</td>
+              <td class="px-4 py-3 text-slate-600">Individuals (no corporate/union treasuries)</td>
+              <td class="px-4 py-3 text-slate-600">Individuals, corporations, unions, other groups</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Can donate to candidates</td>
+              <td class="px-4 py-3 text-slate-600">Yes (up to $5,000 per election)</td>
+              <td class="px-4 py-3 text-slate-600">No</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Can coordinate with campaigns</td>
+              <td class="px-4 py-3 text-slate-600">Yes</td>
+              <td class="px-4 py-3 text-slate-600">No</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">Spending limits</td>
+              <td class="px-4 py-3 text-slate-600">Limited (on direct contributions)</td>
+              <td class="px-4 py-3 text-slate-600">Unlimited (on independent spending)</td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">Disclosure required</td>
+              <td class="px-4 py-3 text-slate-600">Yes</td>
+              <td class="px-4 py-3 text-slate-600">Yes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- WHAT ABOUT DARK MONEY -->
+      <h2 class="text-2xl font-bold">What About "Dark Money"?</h2>
+      <p class="text-slate-600">
+        You may also hear the term <strong>dark money</strong>. This refers to political spending by organizations that are <em>not</em> required to disclose their donors. Dark money doesn't come from PACs or super PACs directly (both must disclose). It typically flows through two types of tax-exempt organizations:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">501(c)(4) Social Welfare Groups</h3>
+          <p class="text-sm text-slate-600">
+            Nonprofits organized under section 501(c)(4) of the tax code can engage in political activity as long as it's not their "primary purpose." They do <strong>not</strong> have to disclose their donors to the public. Examples have existed across the political spectrum, from Crossroads GPS (conservative) to Priorities USA (liberal).
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">501(c)(6) Trade Associations</h3>
+          <p class="text-sm text-slate-600">
+            Business leagues and trade associations (like the U.S. Chamber of Commerce) can also spend on political ads without disclosing individual donors. These groups represent industry interests and can run issue ads or direct advocacy.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Here's how it works: a donor gives money to a 501(c)(4), which doesn't disclose its donors. That group then donates to a super PAC. The super PAC discloses that the 501(c)(4) was its donor&mdash;but the original individual who funded the 501(c)(4) remains anonymous. This is what people mean by "dark money": the money is technically disclosed at one level, but the original source is hidden.
+      </p>
+
+      <!-- HOW CITIZENS UNITED CHANGED EVERYTHING -->
+      <h2 class="text-2xl font-bold">How Citizens United Changed the Landscape</h2>
+      <p class="text-slate-600">
+        The 2010 Supreme Court decision in <em>Citizens United v. FEC</em> is the single most important event in modern campaign finance. Here's what happened:
+      </p>
+      <p class="text-slate-600">
+        A nonprofit called Citizens United wanted to air a documentary critical of Hillary Clinton during the 2008 primary season. Federal law prohibited corporations and unions from spending on "electioneering communications" close to an election. Citizens United argued this violated the First Amendment.
+      </p>
+      <p class="text-slate-600">
+        The Supreme Court, in a 5&ndash;4 decision, agreed. The majority held that the First Amendment protects political speech regardless of whether the speaker is an individual, a corporation, or a union. The ruling didn't change contribution limits to candidates, but it removed limits on <em>independent</em> political spending by organizations.
+      </p>
+
+      <div class="not-prose bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h3 class="font-semibold text-navy mb-3">The Two Sides of the Ruling</h3>
+        <div class="space-y-3 text-sm text-slate-600">
+          <div class="border-l-4 border-dem pl-4">
+            <p><strong>The majority opinion (Kennedy, writing for 5):</strong> "If the First Amendment has any force, it prohibits Congress from fining or jailing citizens, or associations of citizens, for simply engaging in political speech." The Court argued that restricting independent spending was a form of censorship and that transparency (disclosure) was a sufficient safeguard.</p>
+          </div>
+          <div class="border-l-4 border-gop pl-4">
+            <p><strong>The dissent (Stevens, writing for 4):</strong> "A democracy cannot function effectively when its constituent members believe laws are being bought and sold." The dissent warned that unlimited corporate spending would create the appearance&mdash;or reality&mdash;of corruption and that the distinction between corporations and individuals was constitutionally meaningful.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        In the years since, the amount of outside spending in elections has increased dramatically. According to
+        <a href="https://www.opensecrets.org/outside-spending" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets</a>,
+        outside spending in federal elections went from about $338 million in 2008 (pre-Citizens United) to over $2.6 billion in 2024.
+      </p>
+
+      <!-- WHAT IT LOOKS LIKE IN PRACTICE -->
+      <h2 class="text-2xl font-bold">What Does This Look Like in Practice?</h2>
+      <p class="text-slate-600">
+        If you've ever watched TV during election season and seen a political ad that ends with something like <em>"Paid for by Americans for a Better Tomorrow"</em> instead of a candidate's name, you've seen PAC and super PAC money at work.
+      </p>
+      <p class="text-slate-600">
+        Here's what the flow typically looks like:
+      </p>
+
+      <div class="not-prose">
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+            <div>
+              <p class="font-semibold text-navy">A donor writes a check</p>
+              <p class="text-sm text-slate-600">This could be an individual, a corporation, or a union. The amount could be $50 or $50 million, depending on the type of organization receiving it.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+            <div>
+              <p class="font-semibold text-navy">The money goes to a PAC, super PAC, or dark money group</p>
+              <p class="text-sm text-slate-600">Each has different rules about how the money can be used and whether the donor's identity is public.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+            <div>
+              <p class="font-semibold text-navy">The organization spends the money</p>
+              <p class="text-sm text-slate-600">This might mean TV ads, digital campaigns, mailers, canvassing operations, or opposition research. Super PACs and dark money groups can't hand the money to a candidate&mdash;they spend it independently.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">4</div>
+            <div>
+              <p class="font-semibold text-navy">Voters see the result</p>
+              <p class="text-sm text-slate-600">The ad airs. The mailer arrives. The content influences how voters think about a candidate or issue&mdash;for better or worse.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BY THE NUMBERS -->
+      <h2 class="text-2xl font-bold">The Numbers</h2>
+      <p class="text-slate-600">
+        The scale of outside spending has grown significantly since 2010. Here are some figures from
+        <a href="https://www.opensecrets.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets</a>:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">$2.6B+</div>
+          <p class="text-sm text-slate-600 mt-1">outside spending in the <strong>2024</strong> federal election cycle</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">2,400+</div>
+          <p class="text-sm text-slate-600 mt-1">super PACs registered with the FEC as of 2024</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">$1B+</div>
+          <p class="text-sm text-slate-600 mt-1">estimated <strong>dark money</strong> spending in 2024 from groups that don't disclose donors</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-navy">$338M</div>
+          <p class="text-sm text-slate-600 mt-1">outside spending in <strong>2008</strong>&mdash;before Citizens United</p>
+        </div>
+      </div>
+
+      <!-- THE COORDINATION QUESTION -->
+      <h2 class="text-2xl font-bold">The Coordination Question</h2>
+      <p class="text-slate-600">
+        The legal justification for allowing unlimited super PAC spending rests on one crucial assumption: that the spending is <strong>truly independent</strong> from the candidate it supports. The Supreme Court reasoned that independent expenditures don't create corruption or its appearance because the candidate has no control over the money.
+      </p>
+      <p class="text-slate-600">
+        In practice, this separation has been questioned by observers across the political spectrum. Some patterns that have raised eyebrows:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li>Super PACs run by a candidate's former staffers or close associates</li>
+        <li>Candidates appearing at super PAC fundraising events (legal as long as they don't ask for more than the individual contribution limit)</li>
+        <li>"Single-candidate" super PACs that exist solely to support one specific person</li>
+        <li>Candidates publicly signaling their ad strategy, knowing supportive super PACs are watching</li>
+      </ul>
+      <p class="text-slate-600">
+        The FEC, which is tasked with enforcing coordination rules, is a six-member commission evenly split between three Democrats and three Republicans. It frequently deadlocks on enforcement actions, which critics say leaves the coordination rules under-enforced. Defenders of the current structure say the bipartisan split prevents either party from weaponizing enforcement.
+      </p>
+
+      <!-- NOTABLE EXAMPLES -->
+      <h2 class="text-2xl font-bold">Notable Examples</h2>
+      <p class="text-slate-600">
+        PACs and super PACs operate across the entire political spectrum. Here are a few high-profile examples that illustrate how the system works in practice:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Swift Boat Veterans for Truth</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2004</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            This 527 group (a predecessor to super PACs) ran ads questioning John Kerry's military service during the presidential race. The ads were credited with significantly damaging Kerry's campaign. The term "swiftboating" entered the political lexicon, referring to an unfair or misleading attack. The episode highlighted how outside groups could shape a race without any candidate involvement.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Priorities USA Action</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2012&ndash;present</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            One of the largest Democratic super PACs, it was instrumental in supporting Barack Obama's 2012 re-election and Hillary Clinton's 2016 campaign. It spent over $133 million in 2016 alone, mostly on TV ads in swing states.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">Senate Leadership Fund / Congressional Leadership Fund</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">Ongoing</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            Super PACs aligned with Republican congressional leadership. The Senate Leadership Fund spent over $230 million in the 2022 cycle. These groups illustrate how party-aligned super PACs can function as a parallel campaign infrastructure.
+          </p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-5 border border-slate-200">
+          <div class="flex items-start justify-between flex-wrap gap-2">
+            <h4 class="font-bold text-navy">AIPAC's United Democracy Project</h4>
+            <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">2022&ndash;present</span>
+          </div>
+          <p class="text-sm text-slate-600 mt-2">
+            The American Israel Public Affairs Committee launched its first super PAC in 2022 and has since become one of the biggest spenders in congressional primaries. In 2024, it spent tens of millions opposing specific Democratic primary candidates, drawing attention to how super PACs can influence not just general elections but which candidates make it onto the ballot in the first place.
+          </p>
+        </div>
+      </div>
+
+      <!-- WHEN HAS IT GONE WRONG -->
+      <h2 class="text-2xl font-bold">When Has Campaign Finance Gone Wrong?</h2>
+      <p class="text-slate-600">
+        The history of campaign finance is also a history of scandal. Some of the most significant:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">Watergate (1972)</h3>
+          <p class="text-sm text-slate-600">
+            The break-in at the Democratic National Committee headquarters was funded by secret, unreported campaign contributions. The ensuing scandal led to President Nixon's resignation and the passage of the
+            <a href="https://www.fec.gov/introduction-campaign-finance/understanding-ways-support-federal-candidates/presidential-elections/public-funding-presidential-elections/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Election Campaign Act amendments of 1974</a>,
+            which created the FEC and established the modern system of contribution limits and disclosure.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">The Keating Five (1989)</h3>
+          <p class="text-sm text-slate-600">
+            Five U.S. senators were investigated for intervening with federal regulators on behalf of savings-and-loan executive Charles Keating, who had contributed $1.3 million to their campaigns and causes. The scandal intensified calls for campaign finance reform and led to the Senate Ethics Committee reprimanding one senator and criticizing four others.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">Jack Abramoff (2006)</h3>
+          <p class="text-sm text-slate-600">
+            The lobbyist pled guilty to bribing public officials, tax evasion, and fraud. Over 20 people were convicted, including a congressman and several senior congressional aides. The case exposed how campaign contributions and lobbying could intersect in corrupt ways.
+          </p>
+        </div>
+        <div class="border-l-4 border-tossup pl-4">
+          <h3 class="font-bold text-navy">Crypto Super PAC Spending (2024)</h3>
+          <p class="text-sm text-slate-600">
+            The cryptocurrency industry's super PAC Fairshake spent over $130 million on the 2024 elections, becoming one of the biggest outside spenders. Critics raised concerns about a single industry using concentrated wealth to influence which candidates win. Supporters argued it was democratic participation in an industry-relevant policy debate.
+          </p>
+        </div>
+      </div>
+
+      <!-- THE DEBATE -->
+      <h2 class="text-2xl font-bold">The Arguments For and Against</h2>
+      <p class="text-slate-600">
+        Campaign finance is one of those rare issues where you'll find passionate, good-faith disagreement on both sides. Here are the main arguments:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-green-50 rounded-xl p-6 border border-green-200">
+          <h3 class="text-lg font-bold text-navy mb-3">Arguments for the current system</h3>
+          <ul class="space-y-3 text-sm text-slate-700">
+            <li><strong>Free speech.</strong> Political spending is a form of protected speech under the First Amendment. Limiting it is limiting expression.</li>
+            <li><strong>More voices.</strong> PACs and super PACs allow groups of citizens to amplify their message, including unions, advocacy groups, and grassroots organizations.</li>
+            <li><strong>Transparency.</strong> PACs and super PACs must disclose their donors and spending. The public can see who is funding what.</li>
+            <li><strong>Counterbalance.</strong> Outside spending can check the power of incumbents, who already have name recognition and institutional advantages.</li>
+          </ul>
+        </div>
+        <div class="bg-red-50 rounded-xl p-6 border border-red-200">
+          <h3 class="text-lg font-bold text-navy mb-3">Arguments against the current system</h3>
+          <ul class="space-y-3 text-sm text-slate-700">
+            <li><strong>Unequal influence.</strong> When a single donor can spend $50 million, their voice is louder than millions of ordinary voters combined.</li>
+            <li><strong>Appearance of corruption.</strong> Even if explicit quid pro quo is rare, the perception that politicians serve donors first erodes public trust.</li>
+            <li><strong>Dark money loopholes.</strong> The 501(c)(4) pipeline means voters often can't trace the real source of political spending.</li>
+            <li><strong>Coordination fiction.</strong> Critics argue the "independence" between super PACs and campaigns is often a legal fiction, not a practical reality.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- WHAT ARE THE ALTERNATIVES -->
+      <h2 class="text-2xl font-bold">What Are the Alternatives?</h2>
+      <p class="text-slate-600">
+        Reformers have proposed a range of alternatives to the current system. Some have already been tried at the state or local level:
+      </p>
+
+      <div class="not-prose space-y-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Public Financing / Matching Funds</h3>
+          <p class="text-sm text-slate-600">
+            The government matches small donations at a multiplied rate (e.g., 6:1). This amplifies small donors and incentivizes candidates to seek broad grassroots support instead of courting large donors. <strong>New York City</strong> has used a matching funds system since 1988, and
+            <a href="https://www.nyccfb.info/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">New York State</a>
+            launched a statewide version in 2024.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Democracy Vouchers</h3>
+          <p class="text-sm text-slate-600">
+            Seattle pioneered this in 2017: every resident receives vouchers (currently $100 in value) that they can assign to qualifying candidates. The program is funded by a property tax. The idea is to democratize campaign funding by giving every voter, regardless of income, an equal ability to fund candidates.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Disclosure Requirements</h3>
+          <p class="text-sm text-slate-600">
+            The <a href="https://www.congress.gov/bill/118th-congress/house-bill/11/text" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">DISCLOSE Act</a>, introduced repeatedly in Congress but never passed, would require all organizations spending on elections to disclose donors who give $10,000 or more. This wouldn't change spending limits but would close the dark money loophole.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Constitutional Amendment</h3>
+          <p class="text-sm text-slate-600">
+            Because Citizens United was a constitutional ruling, only a constitutional amendment or a future Supreme Court reversal could fully overturn it. Multiple amendments have been proposed (including one that passed the Senate Judiciary Committee in 2014) but none have come close to the two-thirds vote needed in both chambers, plus ratification by 38 states.
+          </p>
+        </div>
+      </div>
+
+      <!-- WHY IT MATTERS -->
+      <h2 class="text-2xl font-bold">Why This Matters for 2026</h2>
+      <p class="text-slate-600">
+        Midterm elections are where PAC and super PAC money often has the <em>biggest</em> impact. Why? Lower turnout. In a presidential year, 150+ million people vote. In a midterm, that number drops significantly. When fewer people vote, each dollar of advertising, outreach, and mobilization carries more weight.
+      </p>
+      <p class="text-slate-600">
+        In 2026, outside groups will spend hundreds of millions of dollars trying to influence who wins
+        <a href="/learn/what-are-midterms" class="text-dem hover:underline">Senate, House, and gubernatorial races</a>.
+        Some of that spending will come from groups whose donors you can look up. Some will come from groups where the original funders are anonymous.
+      </p>
+      <p class="text-slate-600">
+        Regardless of where you fall in the campaign finance debate, understanding how the money flows helps you evaluate the messages you see. When you see a political ad, you can check who paid for it. When a candidate takes a policy position, you can look at who's funding their campaign&mdash;and who's spending independently on their behalf.
+      </p>
+      <p class="text-slate-600">
+        The tools to do this are free and public:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li><a href="https://www.opensecrets.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets.org</a> &mdash; Track campaign contributions, outside spending, and lobbying</li>
+        <li><a href="https://www.fec.gov/data/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FEC.gov</a> &mdash; Official filings from candidates, PACs, and parties</li>
+        <li><a href="https://www.followthemoney.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FollowTheMoney.org</a> &mdash; State-level campaign finance data</li>
+      </ul>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.fec.gov/introduction-campaign-finance/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Election Commission, "Introduction to Campaign Finance"</a>
+        </li>
+        <li>
+          <a href="https://supreme.justia.com/cases/federal/us/558/310/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Justia, <em>Citizens United v. Federal Election Commission</em> (2010)</a>
+        </li>
+        <li>
+          <a href="https://law.justia.com/cases/federal/appellate-courts/cadc/08-5223/08-5223-2010-03-26-1.html" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Justia, <em>SpeechNow.org v. FEC</em> (D.C. Circuit, 2010)</a>
+        </li>
+        <li>
+          <a href="https://www.opensecrets.org/outside-spending" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets, Outside Spending Data</a>
+        </li>
+        <li>
+          <a href="https://www.opensecrets.org/dark-money" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets, "Dark Money Basics"</a>
+        </li>
+        <li>
+          <a href="https://crsreports.congress.gov/product/pdf/R/R44232" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congressional Research Service, "The State of Campaign Finance Policy" (R44232)</a>
+        </li>
+        <li>
+          <a href="https://campaignlegal.org/issues/campaign-finance" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Campaign Legal Center, Campaign Finance Resources</a>
+        </li>
+        <li>
+          <a href="https://www.brennancenter.org/issues/reform-money-politics" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Brennan Center for Justice, "Reform Money in Politics"</a>
+        </li>
+        <li>
+          <a href="https://www.nyccfb.info/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NYC Campaign Finance Board (Matching Funds Program)</a>
+        </li>
+        <li>
+          <a href="https://www.seattle.gov/democracyvoucher" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Seattle Democracy Voucher Program</a>
+        </li>
+        <li>
+          <a href="https://www.archives.gov/legislative/features/keating-five" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives, The Keating Five</a>
+        </li>
+        <li>
+          <a href="https://www.congress.gov/bill/118th-congress/house-bill/11/text" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov, DISCLOSE Act (H.R. 11)</a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Want to follow the money in 2026? See
+          <a href="/whos-running" class="underline">who's running</a>, learn about
+          <a href="/learn/bills-and-votes" class="underline">how bills and votes work</a>, or explore the
+          <a href="/map" class="underline">interactive map</a>
+          to preview competitive races.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

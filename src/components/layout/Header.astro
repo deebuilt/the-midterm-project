@@ -5,7 +5,7 @@ const primaryLinks = [
   { href: "/", label: "Home" },
   { href: "/reelect-or-reject", label: "Re-elect or Reject" },
   { href: "/flip-the-house", label: "Flip the House" },
-  { href: "/meet", label: "Meet the Candidates" },
+  { href: "/meet", label: "Candidates" },
   { href: "/whos-running", label: "Who's Running" },
   { href: "/map", label: "Map" },
 ];
@@ -37,6 +37,7 @@ const learnGroups = [
       { href: "/learn/special-elections", label: "Special Elections" },
       { href: "/learn/bills-and-votes", label: "How Bills & Votes Work" },
       { href: "/learn/career-ladder", label: "The Political Career Ladder" },
+      { href: "/learn/pacs-and-super-pacs", label: "PACs & Super PACs" },
     ],
   },
   {
@@ -97,34 +98,59 @@ const isGroupActive = (links: { href: string }[]) =>
         </a>
       </li>
 
-      <!-- Primary nav links (before dropdowns) -->
-      {primaryLinks.filter((l) => l.href !== "/").map((link) => (
+      <!-- Featured accordion pill -->
+      <li class="relative group/feat">
+        <div
+          class:list={[
+            "px-3 py-1.5 rounded-t-md border border-b-0 border-white/15 bg-white/10 backdrop-blur-sm font-semibold cursor-default whitespace-nowrap",
+            (currentPath === "/reelect-or-reject" || currentPath.startsWith("/reelect-or-reject/") || currentPath === "/flip-the-house" || currentPath.startsWith("/flip-the-house/"))
+              ? "text-tossup bg-white/15"
+              : "text-white",
+          ]}
+        >
+          <span class="text-tossup mr-1.5 text-xs">&#9733;</span>Get Active
+          <span class="text-[10px] text-white/40 ml-1 leading-none">&#9662;</span>
+        </div>
+        <div class="hidden group-hover/feat:block absolute left-0 top-full bg-navy border border-white/10 rounded-lg py-1 min-w-[200px] shadow-lg z-30">
+          <a
+            href="/reelect-or-reject"
+            class:list={[
+              "block px-4 py-2.5 text-sm font-semibold hover:text-tossup hover:bg-white/5 transition-colors",
+              currentPath === "/reelect-or-reject" || currentPath.startsWith("/reelect-or-reject/")
+                ? "text-tossup"
+                : "text-white",
+            ]}
+          >
+            <span class="text-tossup mr-1.5 text-xs">&#9733;</span>Re-elect or Reject
+          </a>
+          <a
+            href="/flip-the-house"
+            class:list={[
+              "block px-4 py-2.5 text-sm font-semibold hover:text-tossup hover:bg-white/5 transition-colors",
+              currentPath === "/flip-the-house" || currentPath.startsWith("/flip-the-house/")
+                ? "text-tossup"
+                : "text-white",
+            ]}
+          >
+            <span class="text-tossup mr-1.5 text-xs">&#9733;</span>Flip the House
+          </a>
+        </div>
+      </li>
+
+      <!-- Regular nav links -->
+      {primaryLinks.filter((l) => l.href !== "/" && l.href !== "/reelect-or-reject" && l.href !== "/flip-the-house").map((link) => (
         <li>
-          {(link.href === "/reelect-or-reject" || link.href === "/flip-the-house" || link.href === "/meet") ? (
-            <a
-              href={link.href}
-              class:list={[
-                "px-3 py-1.5 rounded-t-md border border-b-0 border-white/15 bg-white/10 backdrop-blur-sm font-semibold hover:bg-white/15 transition-all",
-                currentPath === link.href || currentPath.startsWith(link.href + "/")
-                  ? "text-tossup bg-white/15"
-                  : "text-white",
-              ]}
-            >
-              <span class="text-tossup mr-1.5 text-xs">&#9733;</span>{link.label}
-            </a>
-          ) : (
-            <a
-              href={link.href}
-              class:list={[
-                "hover:text-tossup transition-colors",
-                currentPath === link.href || currentPath.startsWith(link.href + "/")
-                  ? "text-tossup"
-                  : "text-white/80",
-              ]}
-            >
-              {link.label}
-            </a>
-          )}
+          <a
+            href={link.href}
+            class:list={[
+              "hover:text-tossup transition-colors",
+              currentPath === link.href || currentPath.startsWith(link.href + "/")
+                ? "text-tossup"
+                : "text-white/80",
+            ]}
+          >
+            {link.label}
+          </a>
         </li>
       ))}
 
@@ -244,7 +270,7 @@ const isGroupActive = (links: { href: string }[]) =>
     {/* Primary links */}
     {primaryLinks.map((link) => (
       <li>
-        {(link.href === "/reelect-or-reject" || link.href === "/flip-the-house" || link.href === "/meet") ? (
+        {(link.href === "/reelect-or-reject" || link.href === "/flip-the-house") ? (
           <a
             href={link.href}
             class:list={[
