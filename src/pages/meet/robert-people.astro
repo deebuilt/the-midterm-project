@@ -1,0 +1,274 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { interviews, partyColor, formatMoney } from "../../data/interviews";
+
+const interview = interviews.find((i) => i.slug === "robert-people")!;
+const colors = partyColor(interview.party);
+---
+
+<Layout
+  title={`${interview.name} — Meet the Candidates`}
+  description={interview.teaser}
+>
+  <article class="max-w-3xl mx-auto py-16 px-4">
+    <!-- Breadcrumb -->
+    <p class="text-sm text-slate-400 mb-6">
+      <a href="/meet" class="hover:text-slate-600 transition-colors">Meet the Candidates</a>
+      <span class="mx-1">/</span>
+      {interview.name}
+    </p>
+
+    <!-- Candidate Header -->
+    <div class="flex flex-col sm:flex-row gap-6 mb-8">
+      {interview.photo ? (
+        <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
+          <img
+            src={interview.photo}
+            alt={interview.name}
+            class="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-xl bg-gradient-to-br from-navy to-slate-700 flex items-center justify-center flex-shrink-0">
+          <span class="text-white/60 text-3xl font-bold">
+            {interview.name.split(" ").map((w) => w[0]).join("")}
+          </span>
+        </div>
+      )}
+
+      <div class="flex-1">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">{interview.name}</h1>
+
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class={`text-xs font-bold px-2 py-0.5 rounded ${colors.badge}`}>
+            {interview.party}
+          </span>
+          <span class="text-sm text-slate-500">
+            Running for {interview.body} &middot;{" "}
+            {interview.body === "House" && interview.district
+              ? `${interview.state} District ${interview.district}`
+              : interview.state}
+          </span>
+        </div>
+
+        <!-- Social / External Links -->
+        <div class="flex flex-wrap gap-3 text-sm">
+          {interview.links.website && (
+            <a
+              href={interview.links.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-dem hover:underline"
+            >
+              Website
+            </a>
+          )}
+          {interview.links.tiktok && (
+            <a
+              href={interview.links.tiktok}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-slate-500 hover:text-slate-700"
+            >
+              TikTok
+            </a>
+          )}
+          {interview.links.instagram && (
+            <a
+              href={interview.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-slate-500 hover:text-slate-700"
+            >
+              Instagram
+            </a>
+          )}
+          {interview.links.twitter && (
+            <a
+              href={interview.links.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-slate-500 hover:text-slate-700"
+            >
+              X / Twitter
+            </a>
+          )}
+          {interview.links.fec && (
+            <a
+              href={interview.links.fec}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-slate-500 hover:text-slate-700"
+            >
+              FEC Filing
+            </a>
+          )}
+          {interview.links.ballotpedia && (
+            <a
+              href={interview.links.ballotpedia}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-slate-500 hover:text-slate-700"
+            >
+              Ballotpedia
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Fundraising Snapshot -->
+    {interview.fundraising && (
+      <div class="bg-slate-50 rounded-xl p-6 mb-8">
+        <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-3">
+          Fundraising Snapshot
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+          <div>
+            <p class="text-2xl font-bold text-slate-800">
+              {formatMoney(interview.fundraising.totalRaised)}
+            </p>
+            <p class="text-xs text-slate-500">Total Raised</p>
+          </div>
+          {interview.fundraising.averageDonation && (
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                ${interview.fundraising.averageDonation}
+              </p>
+              <p class="text-xs text-slate-500">Avg. Donation</p>
+            </div>
+          )}
+          {interview.fundraising.numberOfDonors && (
+            <div>
+              <p class="text-2xl font-bold text-slate-800">
+                {interview.fundraising.numberOfDonors.toLocaleString()}
+              </p>
+              <p class="text-xs text-slate-500">Individual Donors</p>
+            </div>
+          )}
+        </div>
+        <p class="text-[10px] text-slate-400 mt-2 text-center">
+          As of{" "}
+          {new Date(interview.fundraising.asOfDate).toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+    )}
+
+    <!-- Angle / Theme -->
+    <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-4 mb-8">
+      <p class="text-sm text-slate-700">
+        <span class="font-semibold">The angle:</span> {interview.angle}
+      </p>
+    </div>
+
+    <!-- Interview Content -->
+    <div class="prose prose-slate max-w-none">
+      <p class="text-sm text-slate-400 italic">
+        Published{" "}
+        {new Date(interview.publishedDate).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })}
+      </p>
+
+      <!--
+        INTERVIEW CONTENT GOES HERE
+        Write in Q&A format using <h2> for questions and <p> for answers.
+        This section uses Tailwind's prose styling for clean typography.
+      -->
+
+      <h2>Coming Soon</h2>
+      <p>
+        This interview is in the works. We're reaching out to {interview.name} and
+        will publish the full conversation here once it's ready.
+      </p>
+
+      <!--
+        Example Q&A format for when the interview is ready:
+
+        <h2>Why are you running for Congress?</h2>
+        <p>Robert's answer goes here...</p>
+
+        <h2>You've raised $X without taking corporate PAC money. How?</h2>
+        <p>Answer about small-dollar fundraising...</p>
+
+        <h2>What do you say to voters who judge candidates by how much money they've raised?</h2>
+        <p>Answer about the big-money red flag angle...</p>
+      -->
+
+      <!-- Embedded Media Section -->
+      <!--
+        When ready, paste a TikTok embed here:
+
+        <div class="not-prose my-8">
+          <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-3">
+            On TikTok
+          </h2>
+          <blockquote
+            class="tiktok-embed"
+            cite="https://www.tiktok.com/@username/video/1234567890"
+            data-video-id="1234567890"
+          >
+          </blockquote>
+          <script async src="https://www.tiktok.com/embed.js"></script>
+        </div>
+      -->
+    </div>
+
+    <!-- Share CTA -->
+    <div class="border-t border-slate-200 mt-12 pt-8">
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 text-center">
+        <p class="font-bold text-slate-800 mb-2">Know this candidate?</p>
+        <p class="text-sm text-slate-600 mb-4">
+          Share this interview to help voters in {interview.state} learn about
+          who's on their ballot.
+        </p>
+        <button
+          id="share-btn"
+          class="inline-flex items-center gap-2 bg-navy text-white font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+          Share this interview
+        </button>
+      </div>
+
+      <div class="mt-6 text-center">
+        <a href="/meet" class="text-dem hover:underline text-sm font-medium">
+          &larr; All interviews
+        </a>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<script>
+  const shareBtn = document.getElementById("share-btn");
+  shareBtn?.addEventListener("click", async () => {
+    const shareData = {
+      title: document.title,
+      text: "Check out this candidate interview on The Midterm Project",
+      url: window.location.href,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled share
+      }
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      if (shareBtn) {
+        shareBtn.textContent = "Link copied!";
+        setTimeout(() => {
+          shareBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg> Share this interview`;
+        }, 2000);
+      }
+    }
+  });
+</script>

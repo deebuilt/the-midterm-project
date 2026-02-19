@@ -1,0 +1,160 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { interviews, partyColor } from "../../data/interviews";
+
+const published = interviews.filter((i) => i.published);
+---
+
+<Layout
+  title="Meet the Candidates"
+  description="Real conversations with real people running for Congress in 2026. No PAC money, no talking points — just candidates telling you who they are and why they're running."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Meet the Candidates</h1>
+    <p class="text-lg text-slate-500 mb-2">
+      We talked to them so you don't have to.
+    </p>
+    <p class="text-slate-600 leading-relaxed mb-10">
+      Real conversations with real people running for Congress. No PAC money,
+      no talking points&mdash;just candidates telling you who they are and why
+      they're running.
+    </p>
+
+    {published.length === 0 ? (
+      <!-- Coming soon state -->
+      <div class="text-center py-12">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-tossup/10 flex items-center justify-center">
+          <svg class="w-10 h-10 text-tossup" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-navy mb-2">Coming Soon</h2>
+        <p class="text-slate-500 max-w-sm mx-auto">
+          We're reaching out to candidates running in 2026. Our first interviews are in the works&mdash;check back soon.
+        </p>
+      </div>
+    ) : published.length === 1 ? (
+      <div class="max-w-md mx-auto">
+        {published.map((iv) => {
+          const colors = partyColor(iv.party);
+          return (
+            <a
+              href={`/meet/${iv.slug}`}
+              class="group block bg-white rounded-xl border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all overflow-hidden"
+            >
+              {iv.photo ? (
+                <div class="aspect-[16/9] overflow-hidden bg-slate-100">
+                  <img
+                    src={iv.photo}
+                    alt={iv.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ) : (
+                <div class="aspect-[16/9] bg-gradient-to-br from-navy to-slate-700 flex items-center justify-center">
+                  <span class="text-white/60 text-5xl font-bold">
+                    {iv.name.split(" ").map((w) => w[0]).join("")}
+                  </span>
+                </div>
+              )}
+
+              <div class="p-5">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class={`text-xs font-bold px-2 py-0.5 rounded ${colors.badge}`}>
+                    {iv.party}
+                  </span>
+                  <span class="text-xs text-slate-400">
+                    {iv.body === "House" && iv.district
+                      ? `${iv.stateAbbr}-${iv.district}`
+                      : `${iv.stateAbbr} · ${iv.body}`}
+                  </span>
+                </div>
+                <h2 class="text-xl font-bold text-navy group-hover:text-dem transition-colors mb-2">
+                  {iv.name}
+                </h2>
+                <p class="text-sm text-slate-500 mb-4">{iv.teaser}</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-400">
+                    {new Date(iv.publishedDate).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <span class="text-sm font-medium text-dem group-hover:underline">
+                    Read interview &rarr;
+                  </span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {published.map((iv) => {
+          const colors = partyColor(iv.party);
+          return (
+            <a
+              href={`/meet/${iv.slug}`}
+              class="group block bg-white rounded-xl border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all overflow-hidden"
+            >
+              {iv.photo ? (
+                <div class="aspect-[16/9] overflow-hidden bg-slate-100">
+                  <img
+                    src={iv.photo}
+                    alt={iv.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ) : (
+                <div class="aspect-[16/9] bg-gradient-to-br from-navy to-slate-700 flex items-center justify-center">
+                  <span class="text-white/60 text-4xl font-bold">
+                    {iv.name.split(" ").map((w) => w[0]).join("")}
+                  </span>
+                </div>
+              )}
+
+              <div class="p-5">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class={`text-xs font-bold px-2 py-0.5 rounded ${colors.badge}`}>
+                    {iv.party}
+                  </span>
+                  <span class="text-xs text-slate-400">
+                    {iv.body === "House" && iv.district
+                      ? `${iv.stateAbbr}-${iv.district}`
+                      : `${iv.stateAbbr} · ${iv.body}`}
+                  </span>
+                </div>
+                <h2 class="text-lg font-bold text-navy group-hover:text-dem transition-colors mb-1">
+                  {iv.name}
+                </h2>
+                <p class="text-sm text-slate-500 mb-3">{iv.teaser}</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-400">
+                    {new Date(iv.publishedDate).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <span class="text-sm font-medium text-dem group-hover:underline">
+                    Read interview &rarr;
+                  </span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+
+    {published.length > 0 && published.length < 3 && (
+      <div class="mt-10 text-center">
+        <p class="text-sm text-slate-400">
+          More interviews coming soon.
+        </p>
+      </div>
+    )}
+  </section>
+</Layout>
