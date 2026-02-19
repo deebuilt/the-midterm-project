@@ -109,6 +109,7 @@ interface PreviewCandidate {
   slug: string;
   isIncumbent: boolean;
   existsInFilings: boolean;
+  existsInCandidates: boolean;
   existingFilingId: number | null;
   selected: boolean;
   financials: { raised: number; spent: number; cash: number } | null;
@@ -1425,20 +1426,32 @@ function SyncTab({
         return;
       }
 
-      const { data: existingFilings } = await supabase
-        .from("fec_filings")
-        .select("id, fec_candidate_id")
-        .eq("cycle_id", activeCycle.id);
+      const [{ data: existingFilings }, { data: existingCandidates }] = await Promise.all([
+        supabase
+          .from("fec_filings")
+          .select("id, fec_candidate_id")
+          .eq("cycle_id", activeCycle.id),
+        supabase
+          .from("candidates")
+          .select("id, fec_candidate_id")
+          .not("fec_candidate_id", "is", null),
+      ]);
 
       const fecIdMap = new Map<string, number>();
       for (const ef of existingFilings ?? []) {
         if (ef.fec_candidate_id) fecIdMap.set(ef.fec_candidate_id, ef.id);
       }
 
+      const candidateFecIds = new Set<string>();
+      for (const c of existingCandidates ?? []) {
+        if (c.fec_candidate_id) candidateFecIds.add(c.fec_candidate_id);
+      }
+
       const preview: PreviewCandidate[] = candidates.map((fec) => {
         const { first, last } = parseFecName(fec.name);
         const slug = slugifyName(first, last);
         const existingFilingId = fecIdMap.get(fec.candidate_id) ?? null;
+        const existsInCandidates = candidateFecIds.has(fec.candidate_id);
         return {
           fec,
           parsedFirst: first,
@@ -1447,14 +1460,17 @@ function SyncTab({
           slug,
           isIncumbent: fec.incumbent_challenge === "I",
           existsInFilings: existingFilingId !== null,
+          existsInCandidates,
           existingFilingId,
-          selected: !existingFilingId,
+          selected: !existingFilingId && !existsInCandidates,
           financials: null,
         };
       });
 
       preview.sort((a, b) => {
-        if (a.existsInFilings !== b.existsInFilings) return a.existsInFilings ? 1 : -1;
+        const aRank = a.existsInFilings || a.existsInCandidates ? 1 : 0;
+        const bRank = b.existsInFilings || b.existsInCandidates ? 1 : 0;
+        if (aRank !== bRank) return aRank - bRank;
         const stateCompare = a.fec.state.localeCompare(b.fec.state);
         if (stateCompare !== 0) return stateCompare;
         return a.parsedLast.localeCompare(b.parsedLast);
@@ -1509,6 +1525,9 @@ function SyncTab({
           <ul style={{ paddingLeft: 20 }}>
             <li>Create {selected.filter((s) => !s.existsInFilings).length} new filing records</li>
             <li>Update {selected.filter((s) => s.existsInFilings).length} existing filings</li>
+            {selected.some((s) => s.existsInCandidates) && (
+              <li>{selected.filter((s) => s.existsInCandidates).length} already in candidates DB (will sync FEC data to filings)</li>
+            )}
             <li>Store data in the staging table (not live candidates table)</li>
           </ul>
         </div>
@@ -1609,8 +1628,9 @@ function SyncTab({
     );
   }
 
-  const newCount = previewCandidates.filter((p) => !p.existsInFilings).length;
-  const existingCount = previewCandidates.filter((p) => p.existsInFilings).length;
+  const inDbCount = previewCandidates.filter((p) => p.existsInCandidates).length;
+  const newCount = previewCandidates.filter((p) => !p.existsInFilings && !p.existsInCandidates).length;
+  const existingCount = previewCandidates.filter((p) => p.existsInFilings && !p.existsInCandidates).length;
   const selectedCount = previewCandidates.filter((p) => p.selected).length;
 
   return (
@@ -1729,7 +1749,7 @@ function SyncTab({
       {/* Preview */}
       {step === "preview" && previewCandidates.length > 0 && (
         <Card
-          title={<Space><span>Preview ({previewCandidates.length} candidates)</span><Badge count={newCount} style={{ backgroundColor: "#52c41a" }} title={`${newCount} new`} />{existingCount > 0 && <Badge count={existingCount} style={{ backgroundColor: "#faad14" }} title={`${existingCount} already synced`} />}</Space>}
+          title={<Space><span>Preview ({previewCandidates.length} candidates)</span><Badge count={newCount} style={{ backgroundColor: "#52c41a" }} title={`${newCount} new`} />{existingCount > 0 && <Badge count={existingCount} style={{ backgroundColor: "#faad14" }} title={`${existingCount} already synced`} />}{inDbCount > 0 && <Badge count={inDbCount} style={{ backgroundColor: "#1677ff" }} title={`${inDbCount} already in candidates DB`} />}</Space>}
           size="small"
           style={{ marginBottom: 16 }}
           extra={
@@ -1737,7 +1757,7 @@ function SyncTab({
               <Text type="secondary" style={{ fontSize: 12 }}>{selectedCount} selected</Text>
               <Button size="small" onClick={() => toggleAll(true)}>All</Button>
               <Button size="small" onClick={() => toggleAll(false)}>None</Button>
-              <Button size="small" onClick={() => setPreviewCandidates((prev) => prev.map((p) => ({ ...p, selected: !p.existsInFilings })))}>New Only</Button>
+              <Button size="small" onClick={() => setPreviewCandidates((prev) => prev.map((p) => ({ ...p, selected: !p.existsInFilings && !p.existsInCandidates })))}>New Only</Button>
               <Divider type="vertical" />
               <Button type="primary" icon={<SyncOutlined />} onClick={runImport} disabled={selectedCount === 0}>Sync ({selectedCount})</Button>
             </Space>
@@ -1752,10 +1772,18 @@ function SyncTab({
             columns={[
               { title: "", key: "select", width: 40, render: (_, __, index) => <Checkbox checked={previewCandidates[index].selected} onChange={() => toggleCandidate(index)} /> },
               {
-                title: "Status", key: "status", width: 80,
-                filters: [{ text: "New", value: "new" }, { text: "Exists", value: "exists" }],
-                onFilter: (value, record) => value === "new" ? !record.existsInFilings : record.existsInFilings,
-                render: (_, record: PreviewCandidate) => record.existsInFilings ? <Tag color="warning">Synced</Tag> : <Tag color="success">New</Tag>,
+                title: "Status", key: "status", width: 100,
+                filters: [{ text: "New", value: "new" }, { text: "Synced", value: "synced" }, { text: "In DB", value: "indb" }],
+                onFilter: (value, record) => {
+                  if (value === "new") return !record.existsInFilings && !record.existsInCandidates;
+                  if (value === "synced") return record.existsInFilings;
+                  return record.existsInCandidates && !record.existsInFilings;
+                },
+                render: (_, record: PreviewCandidate) => {
+                  if (record.existsInCandidates) return <Tooltip title="Already in candidates table"><Tag color="blue">In DB</Tag></Tooltip>;
+                  if (record.existsInFilings) return <Tag color="warning">Synced</Tag>;
+                  return <Tag color="success">New</Tag>;
+                },
               },
               {
                 title: "Name", key: "name",

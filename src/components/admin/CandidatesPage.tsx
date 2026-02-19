@@ -170,6 +170,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [bulkAssignLoading, setBulkAssignLoading] = useState(false);
   const [allRaces, setAllRaces] = useState<RaceOption[]>([]);
   const [bodyOptions, setBodyOptions] = useState<{ value: number; label: string }[]>([]);
+  const [stateOptions, setStateOptions] = useState<{ value: number; label: string }[]>([]);
   const [racesLoading, setRacesLoading] = useState(false);
   const [bulkAssignRaceId, setBulkAssignRaceId] = useState<number | null>(null);
   const [bulkAssignStatus, setBulkAssignStatus] = useState<CandidateStatus>("announced");
@@ -286,12 +287,26 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     );
   }, []);
 
+  const loadStates = useCallback(async () => {
+    const { data } = await supabase
+      .from("states")
+      .select("id, name, abbr")
+      .order("name");
+    setStateOptions(
+      (data ?? []).map((s: any) => ({
+        value: s.id,
+        label: `${s.abbr} — ${s.name}`,
+      }))
+    );
+  }, []);
+
   useEffect(() => {
     loadCandidates();
     loadTopics();
     loadRaces();
     loadBodies();
-  }, [loadCandidates, loadTopics, loadRaces, loadBodies]);
+    loadStates();
+  }, [loadCandidates, loadTopics, loadRaces, loadBodies, loadStates]);
 
   useEffect(() => {
     setHeaderActions(
@@ -415,6 +430,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       website: record.website ?? "",
       twitter: record.twitter ?? "",
       bio: record.bio ?? "",
+      state_id: record.state_id ?? undefined,
       body_id: record.body_id ?? undefined,
       is_incumbent: record.is_incumbent,
       is_retiring: record.is_retiring ?? false,
@@ -495,6 +511,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
       website: values.website || null,
       twitter: values.twitter || null,
       bio: values.bio || null,
+      state_id: values.state_id || null,
       body_id: values.body_id || null,
       is_incumbent: values.is_incumbent ?? false,
       is_retiring: values.is_retiring ?? false,
@@ -1607,9 +1624,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                     <Tag color="green">Incumbent</Tag>
                   )}
                 </div>
-                {detailCandidate.body_member_title && (
+                {(detailCandidate.body_member_title || detailCandidate.state_abbr) && (
                   <Text type="secondary" style={{ fontSize: 13 }}>
-                    {detailCandidate.body_member_title}
+                    {[detailCandidate.body_member_title, detailCandidate.state_abbr].filter(Boolean).join(" — ")}
                   </Text>
                 )}
                 {(detailCandidate.website || detailCandidate.twitter) && (
@@ -1738,6 +1755,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                       </div>
 
                       <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, alignItems: "flex-start" }}>
+                        <Form.Item name="state_id" label="State" style={{ flex: 1 }}>
+                          <Select showSearch allowClear placeholder="Select state..." options={stateOptions} filterOption={(input, option) => ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())} />
+                        </Form.Item>
                         <Form.Item name="body_id" label="Government Body" style={{ flex: 1 }}>
                           <Select allowClear placeholder="Select body..." options={bodyOptions} />
                         </Form.Item>
