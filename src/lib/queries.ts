@@ -963,6 +963,177 @@ export async function fetchFecFilings(office: "S" | "H" | "both" = "S"): Promise
   }
 }
 
+// ─── House Seats (for Chamber visualization) ───
+
+export interface HouseSeat {
+  id: string;           // bioguide_id
+  name: string;
+  firstName: string;
+  lastName: string;
+  party: "D" | "R" | "I";
+  state: string;        // e.g. "CA"
+  district: number;
+  isAtLarge: boolean;
+  photo: string;
+  website: string | null;
+  twitter: string | null;
+  govtrackId: number | null;
+  firstYear: number | null;
+  isVacant: boolean;
+  rating: string | null;
+}
+
+export interface HouseSeatsData {
+  total: number;
+  parties: { D: number; R: number; I: number };
+  seats: HouseSeat[];
+}
+
+/**
+ * Fetch all House seats for the chamber visualization.
+ * Queries race_candidates → races → districts (body=us-house) + candidates.
+ * Includes vacant seats (districts with no race_candidate).
+ */
+export async function fetchHouseSeats(): Promise<HouseSeatsData> {
+  const { data: cycle } = await supabase
+    .from("election_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .single();
+
+  if (!cycle) throw new Error("No active election cycle found");
+
+  // Get the us-house body_id
+  const { data: houseBody } = await supabase
+    .from("government_bodies")
+    .select("id")
+    .eq("slug", "us-house")
+    .single();
+
+  if (!houseBody) throw new Error("House government body not found");
+
+  // Get ALL House races (not just rated ones) with district + candidate info
+  const { data: races, error } = await supabase
+    .from("races")
+    .select(`
+      id,
+      rating,
+      district:districts!inner(
+        id,
+        number,
+        state:states!inner(abbr, name)
+      ),
+      race_candidates(
+        is_incumbent,
+        candidate:candidates!inner(
+          bioguide_id,
+          first_name,
+          last_name,
+          party,
+          photo_url,
+          website,
+          twitter,
+          govtrack_url,
+          term_start_year
+        )
+      )
+    `)
+    .eq("cycle_id", cycle.id)
+    .eq("districts.body_id", houseBody.id);
+
+  if (error) throw new Error(`Failed to fetch house seats: ${error.message}`);
+
+  const PHOTO_BASE = "https://unitedstates.github.io/images/congress/225x275";
+  const seats: HouseSeat[] = [];
+
+  for (const race of races ?? []) {
+    const dist = race.district as any;
+    const stateAbbr: string = dist.state.abbr;
+    const distNum: number = dist.number ?? 1;
+    const isAtLarge = distNum === 0 || (dist.number === 1 && singleDistrictStates.has(stateAbbr));
+
+    const rcs = (race.race_candidates ?? []) as any[];
+    // Find the incumbent (the sitting rep)
+    const incumbentRc = rcs.find((rc: any) => rc.is_incumbent);
+
+    if (incumbentRc) {
+      const c = incumbentRc.candidate as any;
+      const bio = c.bioguide_id;
+      const partyCode = c.party === "Democrat" ? "D" : c.party === "Republican" ? "R" : "I";
+
+      // Extract govtrack ID from URL: https://www.govtrack.us/congress/members/name/12345
+      let govtrackId: number | null = null;
+      if (c.govtrack_url) {
+        const match = c.govtrack_url.match(/\/(\d+)$/);
+        if (match) govtrackId = parseInt(match[1], 10);
+      }
+
+      seats.push({
+        id: bio || `${stateAbbr}-${distNum}`,
+        name: `${c.first_name} ${c.last_name}`,
+        firstName: c.first_name,
+        lastName: c.last_name,
+        party: partyCode,
+        state: stateAbbr,
+        district: distNum,
+        isAtLarge,
+        photo: bio ? `${PHOTO_BASE}/${bio}.jpg` : "",
+        website: c.website,
+        twitter: c.twitter,
+        govtrackId,
+        firstYear: c.term_start_year,
+        isVacant: false,
+        rating: race.rating,
+      });
+    } else {
+      // Vacant seat — no incumbent
+      seats.push({
+        id: `vacant-${stateAbbr}-${distNum}`,
+        name: "Vacant",
+        firstName: "",
+        lastName: "",
+        party: "I",  // neutral
+        state: stateAbbr,
+        district: distNum,
+        isAtLarge: false,
+        photo: "",
+        website: null,
+        twitter: null,
+        govtrackId: null,
+        firstYear: null,
+        isVacant: true,
+        rating: race.rating,
+      });
+    }
+  }
+
+  // Sort: D on left (+ I with D), R on right, vacants at the end of each group
+  seats.sort((a, b) => {
+    if (a.isVacant !== b.isVacant) return a.isVacant ? 1 : -1;
+    const partyOrder: Record<string, number> = { D: 0, I: 0, R: 1 };
+    if (partyOrder[a.party] !== partyOrder[b.party])
+      return partyOrder[a.party] - partyOrder[b.party];
+    if (a.state !== b.state) return a.state.localeCompare(b.state);
+    return a.district - b.district;
+  });
+
+  const partyCount = { D: 0, R: 0, I: 0 };
+  for (const s of seats) {
+    if (!s.isVacant) partyCount[s.party]++;
+  }
+
+  return {
+    total: seats.length,
+    parties: partyCount,
+    seats,
+  };
+}
+
+// States with only 1 House district (at-large)
+const singleDistrictStates = new Set([
+  "AK", "DE", "ND", "SD", "VT", "WY",
+]);
+
 // ─── House Races ───
 
 /**

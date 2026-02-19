@@ -4,6 +4,7 @@ const currentPath = Astro.url.pathname;
 const primaryLinks = [
   { href: "/", label: "Home" },
   { href: "/reelect-or-reject", label: "Re-elect or Reject" },
+  { href: "/flip-the-house", label: "Flip the House" },
   { href: "/whos-running", label: "Who's Running" },
   { href: "/map", label: "Map" },
 ];
@@ -98,7 +99,7 @@ const isGroupActive = (links: { href: string }[]) =>
       <!-- Primary nav links (before dropdowns) -->
       {primaryLinks.filter((l) => l.href !== "/").map((link) => (
         <li>
-          {link.href === "/reelect-or-reject" ? (
+          {(link.href === "/reelect-or-reject" || link.href === "/flip-the-house") ? (
             <a
               href={link.href}
               class:list={[
@@ -242,7 +243,7 @@ const isGroupActive = (links: { href: string }[]) =>
     {/* Primary links */}
     {primaryLinks.map((link) => (
       <li>
-        {link.href === "/reelect-or-reject" ? (
+        {(link.href === "/reelect-or-reject" || link.href === "/flip-the-house") ? (
           <a
             href={link.href}
             class:list={[

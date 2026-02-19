@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+import HouseChamber from "../components/ui/HouseChamber";
+import { fetchHouseSeats } from "../lib/queries";
+
+const houseData = await fetchHouseSeats();
+---
+
+<Layout
+  title="Flip the House"
+  description="Can you flip the House? Tap seats to flip party colors in this interactive visualization of all 435 U.S. House seats."
+>
+  <section class="max-w-6xl mx-auto py-8 md:py-12 px-4">
+    <div class="mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">Flip the House</h1>
+      <p class="text-lg text-slate-500">
+        All {houseData.total} seats. Tap any seat to flip it.
+      </p>
+      <p class="text-sm text-slate-400 mt-1">
+        Democrats sit on the left, Republicans on the right — just like the real chamber.
+      </p>
+    </div>
+
+    <HouseChamber client:load data={houseData} />
+  </section>
+</Layout>
