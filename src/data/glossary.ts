@@ -139,6 +139,18 @@ export const glossary: GlossaryTerm[] = [
     long: "A toss-up is a race where polls and analysts think either candidate has roughly an equal chance of winning. These are the most closely watched races because they're the ones most likely to determine which party controls Congress. Think of it like a coin flip.",
   },
   {
+    term: "Impoundment",
+    slug: "impoundment",
+    short: "When the president tries to withhold or redirect money that Congress already approved.",
+    long: "Impoundment is when the president refuses to spend money that Congress has appropriated. After President Nixon repeatedly impounded funds in the early 1970s, Congress passed the Impoundment Control Act of 1974, which says the president must spend money the way Congress directs. The president can request a rescission (asking Congress to cancel the spending), but cannot unilaterally redirect or withhold funds without Congressional approval.",
+  },
+  {
+    term: "Rescission",
+    slug: "rescission",
+    short: "A request from the president to cancel spending that Congress already approved.",
+    long: "A rescission is when the president formally asks Congress to take back (cancel) money it already approved for a specific purpose. Under the Impoundment Control Act of 1974, Congress has 45 days to vote on the request. If Congress votes no or doesn't act, the money must be spent as originally planned. The Rescissions Act of 2025 (H.R. 4) used this process to cancel $9.4 billion in foreign aid and public broadcasting funding.",
+  },
+  {
     term: "Veto",
     slug: "veto",
     short: "The president's power to reject a bill passed by Congress.",

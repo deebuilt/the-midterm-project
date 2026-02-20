@@ -15,31 +15,49 @@ import Layout from "../../layouts/Layout.astro";
       <h2 class="text-sm font-bold tracking-wide uppercase text-white/40 mb-1">Right Now</h2>
       <div class="h-0.5 w-12 bg-tossup mb-6"></div>
 
-      <a href="/learn/save-act" class="group block md:flex md:items-start md:gap-8">
-        <div class="flex-1">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="/learn/follow-the-money" class="group block bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all">
+          <span class="inline-block text-xs font-semibold uppercase tracking-wide text-ind bg-ind/15 px-2.5 py-1 rounded-full mb-4">
+            Investigation
+          </span>
+          <h3 class="text-xl md:text-2xl font-bold mb-3 group-hover:text-tossup transition-colors">
+            Follow the Money
+          </h3>
+          <p class="text-white/60 leading-relaxed mb-4 text-sm">
+            How DOGE, the crypto industry, and a $10 billion peace deal trace back to the 2024 election.
+          </p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-navy/40 text-white/70">DOGE</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-tossup/30 text-tossup">Crypto</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-ind/30 text-ind">Board of Peace</span>
+          </div>
+          <span class="text-sm text-tossup font-medium group-hover:underline">
+            Read the full timeline &rarr;
+          </span>
+        </a>
+
+        <a href="/learn/save-act" class="group block bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all">
           <span class="inline-block text-xs font-semibold uppercase tracking-wide text-tossup bg-tossup/15 px-2.5 py-1 rounded-full mb-4">
             Legislation
           </span>
-          <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-tossup transition-colors">
+          <h3 class="text-xl md:text-2xl font-bold mb-3 group-hover:text-tossup transition-colors">
             The SAVE Act, Explained
           </h3>
-          <p class="text-white/60 leading-relaxed mb-4 max-w-xl">
+          <p class="text-white/60 leading-relaxed mb-4 text-sm">
             What the SAVE America Act would change about voter registration and ID requirements&mdash;and what it means for the 2026 midterms.
           </p>
-          <span class="text-sm text-tossup font-medium group-hover:underline">
-            Read the full explainer &rarr;
-          </span>
-        </div>
-        <div class="mt-6 md:mt-0 md:w-64 shrink-0">
-          <div class="bg-white/5 border border-white/10 rounded-xl p-5">
-            <p class="text-xs uppercase tracking-wide text-white/40 mb-2">Current Status</p>
+          <div class="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
+            <p class="text-xs uppercase tracking-wide text-white/40 mb-1">Current Status</p>
             <p class="text-sm text-white/80 leading-relaxed">
               <span class="font-semibold text-tossup">Passed House</span> 218&ndash;213<br/>
               Senate vote expected week of Feb 24
             </p>
           </div>
-        </div>
-      </a>
+          <span class="text-sm text-tossup font-medium group-hover:underline">
+            Read the full explainer &rarr;
+          </span>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -130,6 +148,10 @@ import Layout from "../../layouts/Layout.astro";
         <a href="/learn/pacs-and-super-pacs" class="group block bg-white rounded-lg px-4 py-4 border border-slate-200 hover:border-dem/40 hover:shadow-sm transition-all">
           <h4 class="font-medium text-sm text-navy group-hover:text-dem transition-colors">PACs &amp; Super PACs</h4>
           <p class="text-xs text-slate-400 mt-1">Where the money comes from, where it goes, and why it matters.</p>
+        </a>
+        <a href="/learn/follow-the-money" class="group block bg-white rounded-lg px-4 py-4 border border-slate-200 hover:border-dem/40 hover:shadow-sm transition-all">
+          <h4 class="font-medium text-sm text-navy group-hover:text-dem transition-colors">Follow the Money</h4>
+          <p class="text-xs text-slate-400 mt-1">How DOGE, crypto, and a $10B peace deal trace back to the 2024 election.</p>
         </a>
       </div>
 

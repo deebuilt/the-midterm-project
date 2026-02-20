@@ -1,0 +1,692 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import FollowTheMoneyTimeline from "../../components/ui/FollowTheMoneyTimeline";
+import type { TimelineEvent } from "../../components/ui/FollowTheMoneyTimeline";
+
+const timelineEvents: TimelineEvent[] = [
+  {
+    step: 1,
+    date: "2024",
+    title: "Crypto industry spends $245 million on elections",
+    thread: "crypto",
+    detail: "A super PAC called Fairshake, funded by Coinbase, Ripple, and Andreessen Horowitz, spent more on the 2024 election than the oil, pharma, or defense industries. They targeted candidates who opposed crypto regulation. 91% of the candidates they backed won.",
+    sourceUrl: "https://www.opensecrets.org/news/2024/11/the-crypto-trio-how-the-cryptocurrency-industry-has-made-its-mark-on-2024-elections/",
+    sourceLabel: "OpenSecrets",
+  },
+  {
+    step: 2,
+    date: "Jan 20, 2025",
+    title: "Trump creates DOGE by executive order",
+    thread: "doge",
+    detail: "Executive Order 14158 renamed an existing office called the U.S. Digital Service and put Elon Musk in charge as a 'special government employee.' Despite the name, DOGE is not an actual government department. Congress never voted on it.",
+    sourceUrl: "https://www.federalregister.gov/documents/2025/01/24/2025-01965/establishing-and-implementing-the-presidents-department-of-government-efficiency",
+    sourceLabel: "Federal Register",
+  },
+  {
+    step: 3,
+    date: "Jan 23, 2025",
+    title: "Executive order bans CBDCs, creates crypto working group",
+    thread: "crypto",
+    detail: "Three days later, a second executive order banned the Federal Reserve from creating a digital dollar (called a CBDC). It also created a working group to write crypto-friendly rules, chaired by David Sacks, a venture capitalist and crypto investor.",
+    sourceUrl: "https://www.whitehouse.gov/fact-sheets/2025/01/fact-sheet-executive-order-to-establish-united-states-leadership-in-digital-financial-technology/",
+    sourceLabel: "White House",
+  },
+  {
+    step: 4,
+    date: "Feb\u2013Mar 2025",
+    title: "DOGE begins mass layoffs across federal agencies",
+    thread: "doge",
+    detail: "DOGE directed agencies to fire workers on a 4-to-1 ratio: for every 4 people who leave, only 1 can be hired. Thousands of federal employees were laid off. Contracts worth billions were canceled or frozen. Courts later blocked some of these actions.",
+  },
+  {
+    step: 5,
+    date: "Mar 6, 2025",
+    title: "Strategic Bitcoin Reserve created from seized assets",
+    thread: "crypto",
+    detail: "An executive order created a government Bitcoin reserve using about 207,000 Bitcoin (worth roughly $17 billion) that had been seized in criminal cases. The order banned selling any of it and called Bitcoin a 'digital Fort Knox.'",
+    sourceUrl: "https://www.federalregister.gov/documents/2025/03/11/2025-03992/establishment-of-the-strategic-bitcoin-reserve-and-united-states-digital-asset-stockpile",
+    sourceLabel: "Federal Register",
+  },
+  {
+    step: 6,
+    date: "Mar 11, 2025",
+    title: "Congress passes FY2025 budget, 217\u2013213",
+    thread: "doge",
+    detail: "The government needed money to keep running. The House passed a continuing resolution by just 4 votes. Democrats argued it did nothing to stop DOGE from withholding money Congress had already approved.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/1968",
+    sourceLabel: "Congress.gov: H.R. 1968",
+  },
+  {
+    step: 7,
+    date: "May\u2013Jul 2025",
+    title: "\"One Big Beautiful Bill\" passes by 1 vote",
+    thread: "doge",
+    detail: "The biggest bill of the year passed the House 215-214 and the Senate 51-50 (the Vice President broke the tie). It made the 2017 tax cuts permanent, raised the debt ceiling by $5 trillion, and cut spending on programs like Medicaid.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/1",
+    sourceLabel: "Congress.gov: H.R. 1",
+  },
+  {
+    step: 8,
+    date: "Jun\u2013Jul 2025",
+    title: "Rescissions Act cuts $9.4 billion, passes 214\u2013212",
+    thread: "doge",
+    detail: "This bill turned DOGE's spending cuts into law. It canceled $8.3 billion from foreign aid (including USAID) and $1.1 billion from public broadcasting (NPR and PBS). It passed the House by 2 votes and the Senate by 3.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/4",
+    sourceLabel: "Congress.gov: H.R. 4",
+  },
+  {
+    step: 9,
+    date: "Jul 18, 2025",
+    title: "GENIUS Act signed \u2014 stablecoin regulation",
+    thread: "crypto",
+    detail: "The first major crypto law in U.S. history. It sets rules for who can issue stablecoins (cryptocurrencies pegged to $1). The president's family runs a stablecoin called USD1 that falls under this law. Democrats tried to add a rule barring the president from profiting; Republicans voted it down.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/senate-bill/1582",
+    sourceLabel: "Congress.gov: S.1582",
+  },
+  {
+    step: 10,
+    date: "Jul 17, 2025",
+    title: "CLARITY Act passes House \u2014 crypto market rules",
+    thread: "crypto",
+    detail: "This bill gives the CFTC (a smaller, less aggressive regulator) control over most crypto markets instead of the SEC. The crypto industry had lobbied hard for this change. It passed the House 294-134 but has not yet passed the Senate.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/3633",
+    sourceLabel: "Congress.gov: H.R. 3633",
+  },
+  {
+    step: 11,
+    date: "Oct\u2013Nov 2025",
+    title: "Government shuts down, reopens after 6 weeks",
+    thread: "doge",
+    detail: "Congress couldn't agree on a full budget for 2026. The government shut down on October 1. It reopened November 12 with a temporary fix that funded most agencies through January 30, 2026.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/5371",
+    sourceLabel: "Congress.gov: H.R. 5371",
+  },
+  {
+    step: 12,
+    date: "Jan 2026",
+    title: "Board of Peace established at Davos",
+    thread: "peace",
+    detail: "An international body to oversee rebuilding Gaza. The charter was signed at the World Economic Forum. Trump was named 'chairman for life.' Permanent membership costs $1 billion per country. Most European allies declined to join.",
+    sourceUrl: "https://en.wikipedia.org/wiki/Board_of_Peace",
+    sourceLabel: "Background",
+  },
+  {
+    step: 13,
+    date: "Feb 3, 2026",
+    title: "FY2026 budget finally passes, 217\u2013214",
+    thread: "doge",
+    detail: "After months of shutdowns and temporary fixes, Congress passed a full budget for 2026. It passed the House by just 3 votes. Republicans called it a victory for DOGE-backed reforms; independent analysts said spending was mostly flat.",
+    sourceUrl: "https://www.congress.gov/bill/119th-congress/house-bill/7148",
+    sourceLabel: "Congress.gov: H.R. 7148",
+  },
+  {
+    step: 14,
+    date: "Feb 19, 2026",
+    title: "Trump pledges $10 billion to Board of Peace \u2014 no vote",
+    thread: "peace",
+    detail: "At the Board of Peace's first formal meeting, the president pledged $10 billion in U.S. funds. Congress never voted on it. No funding source was named. Senator Chris Murphy called it 'totally illegal.' Under the Impoundment Control Act of 1974, the president cannot redirect money without Congress's approval.",
+    sourceUrl: "https://www.pbs.org/newshour/show/trump-says-u-s-will-give-10-billion-to-board-of-peace-promising-to-rebuild-gaza",
+    sourceLabel: "PBS NewsHour",
+  },
+];
+---
+
+<Layout
+  title="Follow the Money"
+  description="How DOGE, the crypto industry, and a $10 billion peace deal are connected &mdash; a timeline from the 2024 election to today."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Follow the Money</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Follow the Money</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      How DOGE, the crypto industry, and a $10 billion peace deal are connected&mdash;a timeline from the 2024 election to today.
+    </p>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+
+      <!-- HOOK -->
+      <p class="text-lg text-slate-600">
+        In 2024, one industry spent <strong>$245 million</strong> to help elect a Congress that would write its rules. A new government office started firing thousands of federal workers. And <strong>$10 billion</strong> was promised to rebuild a war zone&mdash;without Congress ever voting on it. These three stories sound unrelated. They're not. Here's how the money connects them.
+      </p>
+
+      <!-- STAT CARDS -->
+      <div class="not-prose grid grid-cols-2 gap-4">
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30 text-center">
+          <div class="text-3xl font-bold text-tossup">$245M</div>
+          <p class="text-sm text-slate-600 mt-1">spent by <strong>the crypto industry</strong> on the 2024 election</p>
+        </div>
+        <div class="bg-navy/10 rounded-xl p-5 border border-navy/30 text-center">
+          <div class="text-3xl font-bold text-navy">$9.4B</div>
+          <p class="text-sm text-slate-600 mt-1">in <strong>DOGE</strong> cuts codified into law by Congress</p>
+        </div>
+        <div class="bg-ind/10 rounded-xl p-5 border border-ind/30 text-center">
+          <div class="text-3xl font-bold text-ind">$10B</div>
+          <p class="text-sm text-slate-600 mt-1">pledged to <strong>the Board of Peace</strong> with no Congressional vote</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 text-center">
+          <div class="text-3xl font-bold text-navy">1&ndash;3</div>
+          <p class="text-sm text-slate-600 mt-1">votes&mdash;the margin on nearly every key bill in this story</p>
+        </div>
+      </div>
+
+      <!-- THREE THREADS LEGEND -->
+      <h2 class="text-2xl font-bold">Three Threads, One Story</h2>
+      <p class="text-slate-600">
+        This page follows three storylines. They start separately, but by the end you'll see how they connect. Each thread has its own color so you can track it through the timeline.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-navy/10 rounded-xl p-5 border border-navy/30">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3 h-3 rounded-full bg-navy"></div>
+            <h3 class="font-bold text-navy text-sm uppercase tracking-wide">DOGE</h3>
+          </div>
+          <p class="text-sm text-slate-600">A new government office created by executive order to cut spending and shrink federal agencies.</p>
+        </div>
+        <div class="bg-tossup/10 rounded-xl p-5 border border-tossup/30">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3 h-3 rounded-full bg-tossup"></div>
+            <h3 class="font-bold text-tossup text-sm uppercase tracking-wide">Crypto</h3>
+          </div>
+          <p class="text-sm text-slate-600">The cryptocurrency industry's campaign to shape its own regulation through record-breaking political spending.</p>
+        </div>
+        <div class="bg-ind/10 rounded-xl p-5 border border-ind/30">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3 h-3 rounded-full bg-ind"></div>
+            <h3 class="font-bold text-ind text-sm uppercase tracking-wide">Board of Peace</h3>
+          </div>
+          <p class="text-sm text-slate-600">An international body created to rebuild Gaza, with a $10 billion U.S. commitment that never went through Congress.</p>
+        </div>
+      </div>
+
+      <!-- JUMP LINKS -->
+      <div class="not-prose flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <span class="text-slate-400 font-medium">Jump to:</span>
+        <a href="#doge" class="text-dem hover:underline">DOGE</a>
+        <span class="text-slate-300">|</span>
+        <a href="#crypto" class="text-dem hover:underline">Crypto</a>
+        <span class="text-slate-300">|</span>
+        <a href="#peace" class="text-dem hover:underline">Board of Peace</a>
+        <span class="text-slate-300">|</span>
+        <a href="#timeline" class="text-dem hover:underline">Timeline</a>
+        <span class="text-slate-300">|</span>
+        <a href="#bills" class="text-dem hover:underline">Key Bills</a>
+      </div>
+
+      <!-- ============================== -->
+      <!-- THREAD 1: DOGE                 -->
+      <!-- ============================== -->
+      <div id="doge" class="scroll-mt-8">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-navy"></div>
+          <h2 class="text-2xl font-bold">What Is DOGE?</h2>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        DOGE stands for the <strong>Department of Government Efficiency</strong>. Despite the name, it is not actually a government department. It was created by <a href="/learn/executive-orders" class="text-dem hover:underline">Executive Order</a> 14158 on January 20, 2025&mdash;the same day the president took office. The order renamed an existing office called the U.S. Digital Service and put Elon Musk in charge as a "special government employee."
+      </p>
+
+      <div class="not-prose border-l-4 border-navy pl-4">
+        <h3 class="font-bold text-navy">Why this matters</h3>
+        <p class="text-sm text-slate-600 mt-1">
+          DOGE was not created by Congress. Nobody voted on it. Because it came from an executive order, a future president can shut it down with one signature. But while it exists, it has fired thousands of federal workers and canceled billions of dollars in contracts and grants.
+        </p>
+      </div>
+
+      <p class="text-slate-600">
+        Here's the sequence of what happened:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="font-semibold text-navy">Executive Order 14158 creates DOGE</p>
+            <p class="text-sm text-slate-600">January 20, 2025. The president renames the U.S. Digital Service, puts Musk in charge, and gives it until July 4, 2026 to operate.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="font-semibold text-navy">Mass layoffs begin</p>
+            <p class="text-sm text-slate-600">February&ndash;March 2025. DOGE directs agencies to use a 4-to-1 rule: for every 4 employees who leave, only 1 can be replaced. Thousands are fired. Courts later block some of these actions.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="font-semibold text-navy">Rescissions Act makes DOGE cuts permanent</p>
+            <p class="text-sm text-slate-600">June&ndash;July 2025. Congress votes to cancel $9.4 billion that had already been approved for foreign aid and public broadcasting. The House passes it <strong>214&ndash;212</strong>. The Senate passes it <strong>51&ndash;48</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-bold">Congress's Role</h3>
+      <p class="text-slate-600">
+        Congress did not create DOGE. But Congress did vote on the <strong>Rescissions Act (H.R. 4)</strong>, which turned $9.4 billion in DOGE spending cuts into permanent law. The House passed it by 2 votes. The Senate passed it by 3. That means this part of the story came down to a handful of members of Congress.
+      </p>
+
+      <div class="not-prose bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h4 class="font-bold text-navy mb-2">What is a rescission?</h4>
+        <p class="text-sm text-slate-600">
+          When the president wants to cancel money that Congress already approved, they send a "rescission request" to Congress. Congress has 45 days to vote yes or no. If Congress votes no (or doesn't vote at all), the money must be spent as originally planned. This rule comes from the <strong>Impoundment Control Act of 1974</strong>, a law passed after President Nixon tried to hold back money Congress had approved. You'll see this law come up again later in this article.
+        </p>
+      </div>
+
+      <p class="text-sm text-slate-500">
+        Want to understand how executive orders and bills work? Read <a href="/learn/executive-orders" class="text-dem hover:underline">Executive Orders</a> and <a href="/learn/bills-and-votes" class="text-dem hover:underline">How Bills &amp; Votes Work</a>.
+      </p>
+
+      <!-- ============================== -->
+      <!-- THREAD 2: CRYPTO               -->
+      <!-- ============================== -->
+      <div id="crypto" class="scroll-mt-8">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-tossup"></div>
+          <h2 class="text-2xl font-bold">The Crypto Connection</h2>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Before a single crypto bill was written, the industry made sure it would have a friendly audience. In the 2024 election, crypto companies and their <a href="/learn/pacs-and-super-pacs" class="text-dem hover:underline">super PACs</a> spent <strong>$245 million</strong>&mdash;more than the oil, pharma, or defense industries. The biggest spender was a super PAC called <strong>Fairshake</strong>, funded by three major crypto players: <strong>Coinbase</strong> (a crypto exchange), <strong>Ripple</strong> (a payments company), and <strong>Andreessen Horowitz</strong> (a venture capital firm that invests heavily in crypto startups).
+      </p>
+      <p class="text-slate-600">
+        What does "spending $245 million on an election" actually mean? It means running TV ads, digital ads, and mailers <em>for</em> candidates who support crypto-friendly laws&mdash;and <em>against</em> candidates who don't. Super PACs can spend unlimited money on these efforts as long as they don't coordinate directly with a candidate's campaign. (Read more about how this works in our <a href="/learn/pacs-and-super-pacs" class="text-dem hover:underline">PACs &amp; Super PACs</a> explainer.)
+      </p>
+      <p class="text-slate-600">
+        Their strategy worked. Of the 58 races Fairshake targeted, <strong>91% of their preferred candidates won</strong>. Here are some of the biggest examples:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-gop text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">R</div>
+          <div>
+            <p class="font-semibold text-navy">Ohio: Bernie Moreno defeated Sherrod Brown</p>
+            <p class="text-sm text-slate-600">Brown (D) was chair of the Senate Banking Committee and had been blocking crypto bills for years. Fairshake and its affiliates spent over <strong>$40 million</strong> against him. Moreno, a Republican and blockchain entrepreneur, won. Ohio went from having one Democrat and one Republican senator to two Republicans.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-dem text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">D</div>
+          <div>
+            <p class="font-semibold text-navy">California: Katie Porter lost her primary</p>
+            <p class="text-sm text-slate-600">Porter (D) was a vocal critic of crypto. Fairshake spent over <strong>$12 million</strong> opposing her Senate bid. She lost in the primary.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full bg-dem text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">D</div>
+          <div>
+            <p class="font-semibold text-navy">New York: Jamaal Bowman lost his primary</p>
+            <p class="text-sm text-slate-600">Bowman (D) was a progressive House member who opposed crypto deregulation. Crypto-backed spending helped his primary opponent defeat him.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        The result: roughly <strong>300 pro-crypto lawmakers</strong> now sit in the House and Senate. That's the audience the crypto industry paid $245 million to build.
+      </p>
+
+      <h3 class="text-xl font-bold">What They Got</h3>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="font-semibold text-navy">Executive order banning CBDCs</p>
+            <p class="text-sm text-slate-600">January 23, 2025. A CBDC is a digital dollar controlled by the Federal Reserve. The crypto industry opposed it because it could compete with their products. The president banned it by executive order.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="font-semibold text-navy">Strategic Bitcoin Reserve</p>
+            <p class="text-sm text-slate-600">March 6, 2025. The government already held about 207,000 Bitcoin seized from criminals (worth roughly $17 billion). An executive order said the government must keep it all and never sell it&mdash;like a "digital Fort Knox."</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="font-semibold text-navy">GENIUS Act signed into law</p>
+            <p class="text-sm text-slate-600">July 18, 2025. The first major crypto law in U.S. history. It creates rules for stablecoins&mdash;cryptocurrencies designed to stay at exactly $1. Passed the Senate <strong>68&ndash;30</strong> and the House <strong>308&ndash;122</strong>. One of the few bills in this story with bipartisan support.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">4</div>
+          <div>
+            <p class="font-semibold text-navy">CLARITY Act passes the House</p>
+            <p class="text-sm text-slate-600">July 17, 2025. This bill shifts oversight of crypto markets from the SEC (a tougher regulator) to the CFTC (a smaller, less aggressive one). The crypto industry lobbied hard for this change. It passed the House but is still waiting on the Senate.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-bold">The Conflict of Interest</h3>
+      <p class="text-slate-600">
+        Here's where it gets uncomfortable. The president's family launched a crypto company called <strong>World Liberty Financial</strong> during the 2024 campaign. It created a stablecoin called <strong>USD1</strong>&mdash;which is exactly the kind of product the GENIUS Act regulates. The family's crypto holdings are reportedly worth about <strong>$5 billion</strong>.
+      </p>
+      <p class="text-slate-600">
+        So the president signed a law that directly affects his own family's business. Democrats tried to add a rule that would bar the president and their family from profiting from crypto while in office. Republicans voted the amendment down.
+      </p>
+
+      <div class="not-prose border-l-4 border-tossup pl-4">
+        <h3 class="font-bold text-navy">Why this matters</h3>
+        <p class="text-sm text-slate-600 mt-1">
+          Whether you see this as smart business or a conflict of interest, the sequence is worth knowing: the crypto industry spent $245 million to elect a friendly Congress, that Congress passed crypto-friendly laws, and the president's family stands to profit from those laws. That's the money trail.
+        </p>
+      </div>
+
+      <div class="not-prose bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h4 class="font-bold text-navy mb-2">Vocab check</h4>
+        <div class="space-y-2 text-sm text-slate-600">
+          <p><strong>CBDC:</strong> Central Bank Digital Currency. A digital dollar controlled by the Federal Reserve. Think of it as a government-run version of crypto. The crypto industry fought against it because it could replace their products.</p>
+          <p><strong>Stablecoin:</strong> A cryptocurrency designed to always be worth $1. Companies that issue stablecoins hold reserves (like U.S. Treasury bonds) to back them up. The GENIUS Act creates rules for how much they need to hold.</p>
+          <p><strong>Super PAC:</strong> An organization that can raise and spend unlimited money to support or oppose candidates, as long as they don't coordinate directly with the campaign. <a href="/learn/pacs-and-super-pacs" class="text-dem hover:underline">Learn more &rarr;</a></p>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- THREAD 3: BOARD OF PEACE       -->
+      <!-- ============================== -->
+      <div id="peace" class="scroll-mt-8">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-ind"></div>
+          <h2 class="text-2xl font-bold">The Board of Peace</h2>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        The Board of Peace is an international body created to oversee rebuilding Gaza after the war. It is not a U.S. government agency. But the United States plays the central role&mdash;and the money involved raises serious questions about who has the power to spend it.
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-ind text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="font-semibold text-navy">The UN endorses the framework</p>
+            <p class="text-sm text-slate-600">November 2025. The UN Security Council passes Resolution 2803 (13&ndash;0, with China and Russia abstaining), endorsing a peace plan for Gaza that includes the Board of Peace as its oversight body.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-ind text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="font-semibold text-navy">Board of Peace established at Davos</p>
+            <p class="text-sm text-slate-600">January 2026. The charter is signed at the World Economic Forum. Trump is named "chairman for life." Permanent membership costs $1 billion per country. Most European allies&mdash;France, Germany, the UK, Spain&mdash;declined to join.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-ind text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="font-semibold text-navy">Trump pledges $10 billion</p>
+            <p class="text-sm text-slate-600">February 19, 2026. At the Board's first meeting, the president pledges $10 billion in U.S. funds. No source of funding was identified. Congress never voted on it. No bill was passed to authorize it.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="not-prose border-l-4 border-ind pl-4">
+        <h3 class="font-bold text-navy">Why this matters</h3>
+        <p class="text-sm text-slate-600 mt-1">
+          Under the <strong>Impoundment Control Act of 1974</strong>, the president cannot redirect money that Congress approved for something else. And Congress never approved $10 billion for the Board of Peace. Senator Chris Murphy (D-CT) called the pledge "totally illegal." Whether it actually happens depends on whether Congress challenges it&mdash;or goes along with it.
+        </p>
+      </div>
+
+      <div class="not-prose bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h4 class="font-bold text-navy mb-2">What is the Impoundment Control Act?</h4>
+        <p class="text-sm text-slate-600">
+          A 1974 law that says the president <strong>must</strong> spend money the way Congress says to spend it. The president can ask Congress to cancel spending (that's a rescission&mdash;see the DOGE section above). But the president cannot just redirect money to something else without asking. This law was passed after President Nixon tried to do exactly that. It's now at the center of both the DOGE story and the Board of Peace story.
+        </p>
+      </div>
+
+      <h3 class="text-xl font-bold">Where the Threads Meet</h3>
+      <p class="text-slate-600">
+        This is where the three stories connect. DOGE cut <strong>$9.4 billion</strong> from domestic programs like foreign aid and public broadcasting. The crypto industry spent <strong>$245 million</strong> to shape its own regulation&mdash;and the president's family now profits from the laws that were passed. And <strong>$10 billion</strong> was pledged to an international body without a single vote in Congress.
+      </p>
+      <p class="text-slate-600">
+        The common thread: enormous amounts of public money, moved with minimal involvement from the people's elected representatives. Whether through razor-thin votes, executive orders, or no vote at all.
+      </p>
+
+      <!-- ============================== -->
+      <!-- INTERACTIVE TIMELINE           -->
+      <!-- ============================== -->
+      <div id="timeline" class="scroll-mt-8">
+        <h2 class="text-2xl font-bold">The Full Timeline</h2>
+      </div>
+      <p class="text-slate-600">
+        Here's the complete sequence from the 2024 election to today. Each event is color-coded by thread. Tap any event to read more.
+      </p>
+
+      <div class="not-prose">
+        <FollowTheMoneyTimeline client:visible events={timelineEvents} />
+      </div>
+
+      <!-- ============================== -->
+      <!-- KEY BILLS TABLE                -->
+      <!-- ============================== -->
+      <div id="bills" class="scroll-mt-8">
+        <h2 class="text-2xl font-bold">Key Bills and Votes</h2>
+      </div>
+      <p class="text-slate-600">
+        Every bill in this story passed by razor-thin margins&mdash;except the crypto bills, which had bipartisan support. Here's the full record.
+      </p>
+
+      <div class="not-prose overflow-x-auto">
+        <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden">
+          <thead class="bg-navy text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Bill</th>
+              <th class="px-4 py-3 font-semibold">Title</th>
+              <th class="px-4 py-3 font-semibold">Chamber</th>
+              <th class="px-4 py-3 font-semibold">Date</th>
+              <th class="px-4 py-3 font-semibold">Vote</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 1968</td>
+              <td class="px-4 py-3 text-slate-600">FY2025 Continuing Resolution</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Mar 11, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>217&ndash;213</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 1968</td>
+              <td class="px-4 py-3 text-slate-600">FY2025 Continuing Resolution</td>
+              <td class="px-4 py-3 text-slate-600">Senate</td>
+              <td class="px-4 py-3 text-slate-600">Mar 14, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>54&ndash;46</strong></td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 1</td>
+              <td class="px-4 py-3 text-slate-600">One Big Beautiful Bill (reconciliation)</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">May 22, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>215&ndash;214</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 1</td>
+              <td class="px-4 py-3 text-slate-600">One Big Beautiful Bill (reconciliation)</td>
+              <td class="px-4 py-3 text-slate-600">Senate</td>
+              <td class="px-4 py-3 text-slate-600">Jul 1, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>51&ndash;50</strong> (VP tiebreaker)</td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 4</td>
+              <td class="px-4 py-3 text-slate-600">Rescissions Act (DOGE cuts)</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Jun 12, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>214&ndash;212</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 4</td>
+              <td class="px-4 py-3 text-slate-600">Rescissions Act (DOGE cuts)</td>
+              <td class="px-4 py-3 text-slate-600">Senate</td>
+              <td class="px-4 py-3 text-slate-600">Jul 17, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>51&ndash;48</strong></td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">S.1582</td>
+              <td class="px-4 py-3 text-slate-600">GENIUS Act (stablecoins)</td>
+              <td class="px-4 py-3 text-slate-600">Senate</td>
+              <td class="px-4 py-3 text-slate-600">Jun 17, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>68&ndash;30</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">S.1582</td>
+              <td class="px-4 py-3 text-slate-600">GENIUS Act (stablecoins)</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Jul 17, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>308&ndash;122</strong></td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 3633</td>
+              <td class="px-4 py-3 text-slate-600">CLARITY Act (crypto markets)</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Jul 17, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>294&ndash;134</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 5371</td>
+              <td class="px-4 py-3 text-slate-600">Partial FY2026 CR (end shutdown)</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Sep 19, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>217&ndash;212</strong></td>
+            </tr>
+            <tr class="bg-white">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 5371</td>
+              <td class="px-4 py-3 text-slate-600">Partial FY2026 CR (end shutdown)</td>
+              <td class="px-4 py-3 text-slate-600">Senate</td>
+              <td class="px-4 py-3 text-slate-600">Nov 10, 2025</td>
+              <td class="px-4 py-3 text-slate-600"><strong>60&ndash;40</strong></td>
+            </tr>
+            <tr class="bg-slate-50">
+              <td class="px-4 py-3 text-slate-600 font-medium">H.R. 7148</td>
+              <td class="px-4 py-3 text-slate-600">FY2026 Appropriations</td>
+              <td class="px-4 py-3 text-slate-600">House</td>
+              <td class="px-4 py-3 text-slate-600">Feb 3, 2026</td>
+              <td class="px-4 py-3 text-slate-600"><strong>217&ndash;214</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="not-prose bg-tossup/10 rounded-xl p-5 border border-tossup/30">
+        <h4 class="font-bold text-navy mb-2">Notice the margins</h4>
+        <p class="text-sm text-slate-600">
+          Six of these twelve votes passed by 5 or fewer votes in their chamber. The One Big Beautiful Bill needed the Vice President to break a tie. The GENIUS Act is the only bill in this story with strong bipartisan support (68&ndash;30 in the Senate). Everything else came down to party-line votes decided by a handful of members.
+        </p>
+      </div>
+
+      <!-- ============================== -->
+      <!-- HOW IT ALL CONNECTS            -->
+      <!-- ============================== -->
+      <h2 class="text-2xl font-bold">How It All Connects</h2>
+
+      <p class="text-slate-600">
+        Step back and look at the full picture:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-tossup text-white flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-sm font-bold">$</span>
+          </div>
+          <div>
+            <p class="font-semibold text-navy">The crypto industry invested $245 million to elect a friendly Congress.</p>
+            <p class="text-sm text-slate-600">That Congress then passed crypto-friendly laws. The president's family profits from those laws.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-sm font-bold">&times;</span>
+          </div>
+          <div>
+            <p class="font-semibold text-navy">DOGE cut $9.4 billion from domestic programs.</p>
+            <p class="text-sm text-slate-600">Created by executive order, not Congress. The cuts were later codified into law by margins of 2&ndash;3 votes.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-ind text-white flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-sm font-bold">?</span>
+          </div>
+          <div>
+            <p class="font-semibold text-navy">$10 billion was pledged overseas with no Congressional vote.</p>
+            <p class="text-sm text-slate-600">The Impoundment Control Act says the president can't do this. Whether it's enforced is up to Congress.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        The pattern in every case: enormous sums of public money, moved with minimal democratic input&mdash;either through razor-thin votes, executive orders, or no vote at all.
+      </p>
+
+      <div class="not-prose border-l-4 border-dem pl-4">
+        <h3 class="font-bold text-navy">What Congress can do</h3>
+        <p class="text-sm text-slate-600 mt-1">
+          Congress has the power to investigate DOGE spending through <a href="/learn/congressional-hearings" class="text-dem hover:underline">oversight hearings</a>. It can enforce the Impoundment Control Act. It can require disclosure of crypto conflicts of interest. The question is whether the members elected in 2026 will do any of that. That's where your vote comes in.
+        </p>
+      </div>
+
+      <!-- ============================== -->
+      <!-- WHAT YOU CAN DO                -->
+      <!-- ============================== -->
+      <h2 class="text-2xl font-bold">What You Can Do</h2>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Look up the votes</p>
+            <p class="text-sm text-slate-600">Every roll call in this article is public record. See how your representatives voted on these bills. Start with <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a> to explore incumbent senators and their voting records.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Follow the money in your district</p>
+            <p class="text-sm text-slate-600">Check <a href="https://www.opensecrets.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets.org</a> to see who's funding your representatives. See who's running in your state at <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Show up</p>
+            <p class="text-sm text-slate-600">Most of these bills passed by 1&ndash;3 votes. Midterm elections are decided by who shows up. Find your ballot and make a plan at <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- SOURCES                        -->
+      <!-- ============================== -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li><a href="https://www.federalregister.gov/documents/2025/01/24/2025-01965/establishing-and-implementing-the-presidents-department-of-government-efficiency" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Register: Executive Order 14158 (DOGE)</a></li>
+        <li><a href="https://www.whitehouse.gov/fact-sheets/2025/01/fact-sheet-executive-order-to-establish-united-states-leadership-in-digital-financial-technology/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">White House: Executive Order on Digital Financial Technology</a></li>
+        <li><a href="https://www.federalregister.gov/documents/2025/03/11/2025-03992/establishment-of-the-strategic-bitcoin-reserve-and-united-states-digital-asset-stockpile" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Federal Register: Strategic Bitcoin Reserve Executive Order</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/1968" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 1968 (FY2025 Continuing Resolution)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/1" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 1 (One Big Beautiful Bill Act)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/4" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 4 (Rescissions Act of 2025)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/senate-bill/1582" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: S.1582 (GENIUS Act)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/3633" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 3633 (CLARITY Act)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/5371" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 5371 (Partial FY2026 CR)</a></li>
+        <li><a href="https://www.congress.gov/bill/119th-congress/house-bill/7148" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov: H.R. 7148 (FY2026 Appropriations)</a></li>
+        <li><a href="https://www.opensecrets.org/news/2024/11/the-crypto-trio-how-the-cryptocurrency-industry-has-made-its-mark-on-2024-elections/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">OpenSecrets: Crypto Industry's Impact on 2024 Elections</a></li>
+        <li><a href="https://www.citizen.org/article/cryptobros-united-fairshake-super-pac-2024-elections/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Public Citizen: Fairshake Super PAC and 2024 Elections</a></li>
+        <li><a href="https://press.un.org/en/2025/sc16225.doc.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">UN: Security Council Resolution 2803</a></li>
+        <li><a href="https://www.pbs.org/newshour/show/trump-says-u-s-will-give-10-billion-to-board-of-peace-promising-to-rebuild-gaza" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS NewsHour: Trump $10 Billion Board of Peace Pledge</a></li>
+        <li><a href="https://www.cbsnews.com/news/trump-wlfi-world-liberty-financial-crypto-wealth/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBS News: Trump Family Crypto Holdings</a></li>
+        <li><a href="https://www.pbs.org/newshour/show/trump-familys-cryptocurrency-ties-raise-concerns-as-administration-loosens-regulations" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS NewsHour: Trump Family Cryptocurrency Ties</a></li>
+      </ul>
+
+      <!-- CTA FOOTER -->
+      <div class="not-prose bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Want to see how your senators actually voted? Try <a href="/reelect-or-reject" class="underline">Re-elect or Reject</a> to swipe through incumbents and view their voting records. Or explore the <a href="/map" class="underline">interactive map</a> to preview competitive races in 2026.
+        </p>
+      </div>
+
+    </div>
+  </section>
+</Layout>
