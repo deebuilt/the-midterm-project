@@ -86,12 +86,18 @@ const quiz = getQuizBySlug("what-are-midterms");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
-      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
-        <p class="text-sm font-medium text-slate-700">
-          Ready to see what's at stake in 2026? Explore the
-          <a href="/senate" class="text-dem underline">Senate</a> and
-          <a href="/house" class="text-gop underline">House</a> races, or
-          <a href="/find-your-ballot" class="text-tossup underline">find your ballot</a>.
+      <!-- NEXT IN SERIES -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 1 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/how-congress-works" class="underline">How Congress Works</a>
+          &mdash; the Senate, the House, and how a bill becomes a law.
+        </p>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
         </p>
       </div>
     </div>

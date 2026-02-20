@@ -361,19 +361,18 @@ const quiz = getQuizBySlug("career-ladder");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
-      <!-- CTA -->
+      <!-- NEXT IN SERIES -->
       <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
-        <p class="text-sm font-medium text-slate-700 mb-2">
-          Now that you know the paths, explore the races:
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 6 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/how-to-run" class="underline">How to Run for Congress</a>
+          &mdash; eligibility, filing, primaries, fundraising, and getting on the ballot.
         </p>
-        <p class="text-sm font-medium">
-          <a href="/reelect-or-reject" class="text-tossup underline">Re-elect or Reject</a>
-          &nbsp;&middot;&nbsp;
-          <a href="/find-your-ballot" class="text-dem underline">Find Your Ballot</a>
-          &nbsp;&middot;&nbsp;
-          <a href="/learn/how-congress-works" class="text-navy underline">How Congress Works</a>
-          &nbsp;&middot;&nbsp;
-          <a href="/learn/how-to-run" class="text-gop underline">How to Run for Congress</a>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
+          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
+          &middot; <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>
         </p>
       </div>
     </div>
