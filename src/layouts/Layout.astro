@@ -8,9 +8,13 @@ interface Props {
   description?: string;
   ogTitle?: string;
   ogDescription?: string;
+  ogImage?: string;
 }
 
-const { title, description = "Voter education for the 2026 U.S. midterm elections.", ogTitle, ogDescription } = Astro.props;
+const siteUrl = "https://themidtermproject.org";
+const { title, description = "Voter education for the 2026 U.S. midterm elections.", ogTitle, ogDescription, ogImage } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const ogImageUrl = ogImage ? new URL(ogImage, siteUrl).href : `${siteUrl}/og-image.png`;
 ---
 
 <!doctype html>
@@ -22,6 +26,7 @@ const { title, description = "Voter education for the 2026 U.S. midterm election
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
@@ -33,9 +38,15 @@ const { title, description = "Voter education for the 2026 U.S. midterm election
     <meta property="og:title" content={ogTitle ?? title} />
     <meta property="og:description" content={ogDescription ?? description} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="The Midterm Project" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={ogTitle ?? title} />
     <meta name="twitter:description" content={ogDescription ?? description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <title>{title} | The Midterm Project</title>
 
     <!-- Google Analytics (GA4) -->

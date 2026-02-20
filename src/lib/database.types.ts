@@ -34,6 +34,25 @@ export const VOLUNTEER_ROLE_LABELS: Record<VolunteerRole, string> = {
   translation: "Translation",
 };
 
+export type ContactSubject = "feedback" | "suggestion" | "candidate_inquiry" | "other";
+
+export const CONTACT_SUBJECT_LABELS: Record<ContactSubject, string> = {
+  feedback: "Feedback",
+  suggestion: "Suggestion or Idea",
+  candidate_inquiry: "Candidate Inquiry",
+  other: "Other",
+};
+
+export interface DbContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: ContactSubject;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export interface DbState {
   id: number;
   name: string;

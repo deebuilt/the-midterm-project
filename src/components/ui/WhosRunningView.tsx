@@ -195,6 +195,9 @@ function StateCard({
     : group.races.filter((r) => r.body === bodyFilter);
 
   const totalCandidates = races.reduce((sum, r) => sum + r.candidates.length, 0);
+  const bodies = bodyFilter === "all"
+    ? [...new Set(group.races.map((r) => r.body))].sort()
+    : null;
   const badge = urgencyBadge(group.daysUntilPrimary);
   const primaryFormatted = group.primaryDate
     ? new Date(group.primaryDate + "T00:00:00").toLocaleDateString("en-US", {
@@ -223,12 +226,24 @@ function StateCard({
           </svg>
           <div>
             <h3 className="text-lg font-bold text-navy">{group.stateName}</h3>
-            <p className="text-sm text-slate-500">
-              {primaryFormatted ? `Primary: ${primaryFormatted}` : "Primary: TBD"}
-              <span className="text-slate-300 mx-1.5">&middot;</span>
-              {races.length} race{races.length !== 1 ? "s" : ""},{" "}
-              {totalCandidates} candidate{totalCandidates !== 1 ? "s" : ""}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm text-slate-500">
+                {primaryFormatted ? `Primary: ${primaryFormatted}` : "Primary: TBD"}
+                <span className="text-slate-300 mx-1.5">&middot;</span>
+                {races.length} race{races.length !== 1 ? "s" : ""},{" "}
+                {totalCandidates} candidate{totalCandidates !== 1 ? "s" : ""}
+              </p>
+              {bodies && bodies.map((b) => (
+                <span
+                  key={b}
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    b === "Senate" ? "bg-indigo-100 text-indigo-700" : "bg-sky-100 text-sky-700"
+                  }`}
+                >
+                  {b}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         {badge && (
@@ -240,9 +255,41 @@ function StateCard({
 
       {isOpen && (
         <div className="px-5 pb-4 border-t border-slate-100 pt-3">
-          {races.map((race) => (
-            <RaceSection key={race.raceId} race={race} />
-          ))}
+          {bodyFilter === "all" ? (
+            <>
+              {(() => {
+                const senateRaces = races.filter((r) => r.body === "Senate");
+                const houseRaces = races.filter((r) => r.body === "House");
+                return (
+                  <>
+                    {senateRaces.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-2">Senate</h4>
+                        {senateRaces.map((race) => (
+                          <RaceSection key={race.raceId} race={race} />
+                        ))}
+                      </div>
+                    )}
+                    {senateRaces.length > 0 && houseRaces.length > 0 && (
+                      <div className="border-t border-slate-200 my-4" />
+                    )}
+                    {houseRaces.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-sky-600 mb-2">House</h4>
+                        {houseRaces.map((race) => (
+                          <RaceSection key={race.raceId} race={race} />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </>
+          ) : (
+            races.map((race) => (
+              <RaceSection key={race.raceId} race={race} />
+            ))
+          )}
           <p className="text-[11px] text-slate-400 mt-2">
             Source: FEC. Fundraising totals may not reflect the latest filings.
           </p>

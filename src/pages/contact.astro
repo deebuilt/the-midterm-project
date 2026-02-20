@@ -1,0 +1,15 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ContactForm from "../components/ContactForm";
+---
+
+<Layout title="Contact Us" description="Get in touch with The Midterm Project. Share feedback, suggest ideas, or reach out about candidate features.">
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Contact Us</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      Have feedback, a suggestion, or want to get featured? We'd love to hear from you.
+    </p>
+
+    <ContactForm client:only="react" />
+  </section>
+</Layout>
