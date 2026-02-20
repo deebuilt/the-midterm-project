@@ -1,0 +1,261 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Understanding Race Ratings"
+  description="What Safe, Likely, Lean, and Toss-Up mean, how nonpartisan analysts rate races, and why it matters for the 2026 midterms."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>Race Ratings</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Understanding Race Ratings</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      What "Safe," "Likely," "Lean," and "Toss-Up" actually mean&mdash;and how analysts decide which races to watch.
+    </p>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        When you look at our <a href="/map" class="text-dem hover:underline">interactive map</a>, you'll see races color-coded by how competitive they are. Those colors come from <strong>race ratings</strong>&mdash;assessments by nonpartisan analysts who study every competitive election in the country and assign each one a category based on how likely either party is to win.
+      </p>
+
+      <!-- WHAT ARE RACE RATINGS -->
+      <h2 class="text-2xl font-bold">What Are Race Ratings?</h2>
+      <p class="text-slate-600">
+        Race ratings are predictions made by political analysts about how competitive an election will be. They're not endorsements and they're not based on who the analysts <em>want</em> to win. They're based on data: polling, fundraising, historical voting patterns, candidate quality, national mood, and on-the-ground reporting.
+      </p>
+      <p class="text-slate-600">
+        Think of them like weather forecasts for elections. A "Safe Republican" rating doesn't mean Democrats <em>can't</em> win&mdash;it means, based on everything analysts can measure, the Republican candidate has an overwhelming advantage. Upsets happen, just like surprise storms.
+      </p>
+
+      <!-- THE SCALE -->
+      <h2 class="text-2xl font-bold">The Rating Scale</h2>
+      <p class="text-slate-600">
+        Most rating systems use a seven-point scale. Here's what each level means:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-4 bg-gop/10 rounded-xl p-5 border border-gop/20">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gop text-white">Safe R</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Safe Republican</p>
+            <p class="text-sm text-slate-600">The Republican candidate is expected to win by a wide margin. The opposing party isn't seriously contesting the race. Think: a deep-red district where the Republican regularly wins by 20+ points.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-gop/5 rounded-xl p-5 border border-gop/15">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gop/80 text-white">Likely R</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Likely Republican</p>
+            <p class="text-sm text-slate-600">The Republican is favored, but conditions could shift. The opposing party has a credible candidate or the district has trended more competitive. A major national wave or scandal could make this competitive.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-gop/5 rounded-xl p-5 border border-gop/10">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gop/60 text-white">Lean R</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Lean Republican</p>
+            <p class="text-sm text-slate-600">The Republican has a slight edge, but this is a genuinely competitive race. Polling is close, both candidates are raising real money, and the outcome could go either way with a push. These are races worth watching.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-tossup/10 rounded-xl p-5 border border-tossup/30">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-tossup text-white">Toss-Up</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Toss-Up</p>
+            <p class="text-sm text-slate-600">Either party could win. The race is essentially a coin flip based on available data. These are the races that decide which party controls the Senate, House, or a governor's mansion. Every vote matters most here.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-dem/5 rounded-xl p-5 border border-dem/10">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-dem/60 text-white">Lean D</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Lean Democrat</p>
+            <p class="text-sm text-slate-600">The Democrat has a slight edge, but the race is competitive. Same dynamics as Lean Republican, just in the other direction.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-dem/5 rounded-xl p-5 border border-dem/15">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-dem/80 text-white">Likely D</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Likely Democrat</p>
+            <p class="text-sm text-slate-600">The Democrat is favored, but the race isn't locked up. A strong challenger, low turnout, or a national shift could make it interesting.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4 bg-dem/10 rounded-xl p-5 border border-dem/20">
+          <div class="w-24 shrink-0">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-dem text-white">Safe D</span>
+          </div>
+          <div>
+            <p class="font-bold text-navy">Safe Democrat</p>
+            <p class="text-sm text-slate-600">The Democrat is expected to win easily. The opposing party isn't seriously competing. Think: a deep-blue urban district where the Democrat wins by 30+ points.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHO MAKES THESE RATINGS -->
+      <h2 class="text-2xl font-bold">Who Makes These Ratings?</h2>
+      <p class="text-slate-600">
+        Several organizations publish race ratings. The most widely respected are nonpartisan&mdash;they don't endorse candidates or take sides. The Midterm Project uses ratings from two of them:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Cook Political Report</h3>
+          <p class="text-sm text-slate-600">
+            Founded in 1984 by Charlie Cook, this is considered the gold standard for race ratings. Their team of analysts rates every Senate, House, and gubernatorial race, updating throughout the cycle as conditions change. They're cited by both parties and major news outlets.
+          </p>
+          <a href="https://www.cookpolitical.com/" target="_blank" rel="noopener noreferrer" class="text-sm text-dem hover:underline mt-2 inline-block">cookpolitical.com &rarr;</a>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h3 class="font-bold text-navy mb-2">Sabato's Crystal Ball</h3>
+          <p class="text-sm text-slate-600">
+            Published by the University of Virginia Center for Politics, led by Larry Sabato. Like Cook, they rate every competitive federal and gubernatorial race. Their academic affiliation and long track record make them a trusted nonpartisan source.
+          </p>
+          <a href="https://centerforpolitics.org/crystalball/" target="_blank" rel="noopener noreferrer" class="text-sm text-dem hover:underline mt-2 inline-block">centerforpolitics.org &rarr;</a>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Other notable rating organizations include
+        <a href="https://insideelections.com/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Inside Elections</a> (formerly Rothenberg &amp; Gonzales) and
+        <a href="https://www.270towin.com/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">270toWin</a>, which aggregates ratings from multiple sources.
+      </p>
+
+      <!-- HOW DO THEY DECIDE -->
+      <h2 class="text-2xl font-bold">How Do Analysts Decide?</h2>
+      <p class="text-slate-600">
+        Rating a race isn't just looking at one poll. Analysts weigh a combination of factors:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Partisan lean</h4>
+          <p class="text-sm text-slate-600">How has this state or district voted in recent elections? A district that went +15 Republican in the last three cycles starts from a very different baseline than one that swung between parties.</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Incumbency</h4>
+          <p class="text-sm text-slate-600">Incumbents win re-election the vast majority of the time. An open seat (no incumbent running) is almost always more competitive than one where a sitting member is defending.</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Candidate quality</h4>
+          <p class="text-sm text-slate-600">Has the challenger held office before? Do they have name recognition? Are they running a professional campaign? A weak candidate in a winnable district can shift a rating toward the other party.</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Fundraising</h4>
+          <p class="text-sm text-slate-600">Money isn't everything, but it's a signal. A challenger raising serious money suggests a real campaign. An incumbent with a thin war chest may be vulnerable. See our <a href="/whos-running" class="text-dem hover:underline">Who's Running</a> page for fundraising data.</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Polling</h4>
+          <p class="text-sm text-slate-600">Public and private polls give a snapshot of where voters stand. Analysts look at polling averages, not individual polls, and weight them by quality and recency.</p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">National environment</h4>
+          <p class="text-sm text-slate-600">Is the president popular or unpopular? Is one party energized? Midterms historically go against the president's party, but the size of that wave varies. A strong national tide can shift dozens of races at once.</p>
+        </div>
+      </div>
+
+      <!-- WHY RATINGS CHANGE -->
+      <h2 class="text-2xl font-bold">Why Do Ratings Change?</h2>
+      <p class="text-slate-600">
+        Ratings aren't set in stone. They're updated throughout the election cycle as new information emerges. Common triggers for a rating change:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li><strong>A strong or weak primary result</strong> &mdash; a candidate who barely survives a primary may enter the general election wounded</li>
+        <li><strong>New polling data</strong> &mdash; a Toss-Up race where one candidate builds a consistent lead might shift to Lean</li>
+        <li><strong>Fundraising reports</strong> &mdash; a surge in donations (or a collapse) signals shifting momentum</li>
+        <li><strong>Candidate scandal or gaffe</strong> &mdash; a major controversy can move a Safe race to Likely overnight</li>
+        <li><strong>Redistricting or legal changes</strong> &mdash; new district maps can make a previously safe seat competitive</li>
+        <li><strong>National events</strong> &mdash; a recession, Supreme Court decision, or major policy change can shift the entire map</li>
+      </ul>
+
+      <!-- HOW ACCURATE ARE THEY -->
+      <h2 class="text-2xl font-bold">How Accurate Are Race Ratings?</h2>
+      <p class="text-slate-600">
+        Pretty accurate, actually. The Cook Political Report has rated thousands of races over four decades, and their final ratings correctly predict the winner the vast majority of the time&mdash;especially for races rated Safe, Likely, or Lean. The closer you get to Toss-Up, the less certain the outcome, which is the whole point of the category.
+      </p>
+      <p class="text-slate-600">
+        That said, ratings are not guarantees. Upsets happen. In 2022, several races rated as Likely or Lean for one party went to the other. In 2018, a "blue wave" flipped races that analysts had rated as competitive but not necessarily Democratic. The value of ratings isn't that they're always right&mdash;it's that they tell you <em>where to pay attention</em>.
+      </p>
+
+      <div class="bg-slate-50 rounded-xl p-6 not-prose">
+        <h4 class="font-bold text-navy mb-2">A good rule of thumb</h4>
+        <p class="text-sm text-slate-600">
+          <strong>Safe</strong> and <strong>Likely</strong> races rarely flip. <strong>Lean</strong> races flip sometimes. <strong>Toss-Up</strong> races are where elections are won and lost. If you want to know which races will decide control of Congress, look at the Toss-Ups and the Leans.
+        </p>
+      </div>
+
+      <!-- HOW WE USE THEM -->
+      <h2 class="text-2xl font-bold">How The Midterm Project Uses Ratings</h2>
+      <p class="text-slate-600">
+        On our <a href="/map" class="text-dem hover:underline">interactive map</a>, we show race ratings for every competitive Senate race. The color coding matches the scale above: deeper red or blue means safer for that party, and amber means Toss-Up.
+      </p>
+      <p class="text-slate-600">
+        We pull our ratings from the Cook Political Report and Sabato's Crystal Ball, updating them manually when analysts change their calls. We check for updates monthly during the primary season and more frequently as the general election approaches.
+      </p>
+      <p class="text-slate-600">
+        Our goal isn't to tell you who to vote for. It's to help you understand which races are competitive, where your vote has the most impact, and where to focus your attention if you want to stay informed.
+      </p>
+
+      <!-- WHY IT MATTERS -->
+      <h2 class="text-2xl font-bold">Why This Matters for You</h2>
+      <p class="text-slate-600">
+        If you live in a state or district with a Toss-Up or Lean race, your vote carries outsized influence. These are the races where a few thousand votes&mdash;or even a few hundred&mdash;can determine the outcome. They're also where campaigns spend the most money, where outside groups pour in resources, and where voter turnout makes the biggest difference.
+      </p>
+      <p class="text-slate-600">
+        Even if you live in a Safe district, understanding race ratings helps you follow the national picture. When you hear pundits say "Democrats need to flip three seats to take the Senate," race ratings tell you <em>which</em> three seats they're talking about.
+      </p>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.cookpolitical.com/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            Cook Political Report
+          </a>
+        </li>
+        <li>
+          <a href="https://centerforpolitics.org/crystalball/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            UVA Center for Politics &mdash; Sabato's Crystal Ball
+          </a>
+        </li>
+        <li>
+          <a href="https://insideelections.com/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            Inside Elections (formerly Rothenberg &amp; Gonzales)
+          </a>
+        </li>
+        <li>
+          <a href="https://www.270towin.com/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            270toWin &mdash; Race Rating Aggregator
+          </a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          See ratings in action on the
+          <a href="/map" class="underline">interactive map</a>, or check out
+          <a href="/reelect-or-reject" class="underline">Re-elect or Reject</a>
+          to swipe through senators up for re-election and see their voting records.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

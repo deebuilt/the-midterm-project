@@ -1,0 +1,245 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="After You Vote"
+  description="What happens to your ballot after you cast it — tracking, counting, certification, recounts, and runoffs explained."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/learn" class="text-dem hover:underline">Learn</a>
+      <span class="mx-1">/</span>
+      <span>After You Vote</span>
+    </p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">After You Vote</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      You dropped off your ballot or walked out of the polling place. Now what?
+    </p>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+      <p class="text-lg text-slate-600">
+        Voting doesn't end when you fill in the bubbles. Your ballot goes on a journey&mdash;from the ballot box to being counted, verified, and ultimately certified as part of the official election results. Understanding what happens after you vote helps you know what to expect, how to track your ballot, and why results sometimes take days (or weeks) to finalize.
+      </p>
+
+      <!-- WHAT HAPPENS TO YOUR BALLOT -->
+      <h2 class="text-2xl font-bold">What Happens to Your Ballot?</h2>
+      <p class="text-slate-600">
+        The exact process varies by state and county, but here's the general flow:
+      </p>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">1</div>
+          <div>
+            <p class="font-semibold text-navy">Your ballot is received</p>
+            <p class="text-sm text-slate-600">If you voted in person, your ballot was fed into a scanner or deposited in a ballot box at the polling place. If you voted by mail, your sealed envelope was received by your county election office.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">2</div>
+          <div>
+            <p class="font-semibold text-navy">Signature and identity verification</p>
+            <p class="text-sm text-slate-600">For mail-in and absentee ballots, election workers verify the signature on the envelope against the one on file. If the signatures don't match, you may be contacted to "cure" (fix) the issue&mdash;the rules for this vary by state.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">3</div>
+          <div>
+            <p class="font-semibold text-navy">Counting</p>
+            <p class="text-sm text-slate-600">Ballots are fed through optical scanners that read your selections. Some jurisdictions use hand counts for audits or small precincts. In-person ballots are usually counted on Election Night. Mail ballots may be counted before, on, or after Election Day depending on state law.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">4</div>
+          <div>
+            <p class="font-semibold text-navy">Unofficial results</p>
+            <p class="text-sm text-slate-600">On Election Night, you see "unofficial" results on TV and news websites. These are running tallies as precincts report in. They're real counts but not yet final&mdash;outstanding mail ballots, provisional ballots, and overseas/military ballots may still need to be counted.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">5</div>
+          <div>
+            <p class="font-semibold text-navy">Canvassing and auditing</p>
+            <p class="text-sm text-slate-600">In the days and weeks after the election, officials conduct a "canvass"&mdash;a detailed review that includes counting remaining ballots, resolving issues, and verifying totals. Many states also conduct post-election audits, comparing machine counts to hand counts of a sample of ballots.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">6</div>
+          <div>
+            <p class="font-semibold text-navy">Certification</p>
+            <p class="text-sm text-slate-600">Once counting and canvassing are complete, the results are <strong>certified</strong>&mdash;officially declared final by the appropriate authority (usually a county board, then the state). This is the point at which election results become legally binding.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAN I TRACK MY BALLOT -->
+      <h2 class="text-2xl font-bold">Can I Track My Ballot?</h2>
+      <p class="text-slate-600">
+        Yes&mdash;in most states. If you voted by mail or absentee, many states offer ballot tracking tools that let you see when your ballot was received, accepted, and counted. This is especially useful if you want to confirm your vote was actually recorded.
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="https://www.vote.org/ballot-tracker/" target="_blank" rel="noopener noreferrer" class="group block bg-slate-50 rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-2">Vote.org Ballot Tracker</h4>
+          <p class="text-sm text-slate-600">Links to every state's ballot tracking tool in one place. Start here.</p>
+        </a>
+        <a href="https://www.ballottrax.net/voter/" target="_blank" rel="noopener noreferrer" class="group block bg-slate-50 rounded-xl p-5 border border-slate-200 hover:border-dem/40 hover:shadow-md transition-all">
+          <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-2">BallotTrax</h4>
+          <p class="text-sm text-slate-600">Used by many counties to send automatic text, email, or voice notifications about your ballot status.</p>
+        </a>
+      </div>
+
+      <div class="bg-slate-50 rounded-xl p-6 not-prose">
+        <h4 class="font-bold text-navy mb-2">What if my mail ballot was rejected?</h4>
+        <p class="text-sm text-slate-600">
+          The most common reason for mail ballot rejection is a <strong>signature mismatch</strong>. Most states have a "ballot curing" process that gives you a window of time (usually a few days) to fix the issue. Check your state's rules and keep an eye on your ballot tracker after you mail it in.
+        </p>
+      </div>
+
+      <!-- WHY DOES COUNTING TAKE SO LONG -->
+      <h2 class="text-2xl font-bold">Why Does Counting Take So Long?</h2>
+      <p class="text-slate-600">
+        If you've ever wondered why some races take days or weeks to call, here's why:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li><strong>Mail ballot processing rules vary by state.</strong> Some states (like Florida) start processing mail ballots before Election Day. Others (like Pennsylvania) can't start until Election Day morning. This is why some states report mail results quickly and others don't.</li>
+        <li><strong>Close races take longer.</strong> When the margin is thin, every outstanding ballot matters. Officials take extra care, and media organizations wait longer before projecting a winner.</li>
+        <li><strong>Provisional ballots need review.</strong> If there was a question about your eligibility at the polls, you cast a provisional ballot. These are set aside and reviewed individually after Election Day.</li>
+        <li><strong>Military and overseas ballots arrive late.</strong> Federal law requires states to accept ballots from military and overseas voters that arrive after Election Day (the deadline varies by state, typically up to 10 days).</li>
+        <li><strong>Accuracy matters more than speed.</strong> Election officials are counting ballots correctly, not quickly. The "slow count" is a feature, not a bug.</li>
+      </ul>
+
+      <!-- RECOUNTS -->
+      <h2 class="text-2xl font-bold">Recounts</h2>
+      <p class="text-slate-600">
+        When an election is very close, a recount may occur. There are two types:
+      </p>
+
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Automatic recounts</h4>
+          <p class="text-sm text-slate-600">
+            Many states trigger an automatic recount when the margin falls below a certain threshold&mdash;often 0.5% or less. No candidate needs to request it; it just happens.
+          </p>
+        </div>
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
+          <h4 class="font-bold text-navy mb-2">Requested recounts</h4>
+          <p class="text-sm text-slate-600">
+            Candidates can request a recount in most states, though some require the requester to pay for it (costs can run into hundreds of thousands of dollars). The rules and deadlines for requesting a recount vary by state.
+          </p>
+        </div>
+      </div>
+
+      <p class="text-slate-600">
+        Recounts rarely change the outcome. A study by FairVote found that of 36 statewide recounts between 2000 and 2023, only three changed the original winner&mdash;and all three involved margins of fewer than 300 votes out of millions cast.
+      </p>
+
+      <!-- RUNOFFS -->
+      <h2 class="text-2xl font-bold">Runoffs</h2>
+      <p class="text-slate-600">
+        In some states, if no candidate gets a majority (more than 50%) of the vote, a <strong>runoff election</strong> is held between the top two finishers. This is most common in the South and in states that use a "jungle primary" system where all candidates run on one ballot.
+      </p>
+
+      <div class="not-prose bg-slate-50 rounded-xl p-5 border border-slate-200">
+        <h4 class="font-bold text-navy mb-2">States with runoff elections</h4>
+        <p class="text-sm text-slate-600">
+          <strong>Georgia, Louisiana, Mississippi, Alabama, Texas, South Carolina, North Carolina, Oklahoma,</strong> and <strong>South Dakota</strong> all have some form of runoff system for certain races. Georgia's runoff rules have been especially high-profile in recent years&mdash;the 2020 and 2022 Senate races both went to December runoffs that drew national attention and record spending.
+        </p>
+      </div>
+
+      <p class="text-slate-600">
+        Runoff elections often have much lower turnout than the original election. If your state has a runoff, showing up is especially important&mdash;your vote counts even more when fewer people are casting ballots.
+      </p>
+
+      <!-- CERTIFICATION -->
+      <h2 class="text-2xl font-bold">Certification: Making It Official</h2>
+      <p class="text-slate-600">
+        After all votes are counted, recounts (if any) are completed, and legal challenges are resolved, the results are <strong>certified</strong>. This happens at multiple levels:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-slate-600">
+        <li><strong>County-level certification:</strong> Local election boards certify their results (typically within 1&ndash;2 weeks after Election Day)</li>
+        <li><strong>State-level certification:</strong> The state's chief election official (usually the Secretary of State) or a state canvassing board certifies the statewide results</li>
+        <li><strong>For federal offices:</strong> Certified results are sent to the relevant body&mdash;the U.S. Senate for Senate races, the Clerk of the House for House races, and Congress for presidential elections</li>
+      </ul>
+      <p class="text-slate-600">
+        Certification has traditionally been a routine, procedural step. In recent years, it's drawn more attention as some officials have attempted to delay or refuse certification. Courts have consistently held that certification is a <strong>mandatory, ministerial duty</strong>&mdash;meaning officials are legally required to certify accurate results regardless of their personal views on the outcome.
+      </p>
+
+      <!-- WHAT CAN YOU DO -->
+      <h2 class="text-2xl font-bold">What Can You Do After Voting?</h2>
+
+      <div class="not-prose space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Track your ballot</p>
+            <p class="text-sm text-slate-600">Use your state's tracking tool to confirm your mail-in ballot was received and accepted.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Be patient with results</p>
+            <p class="text-sm text-slate-600">A slow count is normal and healthy. Resist the urge to treat early returns as final&mdash;the picture can shift significantly as mail and provisional ballots are counted.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Watch for runoffs</p>
+            <p class="text-sm text-slate-600">If your race goes to a runoff, show up again. Runoff turnout is usually low, so your vote has even more impact.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+          <div>
+            <p class="font-semibold text-navy">Stay engaged</p>
+            <p class="text-sm text-slate-600">Voting is just the start. Follow what your elected officials do once they're in office. Hold them accountable. Show up for the next election too.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOURCES -->
+      <h2 class="text-2xl font-bold">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns/post-election-audits" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            NCSL &mdash; Post-Election Audits
+          </a>
+        </li>
+        <li>
+          <a href="https://www.ncsl.org/elections-and-campaigns/automatic-recount-thresholds" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            NCSL &mdash; Automatic Recount Thresholds
+          </a>
+        </li>
+        <li>
+          <a href="https://fairvote.org/resources/recount-tracker/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            FairVote &mdash; Recount Tracker
+          </a>
+        </li>
+        <li>
+          <a href="https://www.eac.gov/voters/what-expect-after-election-day" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            U.S. Election Assistance Commission &mdash; What to Expect After Election Day
+          </a>
+        </li>
+        <li>
+          <a href="https://www.vote.org/ballot-tracker/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">
+            Vote.org &mdash; Ballot Tracker
+          </a>
+        </li>
+      </ul>
+
+      <!-- CTA -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-sm font-medium text-tossup">
+          Not sure what's on your ballot? Use
+          <a href="/find-your-ballot" class="underline">Find Your Ballot</a>
+          to see what races are in your state, or check the
+          <a href="/calendar" class="underline">election calendar</a>
+          for your primary date.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

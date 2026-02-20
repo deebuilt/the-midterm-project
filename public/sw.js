@@ -1,4 +1,4 @@
-const CACHE_NAME = "tmp-v11";
+const CACHE_NAME = "tmp-v12";
 
 const PRECACHE_URLS = [
   "/",
@@ -14,10 +14,17 @@ const PRECACHE_URLS = [
   "/volunteer",
   "/house",
   "/governors",
+  "/reelect-or-reject",
+  "/flip-the-house",
+  "/meet",
+  "/whos-running",
   "/data/states-10m.json",
   "/learn",
   "/learn/how-to-run",
   "/learn/congressional-hearings",
+  "/learn/race-ratings",
+  "/learn/save-act",
+  "/learn/after-you-vote",
 ];
 
 // Install — precache key pages
