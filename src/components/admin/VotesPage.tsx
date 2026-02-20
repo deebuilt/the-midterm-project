@@ -318,11 +318,11 @@ function parseVoteDetailXml(xmlText: string): SenateVoteDetail {
   return { voteNumber, question, result, voteDate, billNumber, title, members };
 }
 
-/** Map Senate.gov vote_cast to our vote_enum */
+/** Map Senate.gov / House.gov vote_cast to our vote_enum */
 function mapVoteCast(voteCast: string): "yea" | "nay" | "abstain" | "not_voting" {
   const v = voteCast.toLowerCase();
-  if (v === "yea" || v === "guilty") return "yea";
-  if (v === "nay" || v === "not guilty") return "nay";
+  if (v === "yea" || v === "aye" || v === "guilty") return "yea";
+  if (v === "nay" || v === "no" || v === "not guilty") return "nay";
   if (v === "not voting") return "not_voting";
   if (v === "present") return "abstain";
   return "not_voting";
@@ -343,7 +343,7 @@ function buildVoteHtmlUrl(congress: number, session: number, voteNumber: string)
 /** Fetch a Senate.gov XML URL via our Edge Function proxy (bypasses CORS) */
 async function fetchSenateXml(url: string, authToken: string): Promise<string> {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const resp = await fetch(`${supabaseUrl}/functions/v1/senate-proxy`, {
+  const resp = await fetch(`${supabaseUrl}/functions/v1/vote-proxy`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -374,6 +374,143 @@ function parseSenateDate(dateStr: string, congressYear: number): string | null {
   const month = monthMap[match[2]];
   if (!month) return null;
   return `${congressYear}-${month}-${day}`;
+}
+
+// ─── House.gov XML Types ───
+
+interface HouseVoteMember {
+  lastName: string;
+  party: string;
+  state: string;
+  voteCast: string;
+  nameId: string; // Bioguide-style ID from name-id attribute
+}
+
+interface HouseVoteDetail {
+  rollCallNumber: string;
+  congress: string;
+  session: string;
+  legisNum: string;
+  voteQuestion: string;
+  voteResult: string;
+  voteDate: string; // raw from XML, e.g. "22-May-2025"
+  voteDesc: string;
+  yeaTotal: number;
+  nayTotal: number;
+  presentTotal: number;
+  notVotingTotal: number;
+  members: HouseVoteMember[];
+}
+
+/** Parse an individual roll call vote XML from clerk.house.gov */
+function parseHouseVoteXml(xmlText: string): HouseVoteDetail {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, "text/xml");
+  const errorNode = doc.querySelector("parsererror");
+  if (errorNode) throw new Error("Invalid XML");
+
+  const meta = doc.querySelector("vote-metadata");
+  const rollCallNumber = meta?.querySelector("rollcall-num")?.textContent?.trim() ?? "";
+  const congress = meta?.querySelector("congress")?.textContent?.trim() ?? "";
+  const session = meta?.querySelector("session")?.textContent?.trim() ?? "";
+  const legisNum = meta?.querySelector("legis-num")?.textContent?.trim() ?? "";
+  const voteQuestion = meta?.querySelector("vote-question")?.textContent?.trim() ?? "";
+  const voteResult = meta?.querySelector("vote-result")?.textContent?.trim() ?? "";
+  const voteDate = meta?.querySelector("action-date")?.textContent?.trim() ?? "";
+  const voteDesc = meta?.querySelector("vote-desc")?.textContent?.trim() ?? "";
+
+  // Parse totals
+  let yeaTotal = 0, nayTotal = 0, presentTotal = 0, notVotingTotal = 0;
+  const totalsByVote = doc.querySelector("totals-by-vote");
+  if (totalsByVote) {
+    yeaTotal = parseInt(totalsByVote.querySelector("yea-total")?.textContent ?? "0", 10)
+      + parseInt(totalsByVote.querySelector("aye-total")?.textContent ?? "0", 10);
+    nayTotal = parseInt(totalsByVote.querySelector("nay-total")?.textContent ?? "0", 10)
+      + parseInt(totalsByVote.querySelector("no-total")?.textContent ?? "0", 10);
+    presentTotal = parseInt(totalsByVote.querySelector("present-total")?.textContent ?? "0", 10);
+    notVotingTotal = parseInt(totalsByVote.querySelector("not-voting-total")?.textContent ?? "0", 10);
+  }
+
+  // Parse member votes
+  const members: HouseVoteMember[] = [];
+  const recordedVotes = doc.querySelectorAll("recorded-vote");
+  for (const rv of recordedVotes) {
+    const legislator = rv.querySelector("legislator");
+    if (!legislator) continue;
+    members.push({
+      lastName: legislator.getAttribute("sort-field") ?? legislator.textContent?.trim() ?? "",
+      party: legislator.getAttribute("party") ?? "",
+      state: legislator.getAttribute("state") ?? "",
+      voteCast: rv.querySelector("vote")?.textContent?.trim() ?? "",
+      nameId: legislator.getAttribute("name-id") ?? "",
+    });
+  }
+
+  return {
+    rollCallNumber, congress, session, legisNum, voteQuestion,
+    voteResult, voteDate, voteDesc, yeaTotal, nayTotal,
+    presentTotal, notVotingTotal, members,
+  };
+}
+
+/** Build the XML URL for a House roll call vote */
+function buildHouseVoteXmlUrl(year: number, rollNumber: number): string {
+  const padded = String(rollNumber).padStart(3, "0");
+  return `https://clerk.house.gov/evs/${year}/roll${padded}.xml`;
+}
+
+/** Build the HTML URL for a House vote (used as source_url) */
+function buildHouseVoteHtmlUrl(year: number, rollNumber: number): string {
+  return `https://clerk.house.gov/Votes/${year}${rollNumber}`;
+}
+
+/** Fetch a clerk.house.gov XML URL via our vote-proxy Edge Function */
+async function fetchHouseXml(url: string, authToken: string): Promise<string> {
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const resp = await fetch(`${supabaseUrl}/functions/v1/vote-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+      apikey: import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ url }),
+  });
+
+  if (!resp.ok) {
+    const body = await resp.json().catch(() => ({ error: `HTTP ${resp.status}` }));
+    throw new Error(body.error ?? `Proxy returned ${resp.status}`);
+  }
+
+  return resp.text();
+}
+
+/** Parse a House.gov date like "22-May-2025" into YYYY-MM-DD */
+function parseHouseDate(dateStr: string): string | null {
+  if (!dateStr) return null;
+  const match = dateStr.match(/^(\d{1,2})-(\w{3})-(\d{4})$/);
+  if (!match) return null;
+  const day = match[1].padStart(2, "0");
+  const monthMap: Record<string, string> = {
+    Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+    Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+  };
+  const month = monthMap[match[2]];
+  if (!month) return null;
+  return `${match[3]}-${month}-${day}`;
+}
+
+/** Normalize a House legis-num like "H R 1" or "H J RES 72" into "H.R. 1" / "H.J.Res. 72" */
+function normalizeHouseBillNumber(legisNum: string): string {
+  if (!legisNum) return "";
+  return legisNum
+    .replace(/^H R\s+/, "H.R. ")
+    .replace(/^H J RES\s+/, "H.J.Res. ")
+    .replace(/^H CON RES\s+/, "H.Con.Res. ")
+    .replace(/^H RES\s+/, "H.Res. ")
+    .replace(/^S\s+/, "S. ")
+    .replace(/^S J RES\s+/, "S.J.Res. ")
+    .trim();
 }
 
 // ─── Component ───
@@ -427,6 +564,18 @@ export default function VotesPage({ setHeaderActions }: Props) {
   const [senateImportResults, setSenateImportResults] = useState<{ voteNumber: string; billName: string; status: "imported" | "skipped" | "failed"; reason?: string }[]>([]);
   const [senateDetailItem, setSenateDetailItem] = useState<SenateVoteListItem | null>(null);
 
+  // House.gov Import
+  const [houseDrawerOpen, setHouseDrawerOpen] = useState(false);
+  const [houseYear, setHouseYear] = useState(2025);
+  const [houseRollNumber, setHouseRollNumber] = useState("");
+  const [houseCandidates, setHouseCandidates] = useState<CandidateOption[]>([]);
+  const [houseLoading, setHouseLoading] = useState(false);
+  const [housePasteMode, setHousePasteMode] = useState(false);
+  const [housePasteText, setHousePasteText] = useState("");
+  const [housePreview, setHousePreview] = useState<HouseVoteDetail | null>(null);
+  const [houseImportStep, setHouseImportStep] = useState<"input" | "preview" | "importing" | "done">("input");
+  const [houseImportResult, setHouseImportResult] = useState<{ status: "imported" | "skipped" | "failed"; billName: string; reason?: string } | null>(null);
+
   // Filters
   const [filterBill, setFilterBill] = useState("");
   const [filterTopic, setFilterTopic] = useState<string>("all");
@@ -446,6 +595,11 @@ export default function VotesPage({ setHeaderActions }: Props) {
         {!isMobile && (
           <Button size="small" icon={<CloudDownloadOutlined />} onClick={() => setSenateDrawerOpen(true)}>
             Senate.gov
+          </Button>
+        )}
+        {!isMobile && (
+          <Button size="small" icon={<CloudDownloadOutlined />} onClick={() => setHouseDrawerOpen(true)}>
+            House.gov
           </Button>
         )}
         {!isMobile && (
@@ -512,6 +666,31 @@ export default function VotesPage({ setHeaderActions }: Props) {
     );
   }
 
+  async function loadHouseCandidates() {
+    const { data: houseBody } = await supabase
+      .from("government_bodies")
+      .select("id")
+      .eq("slug", "us-house")
+      .single();
+
+    const { data } = await supabase
+      .from("candidates")
+      .select("id, first_name, last_name, party, is_incumbent, state:states(abbr)")
+      .eq("is_incumbent", true)
+      .eq("body_id", houseBody?.id ?? 0)
+      .not("state_id", "is", null)
+      .order("last_name");
+
+    setHouseCandidates(
+      (data ?? []).map((c: any) => ({
+        id: c.id,
+        label: `${c.last_name}, ${c.first_name} (${c.party?.charAt(0)}-${c.state?.abbr ?? "?"})`,
+        party: c.party,
+        stateAbbr: c.state?.abbr ?? "",
+      }))
+    );
+  }
+
   async function loadTopics() {
     const { data } = await supabase
       .from("topics")
@@ -522,7 +701,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
   }
 
   useEffect(() => {
-    Promise.all([loadBills(), loadCandidates(), loadTopics()]).then(() =>
+    Promise.all([loadBills(), loadCandidates(), loadHouseCandidates(), loadTopics()]).then(() =>
       setLoading(false)
     );
   }, []);
@@ -1034,6 +1213,144 @@ export default function VotesPage({ setHeaderActions }: Props) {
       status: "imported" as const,
       reason: `${matchedCount} senator votes matched`,
     };
+  }
+
+  // ─── House.gov Import ───
+
+  function resetHouseImport() {
+    setHouseRollNumber("");
+    setHouseLoading(false);
+    setHousePasteMode(false);
+    setHousePasteText("");
+    setHousePreview(null);
+    setHouseImportStep("input");
+    setHouseImportResult(null);
+  }
+
+  async function fetchHouseVote() {
+    const rollNum = parseInt(houseRollNumber, 10);
+    if (!rollNum || rollNum < 1) {
+      messageApi.warning("Enter a valid roll call number");
+      return;
+    }
+
+    setHouseLoading(true);
+    setHousePasteMode(false);
+    const url = buildHouseVoteXmlUrl(houseYear, rollNum);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const xml = await fetchHouseXml(url, session.access_token);
+      const detail = parseHouseVoteXml(xml);
+      setHousePreview(detail);
+      setHouseImportStep("preview");
+    } catch {
+      // Proxy failed — fall back to paste mode
+      setHousePasteMode(true);
+      messageApi.info("Direct fetch failed — paste the XML instead");
+    } finally {
+      setHouseLoading(false);
+    }
+  }
+
+  function handleHousePaste() {
+    if (!housePasteText.trim()) return;
+    try {
+      const detail = parseHouseVoteXml(housePasteText);
+      setHousePreview(detail);
+      setHouseImportStep("preview");
+      setHousePasteMode(false);
+      setHousePasteText("");
+    } catch (err: any) {
+      messageApi.error(`Failed to parse XML: ${err.message}`);
+    }
+  }
+
+  async function importHouseVote() {
+    if (!housePreview) return;
+    setHouseImportStep("importing");
+
+    const detail = housePreview;
+    const billNumber = normalizeHouseBillNumber(detail.legisNum);
+    const billName = detail.voteDesc || detail.legisNum || `House Roll Call #${detail.rollCallNumber}`;
+
+    // Clean up result
+    let resultText = detail.voteResult || "";
+    const parenIdx = resultText.indexOf("(");
+    if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
+
+    // Duplicate check
+    if (billNumber) {
+      const existing = bills.find((b) => b.bill_number === billNumber);
+      if (existing) {
+        setHouseImportResult({ status: "skipped", billName, reason: `Already exists: ${existing.bill_name}` });
+        setHouseImportStep("done");
+        return;
+      }
+    }
+
+    const voteDate = parseHouseDate(detail.voteDate);
+    const rollNum = parseInt(detail.rollCallNumber, 10);
+    const sourceUrl = buildHouseVoteHtmlUrl(houseYear, rollNum);
+
+    try {
+      // Insert bill
+      const { data: billData, error: billErr } = await supabase
+        .from("votes")
+        .insert({
+          bill_name: billName,
+          bill_number: billNumber || null,
+          vote_date: voteDate,
+          result: resultText || null,
+          source_url: sourceUrl,
+          summary: null,
+          topic_id: null,
+        })
+        .select("id")
+        .single();
+
+      if (billErr) throw billErr;
+      const billId = billData.id;
+
+      // Match House members and insert candidate_votes
+      let matchedCount = 0;
+      const candidateVoteRows: { candidate_id: number; vote_id: number; vote: string }[] = [];
+
+      for (const member of detail.members) {
+        // Match by last_name + party initial + state
+        const match = houseCandidates.find(
+          (c) =>
+            c.label.split(",")[0].trim().toLowerCase() === member.lastName.toLowerCase()
+            && c.stateAbbr === member.state
+            && c.party?.charAt(0).toUpperCase() === member.party.toUpperCase()
+        );
+        if (match) {
+          candidateVoteRows.push({
+            candidate_id: match.id,
+            vote_id: billId,
+            vote: mapVoteCast(member.voteCast),
+          });
+          matchedCount++;
+        }
+      }
+
+      if (candidateVoteRows.length > 0) {
+        const { error: cvErr } = await supabase.from("candidate_votes").insert(candidateVoteRows);
+        if (cvErr) throw cvErr;
+      }
+
+      setHouseImportResult({
+        status: "imported",
+        billName,
+        reason: `${matchedCount} of ${detail.members.length} rep votes matched (${houseCandidates.length} incumbents in DB)`,
+      });
+      await loadBills();
+    } catch (err: any) {
+      setHouseImportResult({ status: "failed", billName, reason: err.message });
+    }
+
+    setHouseImportStep("done");
   }
 
   // ─── Topics Drawer CRUD ───
@@ -1946,6 +2263,192 @@ export default function VotesPage({ setHeaderActions }: Props) {
           </div>
         )}
       </MultiLevelDrawer>
+
+      {/* House.gov Import Drawer */}
+      <Drawer
+        title="Import from House.gov"
+        open={houseDrawerOpen}
+        onClose={() => { setHouseDrawerOpen(false); resetHouseImport(); }}
+        width={600}
+        destroyOnClose
+      >
+        {houseImportStep === "input" && (
+          <div>
+            <Text strong style={{ display: "block", marginBottom: 12 }}>
+              Enter a House Roll Call Number
+            </Text>
+            <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 13 }}>
+              Find roll call numbers at{" "}
+              <a href="https://clerk.house.gov/Votes" target="_blank" rel="noopener noreferrer">
+                clerk.house.gov/Votes
+              </a>
+            </Text>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <Select
+                size="small"
+                value={houseYear}
+                onChange={setHouseYear}
+                style={{ width: 100 }}
+                options={[
+                  { value: 2026, label: "2026" },
+                  { value: 2025, label: "2025" },
+                  { value: 2024, label: "2024" },
+                  { value: 2023, label: "2023" },
+                  { value: 2022, label: "2022" },
+                  { value: 2021, label: "2021" },
+                  { value: 2020, label: "2020" },
+                  { value: 2019, label: "2019" },
+                ]}
+              />
+              <Input
+                size="small"
+                placeholder="Roll call #"
+                value={houseRollNumber}
+                onChange={(e) => setHouseRollNumber(e.target.value.replace(/\D/g, ""))}
+                onPressEnter={fetchHouseVote}
+                style={{ width: 120 }}
+              />
+              <Button
+                size="small"
+                type="primary"
+                icon={<CloudDownloadOutlined />}
+                loading={houseLoading}
+                onClick={fetchHouseVote}
+              >
+                Fetch
+              </Button>
+            </div>
+
+            {housePasteMode && (
+              <div>
+                <Alert
+                  type="info"
+                  showIcon
+                  message="Direct fetch blocked (CORS)"
+                  description={
+                    <>
+                      Open{" "}
+                      <a
+                        href={buildHouseVoteXmlUrl(houseYear, parseInt(houseRollNumber, 10) || 1)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        this URL
+                      </a>
+                      {" "}in your browser, select all (Ctrl+A), copy (Ctrl+C), and paste below.
+                    </>
+                  }
+                  style={{ marginBottom: 12 }}
+                />
+                <TextArea
+                  rows={8}
+                  placeholder="Paste the XML here..."
+                  value={housePasteText}
+                  onChange={(e) => setHousePasteText(e.target.value)}
+                />
+                <Button
+                  type="primary"
+                  style={{ marginTop: 8 }}
+                  disabled={!housePasteText.trim()}
+                  onClick={handleHousePaste}
+                >
+                  Parse XML
+                </Button>
+              </div>
+            )}
+
+            {houseCandidates.length === 0 && (
+              <Alert
+                type="warning"
+                showIcon
+                message="No House incumbents found"
+                description="House candidates with is_incumbent=true and body_id=us-house are needed for vote matching."
+                style={{ marginTop: 16 }}
+              />
+            )}
+            {houseCandidates.length > 0 && (
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {houseCandidates.length} House incumbents loaded for matching
+              </Text>
+            )}
+          </div>
+        )}
+
+        {houseImportStep === "preview" && housePreview && (
+          <div>
+            <Text strong style={{ display: "block", marginBottom: 12 }}>
+              Preview — confirm before importing
+            </Text>
+            <Descriptions column={1} size="small" bordered>
+              <Descriptions.Item label="Roll Call #">{housePreview.rollCallNumber}</Descriptions.Item>
+              <Descriptions.Item label="Date">{housePreview.voteDate}</Descriptions.Item>
+              <Descriptions.Item label="Bill">{normalizeHouseBillNumber(housePreview.legisNum) || "—"}</Descriptions.Item>
+              <Descriptions.Item label="Question">{housePreview.voteQuestion}</Descriptions.Item>
+              <Descriptions.Item label="Result">
+                <Tag color={housePreview.voteResult === "Passed" || housePreview.voteResult === "Agreed to" ? "green" : housePreview.voteResult === "Failed" ? "red" : "default"}>
+                  {housePreview.voteResult}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Tally">
+                <Space>
+                  <Text style={{ color: "green" }}>Yea: {housePreview.yeaTotal}</Text>
+                  <Text style={{ color: "red" }}>Nay: {housePreview.nayTotal}</Text>
+                  {housePreview.presentTotal > 0 && <Text>Present: {housePreview.presentTotal}</Text>}
+                  {housePreview.notVotingTotal > 0 && <Text type="secondary">NV: {housePreview.notVotingTotal}</Text>}
+                </Space>
+              </Descriptions.Item>
+              <Descriptions.Item label="Members">{housePreview.members.length} votes recorded</Descriptions.Item>
+            </Descriptions>
+
+            {housePreview.voteDesc && (
+              <>
+                <Divider style={{ margin: "12px 0" }} />
+                <Text strong>Description</Text>
+                <p style={{ whiteSpace: "pre-wrap", marginTop: 8, fontSize: 13, color: "#666" }}>{housePreview.voteDesc}</p>
+              </>
+            )}
+
+            <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+              <Button type="primary" onClick={importHouseVote}>
+                Import This Vote
+              </Button>
+              <Button onClick={() => { setHousePreview(null); setHouseImportStep("input"); }}>
+                Back
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {houseImportStep === "importing" && (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 16 }}>
+              <Text>Importing vote and matching representatives...</Text>
+            </div>
+          </div>
+        )}
+
+        {houseImportStep === "done" && houseImportResult && (
+          <div>
+            <Alert
+              type={houseImportResult.status === "imported" ? "success" : houseImportResult.status === "skipped" ? "warning" : "error"}
+              showIcon
+              message={houseImportResult.status === "imported" ? "Import Successful" : houseImportResult.status === "skipped" ? "Skipped" : "Import Failed"}
+              description={
+                <>
+                  <div style={{ fontWeight: 500 }}>{houseImportResult.billName}</div>
+                  {houseImportResult.reason && <div style={{ marginTop: 4, fontSize: 13 }}>{houseImportResult.reason}</div>}
+                </>
+              }
+              style={{ marginBottom: 16 }}
+            />
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button onClick={resetHouseImport}>Import Another</Button>
+              <Button onClick={() => { setHouseDrawerOpen(false); resetHouseImport(); }}>Close</Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       {/* Topics Drawer */}
       <Drawer
