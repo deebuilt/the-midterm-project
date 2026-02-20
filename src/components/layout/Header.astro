@@ -259,18 +259,42 @@ const isGroupActive = (links: { href: string }[]) =>
           ))}
         </ul>
       </li>
+      <!-- Search button -->
+      <li>
+        <button
+          id="search-btn"
+          class="text-white/60 hover:text-tossup transition-colors flex items-center gap-1"
+          aria-label="Search"
+          title="Search (Ctrl+K)"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </li>
     </ul>
 
-    <!-- Mobile menu button -->
-    <button
-      id="mobile-menu-btn"
-      class="md:hidden text-white/80 hover:text-white"
-      aria-label="Toggle menu"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
+    <!-- Mobile: search + hamburger -->
+    <div class="flex items-center gap-3 md:hidden">
+      <button
+        id="search-btn-mobile"
+        class="text-white/60 hover:text-white"
+        aria-label="Search"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+      <button
+        id="mobile-menu-btn"
+        class="text-white/80 hover:text-white"
+        aria-label="Toggle menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile nav -->
@@ -370,6 +394,14 @@ const isGroupActive = (links: { href: string }[]) =>
 </header>
 
 <script>
+  // Search buttons dispatch a custom event for the React overlay
+  document.getElementById("search-btn")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("open-search"));
+  });
+  document.getElementById("search-btn-mobile")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("open-search"));
+  });
+
   // Mobile menu toggle
   const mobileBtn = document.getElementById("mobile-menu-btn");
   const mobileMenu = document.getElementById("mobile-menu");
