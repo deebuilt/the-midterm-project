@@ -36,6 +36,7 @@ import {
   MoreOutlined,
   TeamOutlined,
   LinkOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { supabase } from "../../lib/supabase";
 import {
@@ -95,6 +96,7 @@ interface LinkCandidate {
   state_abbr: string | null;
   body_name: string | null;
   fec_candidate_id: string | null;
+  funds_raised: number | null;
   is_incumbent: boolean;
 }
 
@@ -304,6 +306,59 @@ async function findOrCreateDistrictAndRace(
   return { districtId, raceId };
 }
 
+/** Link a single FEC filing to an existing candidate (shared by single + bulk flows) */
+async function linkFilingToCandidate(
+  filing: DbFecFiling,
+  candidateId: number,
+  bodyOptions: { value: number; label: string; slug: string }[],
+  cycleId: number
+) {
+  // Step 1: Update existing candidate with FEC financial data only
+  const { error: updateCandidateError } = await supabase
+    .from("candidates")
+    .update({
+      fec_candidate_id: filing.fec_candidate_id,
+      funds_raised: filing.funds_raised,
+      funds_spent: filing.funds_spent,
+      cash_on_hand: filing.cash_on_hand,
+      fec_financials_updated_at: filing.last_synced_at,
+    })
+    .eq("id", candidateId);
+  if (updateCandidateError) throw updateCandidateError;
+
+  // Step 2: Ensure candidate is in the correct race
+  const { raceId } = await findOrCreateDistrictAndRace(
+    filing.state_id,
+    filing.office,
+    filing.district_number,
+    filing.state?.name ?? "Unknown",
+    filing.state?.abbr ?? "??",
+    bodyOptions,
+    cycleId
+  );
+
+  // Step 3: Upsert race_candidates (may already exist if incumbent)
+  const { error: raceCandidateError } = await supabase
+    .from("race_candidates")
+    .upsert(
+      {
+        race_id: raceId,
+        candidate_id: candidateId,
+        status: "announced" as const,
+        is_incumbent: filing.is_incumbent,
+      },
+      { onConflict: "race_id,candidate_id" }
+    );
+  if (raceCandidateError) throw raceCandidateError;
+
+  // Step 4: Link the filing
+  const { error: updateFilingError } = await supabase
+    .from("fec_filings")
+    .update({ promoted_to_candidate_id: candidateId })
+    .eq("id", filing.id);
+  if (updateFilingError) throw updateFilingError;
+}
+
 // ═══════════════════════════════════════════
 // Filings Tab
 // ═══════════════════════════════════════════
@@ -343,6 +398,15 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [bulkPromoteOpen, setBulkPromoteOpen] = useState(false);
   const [bulkPromoting, setBulkPromoting] = useState(false);
+
+  // Bulk Link to Existing state
+  const [bulkLinkOpen, setBulkLinkOpen] = useState(false);
+  const [bulkLinkLoading, setBulkLinkLoading] = useState(false);
+  const [bulkLinkSaving, setBulkLinkSaving] = useState(false);
+  const [bulkLinkCandidates, setBulkLinkCandidates] = useState<Map<number, LinkCandidate[]>>(new Map());
+  const [bulkLinkMappings, setBulkLinkMappings] = useState<Map<number, number | null>>(new Map()); // filingId → candidateId
+  const [bulkLinkSkipped, setBulkLinkSkipped] = useState<Set<number>>(new Set()); // filingIds to skip
+  const [bulkLinkProgress, setBulkLinkProgress] = useState<{ done: number; total: number } | null>(null);
 
   useEffect(() => {
     fetchActiveCycle();
@@ -415,7 +479,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
     try {
       const { data, error } = await supabase
         .from("candidates")
-        .select("id, first_name, last_name, party, is_incumbent, fec_candidate_id, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name)")
+        .select("id, first_name, last_name, party, is_incumbent, fec_candidate_id, funds_raised, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name)")
         .eq("state_id", filing.state_id)
         .order("last_name");
       if (error) throw error;
@@ -428,6 +492,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           state_abbr: c.state?.abbr ?? null,
           body_name: c.body?.name ?? null,
           fec_candidate_id: c.fec_candidate_id,
+          funds_raised: c.funds_raised ?? null,
           is_incumbent: c.is_incumbent,
         }))
       );
@@ -445,7 +510,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
     try {
       const { data, error } = await supabase
         .from("candidates")
-        .select("id, first_name, last_name, party, is_incumbent, fec_candidate_id, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name)")
+        .select("id, first_name, last_name, party, is_incumbent, fec_candidate_id, funds_raised, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name)")
         .or(`last_name.ilike.%${searchText}%,first_name.ilike.%${searchText}%`)
         .order("last_name")
         .limit(50);
@@ -459,6 +524,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           state_abbr: c.state?.abbr ?? null,
           body_name: c.body?.name ?? null,
           fec_candidate_id: c.fec_candidate_id,
+          funds_raised: c.funds_raised ?? null,
           is_incumbent: c.is_incumbent,
         }))
       );
@@ -548,51 +614,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
     if (!linkFiling || !selectedLinkCandidateId || !activeCycleId) return;
     setLinking(true);
     try {
-      // Step 1: Update existing candidate with FEC financial data only
-      const { error: updateCandidateError } = await supabase
-        .from("candidates")
-        .update({
-          fec_candidate_id: linkFiling.fec_candidate_id,
-          funds_raised: linkFiling.funds_raised,
-          funds_spent: linkFiling.funds_spent,
-          cash_on_hand: linkFiling.cash_on_hand,
-          fec_financials_updated_at: linkFiling.last_synced_at,
-        })
-        .eq("id", selectedLinkCandidateId);
-      if (updateCandidateError) throw updateCandidateError;
-
-      // Step 2: Ensure candidate is in the correct race
-      const { raceId } = await findOrCreateDistrictAndRace(
-        linkFiling.state_id,
-        linkFiling.office,
-        linkFiling.district_number,
-        linkFiling.state?.name ?? "Unknown",
-        linkFiling.state?.abbr ?? "??",
-        bodyOptions,
-        activeCycleId
-      );
-
-      // Step 3: Upsert race_candidates (may already exist if incumbent)
-      const { error: raceCandidateError } = await supabase
-        .from("race_candidates")
-        .upsert(
-          {
-            race_id: raceId,
-            candidate_id: selectedLinkCandidateId,
-            status: "announced" as const,
-            is_incumbent: linkFiling.is_incumbent,
-          },
-          { onConflict: "race_id,candidate_id" }
-        );
-      if (raceCandidateError) throw raceCandidateError;
-
-      // Step 4: Link the filing
-      const { error: updateFilingError } = await supabase
-        .from("fec_filings")
-        .update({ promoted_to_candidate_id: selectedLinkCandidateId })
-        .eq("id", linkFiling.id);
-      if (updateFilingError) throw updateFilingError;
-
+      await linkFilingToCandidate(linkFiling, selectedLinkCandidateId, bodyOptions, activeCycleId);
       messageApi.success(
         `Linked ${linkFiling.first_name} ${linkFiling.last_name} to existing candidate`
       );
@@ -751,6 +773,119 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
     });
   };
 
+  const handleBulkLinkOpen = async () => {
+    setBulkLinkOpen(true);
+    setBulkLinkLoading(true);
+    setBulkLinkMappings(new Map());
+    setBulkLinkSkipped(new Set());
+    setBulkLinkProgress(null);
+
+    const selectedFilings = filings.filter(
+      (f) => selectedRowKeys.includes(f.id) && !f.promoted_to_candidate_id
+    );
+
+    // Collect unique state IDs
+    const stateIds = [...new Set(selectedFilings.map((f) => f.state_id))];
+
+    try {
+      // Fetch all candidates from those states in one query
+      const { data, error } = await supabase
+        .from("candidates")
+        .select("id, first_name, last_name, party, is_incumbent, fec_candidate_id, funds_raised, state_id, state:states!candidates_state_id_fkey(abbr), body:government_bodies(name)")
+        .in("state_id", stateIds)
+        .order("last_name");
+      if (error) throw error;
+
+      // Build state → candidates map
+      const byState = new Map<number, LinkCandidate[]>();
+      for (const c of data ?? []) {
+        const stateId = (c as any).state_id as number;
+        const entry: LinkCandidate = {
+          id: c.id,
+          first_name: c.first_name,
+          last_name: c.last_name,
+          party: c.party,
+          state_abbr: (c as any).state?.abbr ?? null,
+          body_name: (c as any).body?.name ?? null,
+          fec_candidate_id: c.fec_candidate_id,
+          funds_raised: c.funds_raised ?? null,
+          is_incumbent: c.is_incumbent,
+        };
+        if (!byState.has(stateId)) byState.set(stateId, []);
+        byState.get(stateId)!.push(entry);
+      }
+      setBulkLinkCandidates(byState);
+
+      // Auto-match by last name
+      const autoMappings = new Map<number, number | null>();
+      for (const filing of selectedFilings) {
+        const stateCandidates = byState.get(filing.state_id) ?? [];
+        const match = stateCandidates.find(
+          (c) =>
+            c.last_name.toLowerCase() === filing.last_name.toLowerCase() &&
+            !(c.fec_candidate_id && c.funds_raised) // skip candidates already linked with funds
+        );
+        autoMappings.set(filing.id, match?.id ?? null);
+      }
+      setBulkLinkMappings(autoMappings);
+    } catch (err) {
+      console.error("Error loading candidates for bulk link:", err);
+      messageApi.error("Failed to load candidates");
+    } finally {
+      setBulkLinkLoading(false);
+    }
+  };
+
+  const handleBulkLinkSave = async () => {
+    if (!activeCycleId) return;
+    setBulkLinkSaving(true);
+
+    const selectedFilings = filings.filter(
+      (f) => selectedRowKeys.includes(f.id) && !f.promoted_to_candidate_id
+    );
+
+    const toLink = selectedFilings.filter((f) => {
+      if (bulkLinkSkipped.has(f.id)) return false;
+      const candidateId = bulkLinkMappings.get(f.id);
+      return candidateId != null;
+    });
+
+    let successCount = 0;
+    const errors: string[] = [];
+    setBulkLinkProgress({ done: 0, total: toLink.length });
+
+    for (const filing of toLink) {
+      const candidateId = bulkLinkMappings.get(filing.id)!;
+      try {
+        await linkFilingToCandidate(filing, candidateId, bodyOptions, activeCycleId);
+        successCount++;
+      } catch (err: any) {
+        errors.push(`${filing.first_name} ${filing.last_name}: ${err.message ?? "Unknown error"}`);
+      }
+      setBulkLinkProgress({ done: successCount + errors.length, total: toLink.length });
+    }
+
+    if (errors.length > 0) {
+      Modal.error({
+        title: `${errors.length} error${errors.length !== 1 ? "s" : ""} during bulk link`,
+        content: (
+          <div style={{ maxHeight: 200, overflow: "auto" }}>
+            {errors.map((e, i) => (
+              <div key={i} style={{ fontSize: 12, marginBottom: 4 }}>{e}</div>
+            ))}
+          </div>
+        ),
+      });
+    }
+
+    messageApi.success(`Linked ${successCount} of ${toLink.length} filing${toLink.length !== 1 ? "s" : ""}`);
+    setBulkLinkSaving(false);
+    setBulkLinkOpen(false);
+    setBulkLinkProgress(null);
+    setSelectedRowKeys([]);
+    fetchFilings();
+  };
+
   const filteredFilings = filings.filter((f) => {
     if (stateFilter !== null && f.state_id !== stateFilter) return false;
     if (bodyFilter !== "all") {
@@ -777,6 +912,65 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
       key: "name",
       width: 200,
       sorter: (a: DbFecFiling, b: DbFecFiling) => a.last_name.localeCompare(b.last_name),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => {
+        const keys = (selectedKeys ?? []) as string[];
+        const searchVal = keys.find((k: string) => k.startsWith("__search__"))?.slice(10) ?? "";
+        const checkKeys = keys.filter((k: string) => !k.startsWith("__search__"));
+        const setKeys = (search: string, checks: string[]) => {
+          const next = [...checks];
+          if (search) next.push("__search__" + search);
+          setSelectedKeys(next);
+        };
+        return (
+          <div style={{ padding: 8, width: 220 }}>
+            <Input
+              placeholder="Search by name..."
+              prefix={<SearchOutlined />}
+              size="small"
+              value={searchVal}
+              onChange={(e) => setKeys(e.target.value, checkKeys)}
+              onPressEnter={() => confirm()}
+              style={{ marginBottom: 8 }}
+              allowClear
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+              <Checkbox
+                checked={checkKeys.includes("__incumbent__")}
+                onChange={(e) => {
+                  const next = e.target.checked
+                    ? [...checkKeys.filter((k: string) => k !== "__non_incumbent__"), "__incumbent__"]
+                    : checkKeys.filter((k: string) => k !== "__incumbent__");
+                  setKeys(searchVal, next);
+                }}
+              >Incumbent</Checkbox>
+              <Checkbox
+                checked={checkKeys.includes("__non_incumbent__")}
+                onChange={(e) => {
+                  const next = e.target.checked
+                    ? [...checkKeys.filter((k: string) => k !== "__incumbent__"), "__non_incumbent__"]
+                    : checkKeys.filter((k: string) => k !== "__non_incumbent__");
+                  setKeys(searchVal, next);
+                }}
+              >Non-Incumbent</Checkbox>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Button size="small" onClick={() => { clearFilters?.(); confirm(); }} type="link">Reset</Button>
+              <Button size="small" type="primary" onClick={() => confirm()}>OK</Button>
+            </div>
+          </div>
+        );
+      },
+      onFilter: (value: unknown, record: DbFecFiling) => {
+        const v = value as string;
+        if (v.startsWith("__search__")) {
+          const search = v.slice(10).toLowerCase();
+          return (`${record.first_name} ${record.last_name}`).toLowerCase().includes(search);
+        }
+        if (v === "__incumbent__") return record.is_incumbent;
+        if (v === "__non_incumbent__") return !record.is_incumbent;
+        return true;
+      },
+      filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />,
       render: (_: any, record: DbFecFiling) => {
         let partyIndicator = "";
         let partyColor = "gray";
@@ -1015,6 +1209,13 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
           </Button>
           <Button
             size="small"
+            icon={<LinkOutlined />}
+            onClick={handleBulkLinkOpen}
+          >
+            Link to Existing
+          </Button>
+          <Button
+            size="small"
             danger
             icon={<DeleteOutlined />}
             onClick={handleBulkDelete}
@@ -1230,7 +1431,7 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
                     const partyColors: Record<string, string> = {
                       Democrat: "blue", Republican: "red", Independent: "purple",
                     };
-                    const alreadyLinked = !!c.fec_candidate_id && c.fec_candidate_id !== linkFiling?.fec_candidate_id;
+                    const alreadyLinked = !!(c.fec_candidate_id && c.funds_raised) && c.fec_candidate_id !== linkFiling?.fec_candidate_id;
 
                     return (
                       <div
@@ -1316,6 +1517,223 @@ function FilingsTab({ messageApi, isMobile }: { messageApi: ReturnType<typeof me
               </>
             }
           />
+        )}
+      </Modal>
+
+      {/* Bulk Link to Existing Modal */}
+      <Modal
+        title={`Bulk Link to Existing — ${selectedRowKeys.length} Filing${selectedRowKeys.length !== 1 ? "s" : ""}`}
+        open={bulkLinkOpen}
+        onCancel={() => !bulkLinkSaving && setBulkLinkOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setBulkLinkOpen(false)} disabled={bulkLinkSaving}>
+            Cancel
+          </Button>,
+          <Button
+            key="save"
+            type="primary"
+            icon={<LinkOutlined />}
+            loading={bulkLinkSaving}
+            disabled={
+              bulkLinkLoading ||
+              [...bulkLinkMappings.values()].filter((v) => v != null).length === 0
+            }
+            onClick={handleBulkLinkSave}
+          >
+            Link{" "}
+            {(() => {
+              const selectedFilingsForLink = filings.filter(
+                (f) => selectedRowKeys.includes(f.id) && !f.promoted_to_candidate_id
+              );
+              const matchedCount = selectedFilingsForLink.filter(
+                (f) => !bulkLinkSkipped.has(f.id) && bulkLinkMappings.get(f.id) != null
+              ).length;
+              return `${matchedCount} Matched`;
+            })()}
+          </Button>,
+        ]}
+        width={isMobile ? "100vw" : 960}
+        style={isMobile ? { top: 0, maxWidth: "100vw", margin: 0, paddingBottom: 0 } : undefined}
+      >
+        <Alert
+          type="info"
+          showIcon
+          message="Only FEC data will be synced"
+          description="This will update each candidate's FEC ID, funds raised, spent, cash on hand, and create race assignments. Existing enrichment data (photo, bio, website) will not be changed."
+          style={{ fontSize: 12, marginBottom: 16 }}
+        />
+
+        {bulkLinkProgress && (
+          <Progress
+            percent={Math.round((bulkLinkProgress.done / bulkLinkProgress.total) * 100)}
+            status="active"
+            style={{ marginBottom: 16 }}
+            format={() => `${bulkLinkProgress.done}/${bulkLinkProgress.total}`}
+          />
+        )}
+
+        {bulkLinkLoading ? (
+          <div style={{ textAlign: "center", padding: 48 }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 12 }}><Text type="secondary">Loading candidates...</Text></div>
+          </div>
+        ) : (
+          <div style={{ maxHeight: isMobile ? "60vh" : 500, overflow: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid #f0f0f0", textAlign: "left" }}>
+                  <th style={{ padding: "8px 8px 8px 0", width: 32 }}>
+                    <Tooltip title="Skip all unmatched">
+                      <Checkbox
+                        onChange={(e) => {
+                          const sf = filings.filter(
+                            (f) => selectedRowKeys.includes(f.id) && !f.promoted_to_candidate_id
+                          );
+                          if (e.target.checked) {
+                            setBulkLinkSkipped(new Set(sf.filter((f) => !bulkLinkMappings.get(f.id)).map((f) => f.id)));
+                          } else {
+                            setBulkLinkSkipped(new Set());
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  </th>
+                  <th style={{ padding: "8px 12px" }}>FEC Filing</th>
+                  <th style={{ padding: "8px 12px" }}>Match To Candidate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filings
+                  .filter((f) => selectedRowKeys.includes(f.id))
+                  .map((filing) => {
+                    const isPromoted = !!filing.promoted_to_candidate_id;
+                    const isSkipped = bulkLinkSkipped.has(filing.id);
+                    const stateCandidates = bulkLinkCandidates.get(filing.state_id) ?? [];
+                    const mappedId = bulkLinkMappings.get(filing.id) ?? null;
+
+                    // Build select options — same-state candidates, sorted with last-name matches first
+                    const options = stateCandidates
+                      .map((c) => {
+                        const lastNameMatch = c.last_name.toLowerCase() === filing.last_name.toLowerCase();
+                        const alreadyLinked = !!(c.fec_candidate_id && c.funds_raised);
+                        return { ...c, lastNameMatch, alreadyLinked };
+                      })
+                      .sort((a, b) => {
+                        if (a.lastNameMatch && !b.lastNameMatch) return -1;
+                        if (!a.lastNameMatch && b.lastNameMatch) return 1;
+                        return a.last_name.localeCompare(b.last_name);
+                      });
+
+                    const partyColors: Record<string, string> = {
+                      Democrat: "blue", Republican: "red", Independent: "purple",
+                    };
+
+                    return (
+                      <tr
+                        key={filing.id}
+                        style={{
+                          borderBottom: "1px solid #f5f5f5",
+                          opacity: isPromoted || isSkipped ? 0.4 : 1,
+                        }}
+                      >
+                        <td style={{ padding: "6px 8px 6px 0", verticalAlign: "top" }}>
+                          <Checkbox
+                            checked={!isSkipped && !isPromoted}
+                            disabled={isPromoted}
+                            onChange={(e) => {
+                              const next = new Set(bulkLinkSkipped);
+                              if (e.target.checked) {
+                                next.delete(filing.id);
+                              } else {
+                                next.add(filing.id);
+                              }
+                              setBulkLinkSkipped(next);
+                            }}
+                          />
+                        </td>
+                        <td style={{ padding: "6px 12px", verticalAlign: "top", whiteSpace: "nowrap" }}>
+                          <div>
+                            <Tag
+                              color={partyColors[filing.party] ?? "default"}
+                              style={{ fontSize: 10, fontWeight: "bold", marginRight: 4 }}
+                            >
+                              {filing.party.charAt(0)}
+                            </Tag>
+                            <Text strong>{filing.first_name} {filing.last_name}</Text>
+                            {filing.is_incumbent && (
+                              <Tag color="green" style={{ marginLeft: 4, fontSize: 10 }}>Inc</Tag>
+                            )}
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 11 }}>
+                            {filing.state?.abbr} · {filing.office === "S" ? "Senate" : `House-${filing.district_number ?? "?"}`} · {formatMoney(filing.funds_raised)}
+                          </Text>
+                          {isPromoted && (
+                            <Tag color="green" style={{ marginLeft: 4, fontSize: 10 }}>Already linked</Tag>
+                          )}
+                        </td>
+                        <td style={{ padding: "6px 12px", verticalAlign: "top" }}>
+                          {isPromoted ? (
+                            <Text type="secondary" style={{ fontSize: 12 }}>—</Text>
+                          ) : (
+                            <Select
+                              style={{ width: "100%" }}
+                              placeholder="Select candidate..."
+                              allowClear
+                              showSearch
+                              value={mappedId}
+                              disabled={isSkipped}
+                              onChange={(value) => {
+                                const next = new Map(bulkLinkMappings);
+                                next.set(filing.id, value ?? null);
+                                setBulkLinkMappings(next);
+                              }}
+                              filterOption={(input, option) =>
+                                (option?.label?.toString() ?? "").toLowerCase().includes(input.toLowerCase())
+                              }
+                              options={options.map((c) => ({
+                                value: c.id,
+                                label: `${c.first_name} ${c.last_name}${c.is_incumbent ? " (Inc)" : ""}${c.body_name ? ` · ${c.body_name}` : ""}${c.alreadyLinked ? " [Has FEC]" : ""}`,
+                                disabled: c.alreadyLinked,
+                              }))}
+                              optionRender={(option) => {
+                                const cand = options.find((c) => c.id === option.value);
+                                if (!cand) return option.label;
+                                return (
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span>
+                                      <Tag
+                                        color={partyColors[cand.party] ?? "default"}
+                                        style={{ fontSize: 10, fontWeight: "bold", marginRight: 4 }}
+                                      >
+                                        {cand.party.charAt(0)}
+                                      </Tag>
+                                      <span style={{ fontWeight: cand.lastNameMatch ? 600 : 400 }}>
+                                        {cand.first_name} {cand.last_name}
+                                      </span>
+                                      {cand.is_incumbent && (
+                                        <Tag color="green" style={{ marginLeft: 4, fontSize: 10 }}>Inc</Tag>
+                                      )}
+                                    </span>
+                                    <span>
+                                      {cand.body_name && (
+                                        <Text type="secondary" style={{ fontSize: 11, marginRight: 4 }}>{cand.body_name}</Text>
+                                      )}
+                                      {cand.alreadyLinked && (
+                                        <Tag color="orange" style={{ fontSize: 10 }}>Has FEC</Tag>
+                                      )}
+                                    </span>
+                                  </div>
+                                );
+                              }}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
         )}
       </Modal>
     </>
