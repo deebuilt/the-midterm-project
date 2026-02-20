@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("race-ratings");
 ---
 
 <Layout
@@ -221,6 +225,11 @@ import Layout from "../../layouts/Layout.astro";
       <p class="text-slate-600">
         Even if you live in a Safe district, understanding race ratings helps you follow the national picture. When you hear pundits say "Democrats need to flip three seats to take the Senate," race ratings tell you <em>which</em> three seats they're talking about.
       </p>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>

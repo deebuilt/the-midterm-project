@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("congressional-hearings");
 ---
 
 <Layout
@@ -448,6 +452,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
       <p class="text-slate-600">
         The key is knowing what a hearing <em>is</em> and what it <em>isn't</em>. It's not a trial. It's a tool for accountability. And like any tool, what matters is how it's used&mdash;and what happens next.
       </p>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>

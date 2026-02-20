@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("pacs-and-super-pacs");
 ---
 
 <Layout
@@ -416,6 +420,11 @@ import Layout from "../../layouts/Layout.astro";
         <li><a href="https://www.fec.gov/data/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FEC.gov</a> &mdash; Official filings from candidates, PACs, and parties</li>
         <li><a href="https://www.followthemoney.org/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">FollowTheMoney.org</a> &mdash; State-level campaign finance data</li>
       </ul>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>

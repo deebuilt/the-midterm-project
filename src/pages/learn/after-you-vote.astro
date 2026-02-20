@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("after-you-vote");
 ---
 
 <Layout
@@ -198,6 +202,11 @@ import Layout from "../../layouts/Layout.astro";
             <p class="text-sm text-slate-600">Voting is just the start. Follow what your elected officials do once they're in office. Hold them accountable. Show up for the next election too.</p>
           </div>
         </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- SOURCES -->

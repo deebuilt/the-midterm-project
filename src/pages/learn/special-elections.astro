@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("special-elections");
 ---
 
 <Layout
@@ -322,6 +326,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
         <a href="https://www.votepalmbeach.gov" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">votepalmbeach.gov</a>
         had all the details on the HD-87 special election&mdash;registration deadlines, voting locations, candidates&mdash;but you had to know to look for it.
       </p>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>

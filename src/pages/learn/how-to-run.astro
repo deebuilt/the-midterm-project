@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("how-to-run");
 ---
 
 <Layout title="How to Run for Congress" description="How regular people become candidates for the U.S. Senate and House — eligibility, filing, primaries, fundraising, and getting on the ballot.">
@@ -342,6 +346,11 @@ import Layout from "../../layouts/Layout.astro";
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- CTA -->

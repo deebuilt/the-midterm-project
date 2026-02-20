@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("what-are-midterms");
 ---
 
 <Layout title="What Are Midterm Elections?" description="What midterm elections are, why they matter, and what's on the ballot.">
@@ -76,6 +80,11 @@ import Layout from "../../layouts/Layout.astro";
       <p class="text-slate-600">
         But here's the thing: the laws that affect your daily life &mdash; taxes, healthcare, education, infrastructure &mdash; are shaped by Congress. Midterms decide who controls Congress.
       </p>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">
         <p class="text-sm font-medium text-slate-700">

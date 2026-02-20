@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("save-act");
 ---
 
 <Layout
@@ -219,6 +223,11 @@ import Layout from "../../layouts/Layout.astro";
             Registration deadlines matter. Check our <a href="/calendar" class="text-dem hover:underline">election calendar</a> for your state's primary date and register well in advance.
           </p>
         </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- SOURCES -->

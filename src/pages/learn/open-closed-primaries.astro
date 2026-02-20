@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("open-closed-primaries");
 ---
 
 <Layout
@@ -326,6 +330,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
       <p class="text-slate-600">
         Either way, the most important thing is to know the rules in your state and make sure you're registered in a way that lets you vote in the elections you care about. Don't find out on primary day that you're locked out.
       </p>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
 
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>

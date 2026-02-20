@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("voter-turnout");
 ---
 
 <Layout
@@ -392,6 +396,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
           <h4 class="font-bold text-navy group-hover:text-dem transition-colors mb-1">Interactive Map</h4>
           <p class="text-sm text-slate-500">Preview your ballot, mark your picks, and research candidates using our interactive Senate map.</p>
         </a>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- SOURCES -->

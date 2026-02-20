@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("how-congress-works");
 ---
 
 <Layout title="How Congress Works" description="A beginner's guide to the U.S. Congress: the Senate and the House of Representatives.">
@@ -117,6 +121,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
         <p class="text-sm text-slate-600">
           Right now, you are represented by <strong>two U.S. Senators</strong>, <strong>one U.S. Representative</strong>, <strong>one state senator</strong>, and <strong>one state representative</strong> (at minimum). That's at least five legislators making laws on your behalf at the federal and state level&mdash;and most people can't name more than one or two of them.
         </p>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6">

@@ -2,6 +2,10 @@
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
 import Tooltip from "../../components/ui/Tooltip.astro";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("bills-and-votes");
 ---
 
 <Layout title="How Bills & Votes Work" description="How a bill becomes a law, how the Senate and House vote differently, and what a filibuster actually is.">
@@ -349,6 +353,11 @@ import Tooltip from "../../components/ui/Tooltip.astro";
           <a href="/learn/how-congress-works" class="underline">how Congress works</a> and
           <a href="/learn/congressional-hearings" class="underline">what congressional hearings actually do</a>.
         </p>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- SOURCES -->

@@ -1,6 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ReadAloud from "../../components/ui/ReadAloud";
+import ArticleQuiz from "../../components/ui/ArticleQuiz";
+import { getQuizBySlug } from "../../data/quizzes";
+
+const quiz = getQuizBySlug("career-ladder");
 ---
 
 <Layout title="The Political Career Ladder" description="There's no single path to the top in American politics. Learn how politicians move between the House, Senate, Governor's mansion, and the presidency.">
@@ -350,6 +354,11 @@ import ReadAloud from "../../components/ui/ReadAloud";
             <li><strong class="text-white">Many careers plateau:</strong> And that's okay. Seniority in one chamber can mean more real power than a title upgrade</li>
           </ul>
         </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- CTA -->
