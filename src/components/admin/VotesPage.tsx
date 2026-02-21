@@ -49,6 +49,10 @@ interface BillRow {
   source_url: string | null;
   result: string | null;
   chamber: "senate" | "house" | "both" | null;
+  senate_vote_date: string | null;
+  house_vote_date: string | null;
+  senate_source_url: string | null;
+  house_source_url: string | null;
   created_at: string;
   // Joined
   topic?: { name: string } | null;
@@ -756,6 +760,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
       source_url: bill.source_url,
       result: bill.result,
       chamber: bill.chamber ?? "senate",
+      senate_vote_date: bill.senate_vote_date ? dayjs(bill.senate_vote_date) : null,
+      house_vote_date: bill.house_vote_date ? dayjs(bill.house_vote_date) : null,
+      senate_source_url: bill.senate_source_url,
+      house_source_url: bill.house_source_url,
     });
 
     // Pre-populate votes from existing candidate_votes
@@ -786,15 +794,26 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
       const chamberValue = (values.chamber ?? "senate") as "senate" | "house" | "both";
 
+      const senateDate = values.senate_vote_date ? values.senate_vote_date.format("YYYY-MM-DD") : null;
+      const houseDate = values.house_vote_date ? values.house_vote_date.format("YYYY-MM-DD") : null;
+
+      // Auto-derive vote_date from chamber-specific dates when available
+      const manualDate = values.vote_date ? values.vote_date.format("YYYY-MM-DD") : null;
+      const derivedDate = manualDate ?? senateDate ?? houseDate;
+
       const billPayload = {
         bill_name: values.bill_name,
         bill_number: values.bill_number || null,
-        vote_date: values.vote_date ? values.vote_date.format("YYYY-MM-DD") : null,
+        vote_date: derivedDate,
         topic_id: values.topic_id || null,
         summary: values.summary || null,
         source_url: values.source_url || null,
         result: values.result || null,
         chamber: chamberValue,
+        senate_vote_date: senateDate,
+        house_vote_date: houseDate,
+        senate_source_url: values.senate_source_url || null,
+        house_source_url: values.house_source_url || null,
       };
 
       let billId: number;
@@ -1225,7 +1244,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
     }
   }
 
-  /** Import a single vote from its detail XML. Returns result info. */
+  /** Import a single vote from its detail XML. Returns result info.
+   *  If a bill with the same bill_number already exists, merges Senate data into it
+   *  instead of skipping or creating a duplicate row.
+   */
   async function importSingleVote(xmlText: string, voteNumber: string) {
     const detail = parseVoteDetailXml(xmlText);
 
@@ -1239,36 +1261,68 @@ export default function VotesPage({ setHeaderActions }: Props) {
     const parenIdx = resultText.indexOf("(");
     if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
 
-    // Check for duplicate by bill_number + same chamber
-    if (billNumber) {
-      const existing = bills.find((b) => b.bill_number === billNumber && (b.chamber ?? "senate") === "senate");
-      if (existing) {
-        return { voteNumber, billName, status: "skipped" as const, reason: `Already exists: ${existing.bill_name}` };
-      }
-    }
-
     const voteDate = parseSenateDate(listItem?.voteDate ?? "", senateCongressYear)
       ?? (detail.voteDate ? detail.voteDate.split("T")[0] : null);
     const sourceUrl = buildVoteHtmlUrl(senateCongress, senateSession, voteNumber);
 
-    // Insert bill
-    const { data: billData, error: billErr } = await supabase
-      .from("votes")
-      .insert({
-        bill_name: billName,
-        bill_number: billNumber || null,
-        vote_date: voteDate,
-        result: resultText || null,
-        source_url: sourceUrl,
-        summary: null,
-        topic_id: null,
-        chamber: "senate" as const,
-      })
-      .select("id")
-      .single();
+    let billId: number;
+    let statusLabel: "imported" | "merged";
 
-    if (billErr) throw billErr;
-    const billId = billData.id;
+    // Check if this bill already exists (any chamber)
+    const existing = billNumber ? bills.find((b) => b.bill_number === billNumber) : null;
+
+    if (existing) {
+      // Already has Senate data? Skip.
+      if (existing.senate_vote_date || (existing.chamber ?? "senate") === "senate") {
+        // Check if it already has senate votes attached
+        const senateVotesExist = (existing.candidate_votes ?? []).some((cv) =>
+          candidates.some((c) => c.id === cv.candidate_id)
+        );
+        if (senateVotesExist) {
+          return { voteNumber, billName, status: "skipped" as const, reason: `Already has Senate votes: ${existing.bill_name}` };
+        }
+      }
+
+      // Merge: add Senate date/source, auto-detect chamber to 'both'
+      const newChamber = existing.house_vote_date || (existing.chamber === "house") ? "both" : "senate";
+      const { error: upErr } = await supabase
+        .from("votes")
+        .update({
+          senate_vote_date: voteDate,
+          senate_source_url: sourceUrl,
+          chamber: newChamber,
+          // Keep existing vote_date if set, otherwise use Senate date
+          vote_date: existing.vote_date ?? voteDate,
+          result: resultText || existing.result,
+        })
+        .eq("id", existing.id);
+      if (upErr) throw upErr;
+
+      billId = existing.id;
+      statusLabel = "merged";
+    } else {
+      // New bill — insert with Senate-specific fields
+      const { data: billData, error: billErr } = await supabase
+        .from("votes")
+        .insert({
+          bill_name: billName,
+          bill_number: billNumber || null,
+          vote_date: voteDate,
+          result: resultText || null,
+          source_url: sourceUrl,
+          senate_vote_date: voteDate,
+          senate_source_url: sourceUrl,
+          summary: null,
+          topic_id: null,
+          chamber: "senate" as const,
+        })
+        .select("id")
+        .single();
+
+      if (billErr) throw billErr;
+      billId = billData.id;
+      statusLabel = "imported";
+    }
 
     // Match senators and insert candidate_votes
     let matchedCount = 0;
@@ -1295,11 +1349,15 @@ export default function VotesPage({ setHeaderActions }: Props) {
       if (cvErr) throw cvErr;
     }
 
+    const reason = statusLabel === "merged"
+      ? `Merged into existing bill — ${matchedCount} senator votes added`
+      : `${matchedCount} senator votes matched`;
+
     return {
       voteNumber,
       billName,
       status: "imported" as const,
-      reason: `${matchedCount} senator votes matched`,
+      reason,
     };
   }
 
@@ -1368,39 +1426,69 @@ export default function VotesPage({ setHeaderActions }: Props) {
     const parenIdx = resultText.indexOf("(");
     if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
 
-    // Duplicate check — only skip if same bill_number AND same chamber
-    if (billNumber) {
-      const existing = bills.find((b) => b.bill_number === billNumber && (b.chamber ?? "senate") === "house");
-      if (existing) {
-        setHouseImportResult({ status: "skipped", billName, reason: `Already exists: ${existing.bill_name}` });
-        setHouseImportStep("done");
-        return;
-      }
-    }
-
     const voteDate = parseHouseDate(detail.voteDate);
     const rollNum = parseInt(detail.rollCallNumber, 10);
     const sourceUrl = buildHouseVoteHtmlUrl(houseYear, rollNum);
 
-    try {
-      // Insert bill
-      const { data: billData, error: billErr } = await supabase
-        .from("votes")
-        .insert({
-          bill_name: billName,
-          bill_number: billNumber || null,
-          vote_date: voteDate,
-          result: resultText || null,
-          source_url: sourceUrl,
-          summary: null,
-          topic_id: null,
-          chamber: "house" as const,
-        })
-        .select("id")
-        .single();
+    // Check if this bill already exists (any chamber)
+    const existing = billNumber ? bills.find((b) => b.bill_number === billNumber) : null;
 
-      if (billErr) throw billErr;
-      const billId = billData.id;
+    try {
+      let billId: number;
+      let statusLabel: "imported" | "merged";
+
+      if (existing) {
+        // Already has House data? Skip.
+        if (existing.house_vote_date || (existing.chamber === "house")) {
+          const houseVotesExist = (existing.candidate_votes ?? []).some((cv) =>
+            houseCandidates.some((c) => c.id === cv.candidate_id)
+          );
+          if (houseVotesExist) {
+            setHouseImportResult({ status: "skipped", billName, reason: `Already has House votes: ${existing.bill_name}` });
+            setHouseImportStep("done");
+            return;
+          }
+        }
+
+        // Merge: add House date/source, auto-detect chamber to 'both'
+        const newChamber = existing.senate_vote_date || (existing.chamber === "senate") ? "both" : "house";
+        const { error: upErr } = await supabase
+          .from("votes")
+          .update({
+            house_vote_date: voteDate,
+            house_source_url: sourceUrl,
+            chamber: newChamber,
+            vote_date: existing.vote_date ?? voteDate,
+            result: resultText || existing.result,
+          })
+          .eq("id", existing.id);
+        if (upErr) throw upErr;
+
+        billId = existing.id;
+        statusLabel = "merged";
+      } else {
+        // New bill — insert with House-specific fields
+        const { data: billData, error: billErr } = await supabase
+          .from("votes")
+          .insert({
+            bill_name: billName,
+            bill_number: billNumber || null,
+            vote_date: voteDate,
+            result: resultText || null,
+            source_url: sourceUrl,
+            house_vote_date: voteDate,
+            house_source_url: sourceUrl,
+            summary: null,
+            topic_id: null,
+            chamber: "house" as const,
+          })
+          .select("id")
+          .single();
+
+        if (billErr) throw billErr;
+        billId = billData.id;
+        statusLabel = "imported";
+      }
 
       // Match House members and insert candidate_votes
       let matchedCount = 0;
@@ -1429,11 +1517,11 @@ export default function VotesPage({ setHeaderActions }: Props) {
         if (cvErr) throw cvErr;
       }
 
-      setHouseImportResult({
-        status: "imported",
-        billName,
-        reason: `${matchedCount} of ${detail.members.length} rep votes matched (${houseCandidates.length} incumbents in DB)`,
-      });
+      const reason = statusLabel === "merged"
+        ? `Merged into existing bill — ${matchedCount} of ${detail.members.length} rep votes added`
+        : `${matchedCount} of ${detail.members.length} rep votes matched (${houseCandidates.length} incumbents in DB)`;
+
+      setHouseImportResult({ status: "imported", billName, reason });
       await loadBills();
     } catch (err: any) {
       setHouseImportResult({ status: "failed", billName, reason: err.message });
@@ -1817,6 +1905,29 @@ export default function VotesPage({ setHeaderActions }: Props) {
           <Form.Item name="summary" label="Summary">
             <TextArea rows={2} placeholder="Factual, 1-2 sentences about the bill" />
           </Form.Item>
+
+          {/* Chamber-specific dates & sources */}
+          {(modalChamber === "senate" || modalChamber === "both") && (
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
+              <Form.Item name="senate_vote_date" label="Senate Vote Date">
+                <DatePicker style={{ width: "100%" }} />
+              </Form.Item>
+              <Form.Item name="senate_source_url" label="Senate Source URL">
+                <Input placeholder="senate.gov roll call link" />
+              </Form.Item>
+            </div>
+          )}
+
+          {(modalChamber === "house" || modalChamber === "both") && (
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
+              <Form.Item name="house_vote_date" label="House Vote Date">
+                <DatePicker style={{ width: "100%" }} />
+              </Form.Item>
+              <Form.Item name="house_source_url" label="House Source URL">
+                <Input placeholder="clerk.house.gov roll call link" />
+              </Form.Item>
+            </div>
+          )}
         </Form>
 
         {/* Vote Assignments — conditional on chamber */}

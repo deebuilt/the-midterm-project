@@ -180,6 +180,10 @@ export interface DbVote {
   source_url: string | null;
   result: string | null;
   chamber: BillChamber | null;
+  senate_vote_date: string | null;
+  house_vote_date: string | null;
+  senate_source_url: string | null;
+  house_source_url: string | null;
   created_at: string;
   updated_at: string;
 }
