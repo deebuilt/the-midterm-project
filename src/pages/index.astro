@@ -177,29 +177,90 @@ function timeAgo(dateStr: string): string {
     </section>
   )}
 
-  <!-- Learn -->
+  <!-- Explore -->
   <section class="bg-slate-50 py-16 px-4">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">The basics</h2>
-      <p class="text-2xl font-bold mb-8">New to this? Start here.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {[
-          { href: "/learn/how-congress-works", title: "How Congress Works", desc: "The two chambers, what they do, and how a bill becomes law." },
-          { href: "/senate#101", title: "Senate 101", desc: "100 senators, 6-year terms, and the 3-class rotation system." },
-          { href: "/house#101", title: "House 101", desc: "435 representatives, 2-year terms, districts, and gerrymandering." },
-          { href: "/learn/what-are-midterms", title: "What Are Midterms?", desc: "Why the elections between presidential years matter just as much." },
-        ].map((item) => (
-          <a
-            href={item.href}
-            class="group flex items-start gap-4 bg-white rounded-lg p-5 border border-slate-200 hover:border-slate-400 transition-colors"
-          >
-            <div class="flex-1">
-              <h3 class="font-semibold mb-1 group-hover:text-dem transition-colors">{item.title}</h3>
-              <p class="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">Dive in</h2>
+      <p class="text-2xl font-bold mb-8">Learn something new.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Lane 1: Start with the basics -->
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-dem mb-1">New to this?</h3>
+          {[
+            { href: "/learn/how-congress-works", title: "How Congress Works", desc: "The two chambers and how a bill becomes law." },
+            { href: "/learn/what-are-midterms", title: "What Are Midterms?", desc: "Why elections between presidential years matter." },
+            { href: "/senate#101", title: "Senate 101", desc: "100 senators, 6-year terms, and the rotation system." },
+          ].map((item) => (
+            <a
+              href={item.href}
+              class="group flex items-start gap-3 bg-white rounded-lg p-4 border border-slate-200 hover:border-dem/40 transition-colors"
+            >
+              <div class="flex-1">
+                <h4 class="text-sm font-semibold mb-0.5 group-hover:text-dem transition-colors">{item.title}</h4>
+                <p class="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+              </div>
+              <span class="text-slate-300 group-hover:text-dem transition-colors text-sm mt-0.5">&rarr;</span>
+            </a>
+          ))}
+        </div>
+
+        <!-- Lane 2: Follow a guided path -->
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-navy mb-1">Learning tracks</h3>
+          <a href="/learn" class="group block bg-white rounded-lg border border-slate-200 hover:border-navy/40 transition-colors overflow-hidden">
+            <div class="p-4">
+              <p class="text-sm font-semibold mb-2 group-hover:text-navy transition-colors">16 guides across 4 tracks</p>
+              <p class="text-xs text-slate-500 leading-relaxed mb-3">
+                Start from the basics and work your way up. Each guide builds on the last — from how government works to money, elections, and your ballot.
+              </p>
+              <div class="space-y-1.5">
+                {[
+                  { label: "How Government Works", color: "bg-dem" },
+                  { label: "Money & Power", color: "bg-tossup" },
+                  { label: "Elections & Voting", color: "bg-navy" },
+                  { label: "Your Ballot", color: "bg-gop" },
+                ].map((track) => (
+                  <div class="flex items-center gap-2">
+                    <div class={`w-2 h-2 rounded-full ${track.color} shrink-0`}></div>
+                    <span class="text-xs text-slate-600">{track.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <span class="text-slate-300 group-hover:text-dem transition-colors mt-1">&rarr;</span>
+            <div class="bg-slate-50 border-t border-slate-100 px-4 py-2.5">
+              <span class="text-xs text-navy font-medium group-hover:underline">Browse all guides &rarr;</span>
+            </div>
           </a>
-        ))}
+        </div>
+
+        <!-- Lane 3: Deep Dives -->
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-tossup mb-1">Go deeper</h3>
+          <a href="/deep-dives" class="group block bg-slate-900 rounded-lg border border-slate-700 hover:border-tossup/40 transition-colors overflow-hidden">
+            <div class="p-4">
+              <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-tossup bg-tossup/15 px-2 py-0.5 rounded-full mb-3">
+                3-Part Series
+              </span>
+              <p class="text-sm font-semibold text-white mb-2 group-hover:text-tossup transition-colors">
+                Presidential Overreach
+              </p>
+              <p class="text-xs text-white/50 leading-relaxed mb-3">
+                230 years of presidents breaking guardrails. What broke, what we built, and what we need to build next.
+              </p>
+              <div class="space-y-1.5">
+                <p class="text-xs text-white/40">&#x1F578; The Worst of All of Them</p>
+                <p class="text-xs text-white/40">&#x1F4CB; The Scorecard</p>
+                <p class="text-xs text-white/40">&#x1F9F9; Sweeping Up the Rubble</p>
+              </div>
+            </div>
+            <div class="bg-white/5 border-t border-white/10 px-4 py-2.5">
+              <span class="text-xs text-tossup font-medium group-hover:underline">Read the series &rarr;</span>
+            </div>
+          </a>
+        </div>
+
       </div>
     </div>
   </section>

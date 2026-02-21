@@ -5,7 +5,7 @@ const primaryLinks = [
   { href: "/", label: "Home" },
   { href: "/reelect-or-reject", label: "Re-elect or Reject" },
   { href: "/flip-the-house", label: "Flip the House" },
-  { href: "/meet", label: "Candidates" },
+  // { href: "/meet", label: "Candidates" },  // Hidden until first interview is published
   { href: "/whos-running", label: "Who's Running" },
   { href: "/map", label: "Map" },
 ];
@@ -59,7 +59,6 @@ const learnGroups = [
 const allLearnLinks = learnGroups.flatMap((g) => g.links);
 
 const moreLinks = [
-  { href: "/deep-dives", label: "Deep Dives" },
   { href: "/find-your-ballot", label: "Find Your Ballot" },
   { href: "/calendar", label: "Calendar" },
   { href: "/news", label: "News" },
@@ -74,7 +73,7 @@ const moreLinks = [
 const isLearnActive =
   allLearnLinks.some(
     (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
-  ) || currentPath.startsWith("/learn/");
+  ) || currentPath.startsWith("/learn/") || currentPath.startsWith("/deep-dives");
 
 const isMoreActive = moreLinks.some(
   (link) => currentPath === link.href || currentPath.startsWith(link.href + "/")
@@ -188,6 +187,15 @@ const isGroupActive = (links: { href: string }[]) =>
             ]}
           >
             All Guides
+          </a>
+          <a
+            href="/deep-dives"
+            class:list={[
+              "block px-4 py-2 text-sm font-semibold hover:text-tossup hover:bg-white/5 transition-colors",
+              currentPath.startsWith("/deep-dives") ? "text-tossup" : "text-white",
+            ]}
+          >
+            Deep Dives
           </a>
           <div class="border-t border-white/10 my-1"></div>
           <!-- Category rows -->
@@ -337,6 +345,17 @@ const isGroupActive = (links: { href: string }[]) =>
         "text-xs uppercase tracking-wider hover:text-tossup transition-colors",
         currentPath === "/learn" ? "text-tossup" : "text-white/30",
       ]}>Learn &mdash; All Guides</a>
+    </li>
+    <li>
+      <a
+        href="/deep-dives"
+        class:list={[
+          "block py-2 pl-2 font-semibold hover:text-tossup transition-colors",
+          currentPath.startsWith("/deep-dives") ? "text-tossup" : "text-white",
+        ]}
+      >
+        Deep Dives
+      </a>
     </li>
     {learnGroups.map((group, i) => (
       <>
