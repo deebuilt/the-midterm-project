@@ -48,6 +48,7 @@ interface BillRow {
   summary: string | null;
   source_url: string | null;
   result: string | null;
+  chamber: "senate" | "house" | "both" | null;
   created_at: string;
   // Joined
   topic?: { name: string } | null;
@@ -105,6 +106,18 @@ const partyColors: Record<string, string> = {
   Independent: "purple",
 };
 
+const chamberColors: Record<string, string> = {
+  senate: "purple",
+  house: "cyan",
+  both: "gold",
+};
+
+const chamberLabels: Record<string, string> = {
+  senate: "Senate",
+  house: "House",
+  both: "Both",
+};
+
 // ─── CSV Import ───
 
 /** DB fields that CSV columns can map to */
@@ -117,9 +130,10 @@ const BILL_FIELDS = [
   { value: "summary", label: "Summary" },
   { value: "source_url", label: "Source URL" },
   { value: "result", label: "Result" },
+  { value: "chamber", label: "Chamber" },
 ] as const;
 
-type BillFieldKey = "bill_name" | "bill_number" | "vote_date" | "topic" | "summary" | "source_url" | "result";
+type BillFieldKey = "bill_name" | "bill_number" | "vote_date" | "topic" | "summary" | "source_url" | "result" | "chamber";
 
 /** Auto-detect mapping from CSV header to bill field */
 function autoDetectField(header: string): BillFieldKey | "" {
@@ -131,6 +145,7 @@ function autoDetectField(header: string): BillFieldKey | "" {
   if (h.includes("summary") || h.includes("description") || h.includes("desc")) return "summary";
   if (h.includes("source") || h.includes("url") || h.includes("link")) return "source_url";
   if (h.includes("result") || h.includes("outcome") || h.includes("passed")) return "result";
+  if (h.includes("chamber") || h.includes("body")) return "chamber";
   return "";
 }
 
@@ -579,9 +594,17 @@ export default function VotesPage({ setHeaderActions }: Props) {
   // Filters
   const [filterBill, setFilterBill] = useState("");
   const [filterTopic, setFilterTopic] = useState<string>("all");
+  const [filterChamber, setFilterChamber] = useState<string>("all");
+
+  // House vote assignments in modal (parallel to senatorVotes)
+  const [houseVotes, setHouseVotes] = useState<SenatorVoteEntry[]>([]);
+  const [houseSearch, setHouseSearch] = useState("");
 
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+
+  // Reactive chamber value from the modal form
+  const modalChamber: string = Form.useWatch("chamber", form) ?? "senate";
   const isMobile = useIsMobile();
 
   // ─── Header Actions ───
@@ -711,15 +734,19 @@ export default function VotesPage({ setHeaderActions }: Props) {
   function openCreateModal() {
     setEditingBill(null);
     form.resetFields();
+    form.setFieldsValue({ chamber: "senate" });
     setSenatorSearch("");
-    // Initialize all senators with null (unassigned)
+    setHouseSearch("");
+    // Initialize all candidates with null (unassigned)
     setSenatorVotes(candidates.map((c) => ({ candidateId: c.id, vote: null })));
+    setHouseVotes(houseCandidates.map((c) => ({ candidateId: c.id, vote: null })));
     setModalOpen(true);
   }
 
   function openEditModal(bill: BillRow) {
     setEditingBill(bill);
     setSenatorSearch("");
+    setHouseSearch("");
     form.setFieldsValue({
       bill_name: bill.bill_name,
       bill_number: bill.bill_number,
@@ -728,9 +755,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
       summary: bill.summary,
       source_url: bill.source_url,
       result: bill.result,
+      chamber: bill.chamber ?? "senate",
     });
 
-    // Pre-populate senator votes from existing candidate_votes
+    // Pre-populate votes from existing candidate_votes
     const existingVotes = new Map<number, string>();
     for (const cv of bill.candidate_votes ?? []) {
       existingVotes.set(cv.candidate_id, cv.vote);
@@ -738,6 +766,12 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
     setSenatorVotes(
       candidates.map((c) => ({
+        candidateId: c.id,
+        vote: (existingVotes.get(c.id) as SenatorVoteEntry["vote"]) ?? null,
+      }))
+    );
+    setHouseVotes(
+      houseCandidates.map((c) => ({
         candidateId: c.id,
         vote: (existingVotes.get(c.id) as SenatorVoteEntry["vote"]) ?? null,
       }))
@@ -750,6 +784,8 @@ export default function VotesPage({ setHeaderActions }: Props) {
       const values = await form.validateFields();
       setModalLoading(true);
 
+      const chamberValue = (values.chamber ?? "senate") as "senate" | "house" | "both";
+
       const billPayload = {
         bill_name: values.bill_name,
         bill_number: values.bill_number || null,
@@ -758,6 +794,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         summary: values.summary || null,
         source_url: values.source_url || null,
         result: values.result || null,
+        chamber: chamberValue,
       };
 
       let billId: number;
@@ -770,12 +807,29 @@ export default function VotesPage({ setHeaderActions }: Props) {
         if (error) throw error;
         billId = editingBill.id;
 
-        // Delete existing candidate_votes for this bill, re-insert
-        const { error: delErr } = await supabase
-          .from("candidate_votes")
-          .delete()
-          .eq("vote_id", billId);
-        if (delErr) throw delErr;
+        // Scoped delete: only remove votes for candidates we're managing in this modal
+        if (chamberValue === "senate" || chamberValue === "both") {
+          const senateIds = candidates.map((c) => c.id);
+          if (senateIds.length > 0) {
+            const { error: delErr } = await supabase
+              .from("candidate_votes")
+              .delete()
+              .eq("vote_id", billId)
+              .in("candidate_id", senateIds);
+            if (delErr) throw delErr;
+          }
+        }
+        if (chamberValue === "house" || chamberValue === "both") {
+          const houseIds = houseCandidates.map((c) => c.id);
+          if (houseIds.length > 0) {
+            const { error: delErr } = await supabase
+              .from("candidate_votes")
+              .delete()
+              .eq("vote_id", billId)
+              .in("candidate_id", houseIds);
+            if (delErr) throw delErr;
+          }
+        }
       } else {
         const { data, error } = await supabase
           .from("votes")
@@ -786,16 +840,32 @@ export default function VotesPage({ setHeaderActions }: Props) {
         billId = data.id;
       }
 
-      // Insert candidate_votes for assigned senators
-      const assignedVotes = senatorVotes.filter((sv) => sv.vote !== null);
-      if (assignedVotes.length > 0) {
-        const rows = assignedVotes.map((sv) => ({
-          candidate_id: sv.candidateId,
-          vote_id: billId,
-          vote: sv.vote!,
-        }));
-        const { error: cvErr } = await supabase.from("candidate_votes").insert(rows);
-        if (cvErr) throw cvErr;
+      // Re-insert Senate votes
+      if (chamberValue === "senate" || chamberValue === "both") {
+        const assignedSenate = senatorVotes.filter((sv) => sv.vote !== null);
+        if (assignedSenate.length > 0) {
+          const rows = assignedSenate.map((sv) => ({
+            candidate_id: sv.candidateId,
+            vote_id: billId,
+            vote: sv.vote!,
+          }));
+          const { error: cvErr } = await supabase.from("candidate_votes").insert(rows);
+          if (cvErr) throw cvErr;
+        }
+      }
+
+      // Re-insert House votes
+      if (chamberValue === "house" || chamberValue === "both") {
+        const assignedHouse = houseVotes.filter((sv) => sv.vote !== null);
+        if (assignedHouse.length > 0) {
+          const rows = assignedHouse.map((sv) => ({
+            candidate_id: sv.candidateId,
+            vote_id: billId,
+            vote: sv.vote!,
+          }));
+          const { error: cvErr } = await supabase.from("candidate_votes").insert(rows);
+          if (cvErr) throw cvErr;
+        }
       }
 
       messageApi.success(editingBill ? "Bill updated" : "Bill created");
@@ -803,6 +873,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
       form.resetFields();
       setEditingBill(null);
       setSenatorVotes([]);
+      setHouseVotes([]);
       await loadBills();
     } catch (err: any) {
       messageApi.error(err.message ?? "Failed to save");
@@ -832,6 +903,17 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
   function bulkSetVote(vote: SenatorVoteEntry["vote"]) {
     setSenatorVotes((prev) => prev.map((sv) => ({ ...sv, vote })));
+  }
+
+  // House vote helpers (parallel to Senate)
+  function setHouseVoteValue(candidateId: number, vote: SenatorVoteEntry["vote"]) {
+    setHouseVotes((prev) =>
+      prev.map((sv) => (sv.candidateId === candidateId ? { ...sv, vote } : sv))
+    );
+  }
+
+  function bulkSetHouseVote(vote: SenatorVoteEntry["vote"]) {
+    setHouseVotes((prev) => prev.map((sv) => ({ ...sv, vote })));
   }
 
   // ─── Paste-and-Match senators ───
@@ -944,15 +1026,20 @@ export default function VotesPage({ setHeaderActions }: Props) {
       // Build topic name → ID lookup (case-insensitive)
       const topicMap = new Map(topics.map((t) => [t.name.toLowerCase(), t.id]));
 
-      const payloads = valid.map((row: any) => ({
-        bill_name: row.bill_name.trim(),
-        bill_number: row.bill_number?.trim() || null,
-        vote_date: row.vote_date?.trim() || null,
-        topic_id: topicMap.get((row.topic ?? "").trim().toLowerCase()) ?? null,
-        summary: row.summary?.trim() || null,
-        source_url: row.source_url?.trim() || null,
-        result: row.result?.trim() || null,
-      }));
+      const payloads = valid.map((row: any) => {
+        const rawChamber = (row.chamber ?? "").trim().toLowerCase();
+        const chamber = (rawChamber === "house" || rawChamber === "both") ? rawChamber : "senate";
+        return {
+          bill_name: row.bill_name.trim(),
+          bill_number: row.bill_number?.trim() || null,
+          vote_date: row.vote_date?.trim() || null,
+          topic_id: topicMap.get((row.topic ?? "").trim().toLowerCase()) ?? null,
+          summary: row.summary?.trim() || null,
+          source_url: row.source_url?.trim() || null,
+          result: row.result?.trim() || null,
+          chamber,
+        };
+      });
 
       const { error } = await supabase.from("votes").insert(payloads);
       if (error) throw error;
@@ -1152,9 +1239,9 @@ export default function VotesPage({ setHeaderActions }: Props) {
     const parenIdx = resultText.indexOf("(");
     if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
 
-    // Check for duplicate by bill_number
+    // Check for duplicate by bill_number + same chamber
     if (billNumber) {
-      const existing = bills.find((b) => b.bill_number === billNumber);
+      const existing = bills.find((b) => b.bill_number === billNumber && (b.chamber ?? "senate") === "senate");
       if (existing) {
         return { voteNumber, billName, status: "skipped" as const, reason: `Already exists: ${existing.bill_name}` };
       }
@@ -1175,6 +1262,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
         source_url: sourceUrl,
         summary: null,
         topic_id: null,
+        chamber: "senate" as const,
       })
       .select("id")
       .single();
@@ -1280,9 +1368,9 @@ export default function VotesPage({ setHeaderActions }: Props) {
     const parenIdx = resultText.indexOf("(");
     if (parenIdx > 0) resultText = resultText.substring(0, parenIdx).trim();
 
-    // Duplicate check
+    // Duplicate check — only skip if same bill_number AND same chamber
     if (billNumber) {
-      const existing = bills.find((b) => b.bill_number === billNumber);
+      const existing = bills.find((b) => b.bill_number === billNumber && (b.chamber ?? "senate") === "house");
       if (existing) {
         setHouseImportResult({ status: "skipped", billName, reason: `Already exists: ${existing.bill_name}` });
         setHouseImportStep("done");
@@ -1306,6 +1394,7 @@ export default function VotesPage({ setHeaderActions }: Props) {
           source_url: sourceUrl,
           summary: null,
           topic_id: null,
+          chamber: "house" as const,
         })
         .select("id")
         .single();
@@ -1391,6 +1480,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
     if (filterTopic !== "all") {
       if (String(b.topic_id) !== filterTopic) return false;
     }
+    if (filterChamber !== "all") {
+      const effectiveChamber = b.chamber ?? "senate";
+      if (effectiveChamber !== filterChamber) return false;
+    }
     return true;
   });
 
@@ -1430,6 +1523,16 @@ export default function VotesPage({ setHeaderActions }: Props) {
       key: "result",
       width: 100,
       render: (r: string | null) => r ? <Tag>{r}</Tag> : <Text type="secondary">—</Text>,
+    },
+    {
+      title: "Chamber",
+      dataIndex: "chamber",
+      key: "chamber",
+      width: 90,
+      render: (c: string | null) => {
+        const val = c ?? "senate";
+        return <Tag color={chamberColors[val] ?? "default"}>{chamberLabels[val] ?? val}</Tag>;
+      },
     },
     {
       title: "Votes",
@@ -1492,6 +1595,14 @@ export default function VotesPage({ setHeaderActions }: Props) {
 
   const assignedCount = senatorVotes.filter((sv) => sv.vote !== null).length;
 
+  const filteredHouseReps = houseCandidates.filter((c) => {
+    if (!houseSearch) return true;
+    const q = houseSearch.toLowerCase();
+    return c.label.toLowerCase().includes(q) || c.stateAbbr.toLowerCase().includes(q);
+  });
+
+  const houseAssignedCount = houseVotes.filter((sv) => sv.vote !== null).length;
+
   const mobileCards = isMobile && (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {filteredBills.map((r) => {
@@ -1514,6 +1625,9 @@ export default function VotesPage({ setHeaderActions }: Props) {
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
               {r.vote_date && <Text type="secondary" style={{ fontSize: 12 }}>{dayjs(r.vote_date).format("MMM D, YYYY")}</Text>}
+              <Tag color={chamberColors[r.chamber ?? "senate"] ?? "default"} style={{ margin: 0 }}>
+                {chamberLabels[r.chamber ?? "senate"]}
+              </Tag>
               {r.topic?.name && <Tag style={{ margin: 0 }}>{r.topic.name}</Tag>}
               {r.result && <Tag style={{ margin: 0 }}>{r.result}</Tag>}
             </div>
@@ -1554,6 +1668,17 @@ export default function VotesPage({ setHeaderActions }: Props) {
             ...topics.map((t) => ({ value: String(t.id), label: t.name })),
           ]}
         />
+        <Select
+          value={filterChamber}
+          onChange={setFilterChamber}
+          style={{ width: isMobile ? "100%" : 140 }}
+          options={[
+            { value: "all", label: "All Chambers" },
+            { value: "senate", label: "Senate" },
+            { value: "house", label: "House" },
+            { value: "both", label: "Both Chambers" },
+          ]}
+        />
         <Text type="secondary" style={{ lineHeight: "32px" }}>
           {filteredBills.length} bill{filteredBills.length !== 1 ? "s" : ""}
         </Text>
@@ -1570,7 +1695,10 @@ export default function VotesPage({ setHeaderActions }: Props) {
           expandable={{
             expandedRowRender: (record: BillRow) => {
               const cvs = record.candidate_votes ?? [];
-              if (cvs.length === 0) return <Text type="secondary">No senator votes assigned yet.</Text>;
+              if (cvs.length === 0) {
+                const ch = record.chamber ?? "senate";
+                return <Text type="secondary">No {ch === "house" ? "representative" : ch === "both" ? "" : "senator"} votes assigned yet.</Text>;
+              }
               return (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {cvs
@@ -1675,7 +1803,15 @@ export default function VotesPage({ setHeaderActions }: Props) {
                 ]}
               />
             </Form.Item>
-            <div />
+            <Form.Item name="chamber" label="Chamber">
+              <Select
+                options={[
+                  { value: "senate", label: "Senate" },
+                  { value: "house", label: "House" },
+                  { value: "both", label: "Both Chambers" },
+                ]}
+              />
+            </Form.Item>
           </div>
 
           <Form.Item name="summary" label="Summary">
@@ -1683,65 +1819,134 @@ export default function VotesPage({ setHeaderActions }: Props) {
           </Form.Item>
         </Form>
 
-        {/* Senator Vote Assignments */}
+        {/* Vote Assignments — conditional on chamber */}
         <Divider style={{ margin: "12px 0" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <Text strong>Senator Votes ({assignedCount} assigned)</Text>
-          <Space size="small">
-            <Button size="small" onClick={() => setPasteModalOpen(true)}>Paste Names</Button>
-            <Button size="small" onClick={() => bulkSetVote("yea")}>All Yea</Button>
-            <Button size="small" onClick={() => bulkSetVote("nay")}>All Nay</Button>
-            <Button size="small" onClick={() => bulkSetVote(null)}>Clear</Button>
-          </Space>
-        </div>
 
-        {/* Search senators */}
-        <Input
-          size="small"
-          placeholder="Search senators by name or state..."
-          allowClear
-          value={senatorSearch}
-          onChange={(e) => setSenatorSearch(e.target.value)}
-          style={{ marginBottom: 8 }}
-        />
+        {/* Senate vote checklist */}
+        {(modalChamber === "senate" || modalChamber === "both") && (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <Text strong>Senator Votes ({assignedCount} assigned)</Text>
+              <Space size="small">
+                <Button size="small" onClick={() => setPasteModalOpen(true)}>Paste Names</Button>
+                <Button size="small" onClick={() => bulkSetVote("yea")}>All Yea</Button>
+                <Button size="small" onClick={() => bulkSetVote("nay")}>All Nay</Button>
+                <Button size="small" onClick={() => bulkSetVote(null)}>Clear</Button>
+              </Space>
+            </div>
 
-        <div style={{ maxHeight: 300, overflowY: "auto", border: "1px solid #f0f0f0", borderRadius: 6, padding: 8 }}>
-          {filteredSenators.length === 0 ? (
-            <Text type="secondary" style={{ padding: 8, display: "block" }}>No senators match "{senatorSearch}"</Text>
-          ) : (
-            filteredSenators.map((senator) => {
-              const entry = senatorVotes.find((sv) => sv.candidateId === senator.id);
-              const currentVote = entry?.vote ?? null;
-              return (
-                <div key={senator.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 4px", borderBottom: "1px solid #fafafa" }}>
-                  <Checkbox
-                    checked={currentVote !== null}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSenatorVoteValue(senator.id, "yea");
-                      } else {
-                        setSenatorVoteValue(senator.id, null);
-                      }
-                    }}
-                  />
-                  <Tag color={partyColors[senator.party] ?? "default"} style={{ margin: 0, minWidth: 20, textAlign: "center" }}>
-                    {senator.party.charAt(0)}
-                  </Tag>
-                  <span style={{ flex: 1, fontSize: 13 }}>{senator.label}</span>
-                  {currentVote !== null && (
-                    <Select
-                      size="small"
-                      value={currentVote}
-                      onChange={(v) => setSenatorVoteValue(senator.id, v)}
-                      style={{ width: 110 }}
-                      options={voteOptions}
-                    />
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
+            <Input
+              size="small"
+              placeholder="Search senators by name or state..."
+              allowClear
+              value={senatorSearch}
+              onChange={(e) => setSenatorSearch(e.target.value)}
+              style={{ marginBottom: 8 }}
+            />
+
+            <div style={{ maxHeight: 300, overflowY: "auto", border: "1px solid #f0f0f0", borderRadius: 6, padding: 8 }}>
+              {filteredSenators.length === 0 ? (
+                <Text type="secondary" style={{ padding: 8, display: "block" }}>No senators match "{senatorSearch}"</Text>
+              ) : (
+                filteredSenators.map((senator) => {
+                  const entry = senatorVotes.find((sv) => sv.candidateId === senator.id);
+                  const currentVote = entry?.vote ?? null;
+                  return (
+                    <div key={senator.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 4px", borderBottom: "1px solid #fafafa" }}>
+                      <Checkbox
+                        checked={currentVote !== null}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSenatorVoteValue(senator.id, "yea");
+                          } else {
+                            setSenatorVoteValue(senator.id, null);
+                          }
+                        }}
+                      />
+                      <Tag color={partyColors[senator.party] ?? "default"} style={{ margin: 0, minWidth: 20, textAlign: "center" }}>
+                        {senator.party.charAt(0)}
+                      </Tag>
+                      <span style={{ flex: 1, fontSize: 13 }}>{senator.label}</span>
+                      {currentVote !== null && (
+                        <Select
+                          size="small"
+                          value={currentVote}
+                          onChange={(v) => setSenatorVoteValue(senator.id, v)}
+                          style={{ width: 110 }}
+                          options={voteOptions}
+                        />
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Divider between Senate and House sections */}
+        {modalChamber === "both" && <Divider style={{ margin: "12px 0" }} />}
+
+        {/* House vote checklist */}
+        {(modalChamber === "house" || modalChamber === "both") && (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <Text strong>Representative Votes ({houseAssignedCount} assigned)</Text>
+              <Space size="small">
+                <Button size="small" onClick={() => bulkSetHouseVote("yea")}>All Yea</Button>
+                <Button size="small" onClick={() => bulkSetHouseVote("nay")}>All Nay</Button>
+                <Button size="small" onClick={() => bulkSetHouseVote(null)}>Clear</Button>
+              </Space>
+            </div>
+
+            <Input
+              size="small"
+              placeholder="Search representatives by name or state..."
+              allowClear
+              value={houseSearch}
+              onChange={(e) => setHouseSearch(e.target.value)}
+              style={{ marginBottom: 8 }}
+            />
+
+            <div style={{ maxHeight: 300, overflowY: "auto", border: "1px solid #f0f0f0", borderRadius: 6, padding: 8 }}>
+              {filteredHouseReps.length === 0 ? (
+                <Text type="secondary" style={{ padding: 8, display: "block" }}>No representatives match "{houseSearch}"</Text>
+              ) : (
+                filteredHouseReps.map((rep) => {
+                  const entry = houseVotes.find((sv) => sv.candidateId === rep.id);
+                  const currentVote = entry?.vote ?? null;
+                  return (
+                    <div key={rep.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 4px", borderBottom: "1px solid #fafafa" }}>
+                      <Checkbox
+                        checked={currentVote !== null}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setHouseVoteValue(rep.id, "yea");
+                          } else {
+                            setHouseVoteValue(rep.id, null);
+                          }
+                        }}
+                      />
+                      <Tag color={partyColors[rep.party] ?? "default"} style={{ margin: 0, minWidth: 20, textAlign: "center" }}>
+                        {rep.party.charAt(0)}
+                      </Tag>
+                      <span style={{ flex: 1, fontSize: 13 }}>{rep.label}</span>
+                      {currentVote !== null && (
+                        <Select
+                          size="small"
+                          value={currentVote}
+                          onChange={(v) => setHouseVoteValue(rep.id, v)}
+                          style={{ width: 110 }}
+                          options={voteOptions}
+                        />
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
       </Modal>
 
       {/* Paste Names Modal */}

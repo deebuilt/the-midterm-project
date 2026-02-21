@@ -168,6 +168,7 @@ export interface DbCandidatePosition {
 }
 
 export type VoteEnum = "yea" | "nay" | "abstain" | "not_voting";
+export type BillChamber = "senate" | "house" | "both";
 
 export interface DbVote {
   id: number;
@@ -178,6 +179,7 @@ export interface DbVote {
   summary: string | null;
   source_url: string | null;
   result: string | null;
+  chamber: BillChamber | null;
   created_at: string;
   updated_at: string;
 }
