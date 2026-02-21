@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
 import FollowTheMoneyTimeline from "../../components/ui/FollowTheMoneyTimeline";
 import type { TimelineEvent } from "../../components/ui/FollowTheMoneyTimeline";
 
@@ -142,9 +143,12 @@ const timelineEvents: TimelineEvent[] = [
       <span>Follow the Money</span>
     </p>
     <h1 class="text-3xl md:text-4xl font-bold mb-2">Follow the Money</h1>
-    <p class="text-lg text-slate-500 mb-10">
+    <p class="text-lg text-slate-500 mb-4">
       How DOGE, the crypto industry, and a $10 billion peace deal are connected&mdash;a timeline from the 2024 election to today.
     </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/follow-the-money.mp3" />
+    </div>
 
     <div class="prose prose-slate max-w-none space-y-8">
 
@@ -676,6 +680,21 @@ const timelineEvents: TimelineEvent[] = [
         </div>
       </div>
 
+      <!-- NEXT IN SERIES -->
+      <div class="not-prose bg-tossup/10 border border-tossup/30 rounded-lg p-6">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 9 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/open-closed-primaries" class="underline">Open vs. Closed Primaries</a>
+          &mdash; how your party registration affects whether you can vote in a primary.
+        </p>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+          &middot; <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>
+        </p>
+      </div>
+
       <!-- ============================== -->
       <!-- SOURCES                        -->
       <!-- ============================== -->
@@ -698,21 +717,6 @@ const timelineEvents: TimelineEvent[] = [
         <li><a href="https://www.cbsnews.com/news/trump-wlfi-world-liberty-financial-crypto-wealth/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBS News: Trump Family Crypto Holdings</a></li>
         <li><a href="https://www.pbs.org/newshour/show/trump-familys-cryptocurrency-ties-raise-concerns-as-administration-loosens-regulations" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">PBS NewsHour: Trump Family Cryptocurrency Ties</a></li>
       </ul>
-
-      <!-- NEXT IN SERIES -->
-      <div class="not-prose bg-tossup/10 border border-tossup/30 rounded-lg p-6">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 9 of 16</p>
-        <p class="text-sm font-medium text-tossup">
-          Next up:
-          <a href="/learn/open-closed-primaries" class="underline">Open vs. Closed Primaries</a>
-          &mdash; how your party registration affects whether you can vote in a primary.
-        </p>
-        <p class="text-xs text-slate-400 mt-2">
-          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
-          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
-          &middot; <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>
-        </p>
-      </div>
 
     </div>
   </section>

@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
 import ArticleQuiz from "../../components/ui/ArticleQuiz";
 import { getQuizBySlug } from "../../data/quizzes";
 
@@ -11,7 +12,10 @@ const quiz = getQuizBySlug("what-are-midterms");
     <p class="text-sm text-slate-400 mb-2">
       <a href="/learn" class="text-dem hover:underline">Learn</a> / What Are Midterms?
     </p>
-    <h1 class="text-3xl md:text-4xl font-bold mb-6">What Are Midterm Elections?</h1>
+    <h1 class="text-3xl md:text-4xl font-bold mb-4">What Are Midterm Elections?</h1>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/what-are-midterms.mp3" />
+    </div>
 
     <div class="space-y-8">
       <p class="text-lg text-slate-600">

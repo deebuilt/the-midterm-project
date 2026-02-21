@@ -332,6 +332,21 @@ const quiz = getQuizBySlug("special-elections");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
+      <!-- NEXT IN SERIES -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 12 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/voter-turnout" class="underline">Voter Turnout in America</a>
+          &mdash; how many Americans actually vote, who shows up, and why it matters.
+        </p>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
+          &middot; <a href="/calendar" class="text-dem hover:underline">Calendar</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+        </p>
+      </div>
+
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>
       <ul class="text-sm text-slate-500 space-y-1">
@@ -354,21 +369,6 @@ const quiz = getQuizBySlug("special-elections");
           <a href="https://floridapolitics.com/archives/773651-emily-gregory-jon-maples-advance-in-hd-87-special-election-with-primary-wins-tuesday/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Florida Politics &mdash; HD-87 Special Election Results</a>
         </li>
       </ul>
-
-      <!-- NEXT IN SERIES -->
-      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 12 of 16</p>
-        <p class="text-sm font-medium text-tossup">
-          Next up:
-          <a href="/learn/voter-turnout" class="underline">Voter Turnout in America</a>
-          &mdash; how many Americans actually vote, who shows up, and why it matters.
-        </p>
-        <p class="text-xs text-slate-400 mt-2">
-          Or explore: <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
-          &middot; <a href="/calendar" class="text-dem hover:underline">Calendar</a>
-          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
-        </p>
-      </div>
     </div>
   </section>
 </Layout>

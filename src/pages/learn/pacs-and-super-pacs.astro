@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
 import ArticleQuiz from "../../components/ui/ArticleQuiz";
 import { getQuizBySlug } from "../../data/quizzes";
 
@@ -17,9 +18,12 @@ const quiz = getQuizBySlug("pacs-and-super-pacs");
       <span>PACs &amp; Super PACs</span>
     </p>
     <h1 class="text-3xl md:text-4xl font-bold mb-2">PACs &amp; Super PACs</h1>
-    <p class="text-lg text-slate-500 mb-10">
+    <p class="text-lg text-slate-500 mb-4">
       What they are, where the money goes, and why campaign finance is one of the most debated topics in American politics.
     </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/pacs-and-super-pacs.mp3" />
+    </div>
 
     <div class="prose prose-slate max-w-none space-y-8">
       <p class="text-lg text-slate-600">
@@ -426,6 +430,21 @@ const quiz = getQuizBySlug("pacs-and-super-pacs");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
+      <!-- NEXT IN SERIES -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 8 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/follow-the-money" class="underline">Follow the Money</a>
+          &mdash; how DOGE, the crypto industry, and a $10 billion peace deal trace back to the 2024 election.
+        </p>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+          &middot; <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
+        </p>
+      </div>
+
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>
       <ul class="text-sm text-slate-500 space-y-1">
@@ -466,21 +485,6 @@ const quiz = getQuizBySlug("pacs-and-super-pacs");
           <a href="https://www.congress.gov/bill/118th-congress/house-bill/11/text" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Congress.gov, DISCLOSE Act (H.R. 11)</a>
         </li>
       </ul>
-
-      <!-- NEXT IN SERIES -->
-      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 8 of 16</p>
-        <p class="text-sm font-medium text-tossup">
-          Next up:
-          <a href="/learn/follow-the-money" class="underline">Follow the Money</a>
-          &mdash; how DOGE, the crypto industry, and a $10 billion peace deal trace back to the 2024 election.
-        </p>
-        <p class="text-xs text-slate-400 mt-2">
-          Or explore: <a href="/whos-running" class="text-dem hover:underline">Who's Running</a>
-          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
-          &middot; <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
-        </p>
-      </div>
     </div>
   </section>
 </Layout>

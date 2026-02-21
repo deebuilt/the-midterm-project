@@ -344,6 +344,11 @@ const quiz = getQuizBySlug("bills-and-votes");
         The representatives and senators you elect in midterm elections determine which bills get heard, which get voted on, and whether anything actually becomes law. Every committee chair, every leadership position, every vote threshold&mdash;it all comes down to who holds those seats.
       </p>
 
+      <!-- QUIZ -->
+      <div class="not-prose">
+        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
+      </div>
+
       <!-- NEXT IN SERIES -->
       <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 3 of 16</p>
@@ -357,11 +362,6 @@ const quiz = getQuizBySlug("bills-and-votes");
           &middot; <a href="/map" class="text-dem hover:underline">Map</a>
           &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
         </p>
-      </div>
-
-      <!-- QUIZ -->
-      <div class="not-prose">
-        {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
       <!-- SOURCES -->

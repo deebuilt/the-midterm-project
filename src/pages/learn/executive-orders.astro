@@ -413,6 +413,21 @@ const quiz = getQuizBySlug("executive-orders");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
+      <!-- NEXT IN SERIES -->
+      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 5 of 16</p>
+        <p class="text-sm font-medium text-tossup">
+          Next up:
+          <a href="/learn/career-ladder" class="underline">The Political Career Ladder</a>
+          &mdash; how politicians move between the House, Senate, and governor's mansion.
+        </p>
+        <p class="text-xs text-slate-400 mt-2">
+          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
+        </p>
+      </div>
+
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>
       <ul class="text-sm text-slate-500 space-y-1">
@@ -459,21 +474,6 @@ const quiz = getQuizBySlug("executive-orders");
           <a href="https://www.pewresearch.org/short-reads/2025/12/16/trump-has-already-issued-more-executive-orders-in-his-second-term-than-in-his-first/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Pew Research Center, Executive Orders Comparison (Dec. 2025)</a>
         </li>
       </ul>
-
-      <!-- NEXT IN SERIES -->
-      <div class="bg-tossup/10 border border-tossup/30 rounded-lg p-6 not-prose">
-        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Guide 5 of 16</p>
-        <p class="text-sm font-medium text-tossup">
-          Next up:
-          <a href="/learn/career-ladder" class="underline">The Political Career Ladder</a>
-          &mdash; how politicians move between the House, Senate, and governor's mansion.
-        </p>
-        <p class="text-xs text-slate-400 mt-2">
-          Or explore: <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a>
-          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
-          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
-        </p>
-      </div>
     </div>
   </section>
 </Layout>

@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ReadAloud from "../../components/ui/ReadAloud";
 import ArticleQuiz from "../../components/ui/ArticleQuiz";
 import { getQuizBySlug } from "../../data/quizzes";
 
@@ -17,9 +18,12 @@ const quiz = getQuizBySlug("after-you-vote");
       <span>After You Vote</span>
     </p>
     <h1 class="text-3xl md:text-4xl font-bold mb-2">After You Vote</h1>
-    <p class="text-lg text-slate-500 mb-10">
+    <p class="text-lg text-slate-500 mb-4">
       You dropped off your ballot or walked out of the polling place. Now what?
     </p>
+    <div class="mb-10">
+      <ReadAloud client:load src="/audio/after-you-vote.mp3" />
+    </div>
 
     <div class="prose prose-slate max-w-none space-y-8">
       <p class="text-lg text-slate-600">
@@ -209,6 +213,20 @@ const quiz = getQuizBySlug("after-you-vote");
         {quiz && <ArticleQuiz client:visible slug={quiz.slug} articleTitle={quiz.articleTitle} questions={quiz.questions} />}
       </div>
 
+      <!-- YOU FINISHED! -->
+      <div class="bg-dem/10 border border-dem/30 rounded-lg p-6 not-prose">
+        <p class="text-xs font-semibold uppercase tracking-wide text-dem mb-1">Guide 16 of 16 &mdash; You made it!</p>
+        <p class="text-sm font-medium text-navy mb-3">
+          You've completed all 16 guides. You now understand how government works, where the money goes, how elections run, and what happens to your ballot. Time to put it to use.
+        </p>
+        <p class="text-sm font-medium">
+          <a href="/reelect-or-reject" class="text-tossup hover:underline">Re-elect or Reject</a>
+          &middot; <a href="/learn/follow-the-money" class="text-tossup hover:underline">Follow the Money</a>
+          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
+          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
+        </p>
+      </div>
+
       <!-- SOURCES -->
       <h2 class="text-2xl font-bold">Sources</h2>
       <ul class="text-sm text-slate-500 space-y-1">
@@ -238,20 +256,6 @@ const quiz = getQuizBySlug("after-you-vote");
           </a>
         </li>
       </ul>
-
-      <!-- YOU FINISHED! -->
-      <div class="bg-dem/10 border border-dem/30 rounded-lg p-6 not-prose">
-        <p class="text-xs font-semibold uppercase tracking-wide text-dem mb-1">Guide 16 of 16 &mdash; You made it!</p>
-        <p class="text-sm font-medium text-navy mb-3">
-          You've completed all 16 guides. You now understand how government works, where the money goes, how elections run, and what happens to your ballot. Time to put it to use.
-        </p>
-        <p class="text-sm font-medium">
-          <a href="/reelect-or-reject" class="text-tossup hover:underline">Re-elect or Reject</a>
-          &middot; <a href="/learn/follow-the-money" class="text-tossup hover:underline">Follow the Money</a>
-          &middot; <a href="/map" class="text-dem hover:underline">Map</a>
-          &middot; <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>
-        </p>
-      </div>
     </div>
   </section>
 </Layout>
