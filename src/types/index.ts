@@ -265,6 +265,11 @@ export interface RaceCandidateInfo {
   fecCandidateId: string | null;
   website: string | null;
   twitter: string | null;
+  bio: string | null;
+  govtrackUrl: string | null;
+  isRetiring: boolean;
+  termStartYear: number | null;
+  votes: VotingRecord[];
 }
 
 export interface RaceWithCandidates {
@@ -280,6 +285,7 @@ export interface RaceWithCandidates {
   generalDate: string | null;
   whyCompetitive: string | null;
   candidates: RaceCandidateInfo[];
+  memberTitle: string;
 }
 
 export interface RacesByState {

@@ -1400,7 +1400,11 @@ export async function fetchRaceCandidates(): Promise<RacesByState[]> {
             funds_raised,
             funds_spent,
             cash_on_hand,
-            fec_candidate_id
+            fec_candidate_id,
+            bio,
+            govtrack_url,
+            is_retiring,
+            term_start_year
           )
         )
       `)
@@ -1416,6 +1420,60 @@ export async function fetchRaceCandidates(): Promise<RacesByState[]> {
       const rcs = race.race_candidates as any[];
       return rcs && rcs.some((rc: any) => rc.candidate?.fec_candidate_id);
     });
+
+    // Collect all candidate IDs for voting records bulk query
+    const allCandidateIds: number[] = [];
+    for (const race of racesWithFecCandidates) {
+      const rcs = (race.race_candidates ?? []) as any[];
+      for (const rc of rcs) {
+        if (rc.candidate?.id) allCandidateIds.push(rc.candidate.id);
+      }
+    }
+
+    // Fetch voting records for all candidates (build-time batch query)
+    let votesByCandidate = new Map<number, VotingRecord[]>();
+    if (allCandidateIds.length > 0) {
+      const { data: candidateVotes } = await supabase
+        .from("candidate_votes")
+        .select(`
+          id,
+          candidate_id,
+          vote,
+          bill:votes!inner(
+            id,
+            bill_name,
+            bill_number,
+            vote_date,
+            summary,
+            source_url,
+            result,
+            topic:topics(name)
+          )
+        `)
+        .in("candidate_id", allCandidateIds);
+
+      for (const cv of candidateVotes ?? []) {
+        const bill = cv.bill as any;
+        const record: VotingRecord = {
+          id: bill.id,
+          billName: bill.bill_name,
+          billNumber: bill.bill_number,
+          vote: cv.vote as VotingRecord["vote"],
+          voteDate: bill.vote_date,
+          topic: bill.topic?.name ?? null,
+          summary: bill.summary,
+          sourceUrl: bill.source_url,
+          result: bill.result ?? null,
+        };
+        if (!votesByCandidate.has(cv.candidate_id)) {
+          votesByCandidate.set(cv.candidate_id, []);
+        }
+        votesByCandidate.get(cv.candidate_id)!.push(record);
+      }
+      for (const records of votesByCandidate.values()) {
+        records.sort((a, b) => (b.voteDate ?? "").localeCompare(a.voteDate ?? ""));
+      }
+    }
 
     // Get primary dates from calendar_events as fallback
     const { data: primaryEvents } = await supabase
@@ -1477,6 +1535,11 @@ export async function fetchRaceCandidates(): Promise<RacesByState[]> {
             fecCandidateId: c.fec_candidate_id ?? null,
             website: c.website ?? null,
             twitter: c.twitter ?? null,
+            bio: c.bio ?? null,
+            govtrackUrl: c.govtrack_url ?? null,
+            isRetiring: c.is_retiring ?? false,
+            termStartYear: c.term_start_year ?? null,
+            votes: votesByCandidate.get(c.id) ?? [],
           };
         })
         .sort((a: RaceCandidateInfo, b: RaceCandidateInfo) => {
@@ -1497,6 +1560,7 @@ export async function fetchRaceCandidates(): Promise<RacesByState[]> {
         generalDate: race.general_date ?? null,
         whyCompetitive: race.why_competitive ?? null,
         candidates,
+        memberTitle: body.member_title ?? (bodyLabel === "Senate" ? "U.S. Senator" : bodyLabel === "House" ? "U.S. Representative" : "Governor"),
       });
     }
 
