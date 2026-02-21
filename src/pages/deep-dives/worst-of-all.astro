@@ -1,0 +1,191 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { presidents, trumpActions } from "../../data/deep-dives";
+
+// Build a lookup for president names
+const presMap = Object.fromEntries(presidents.map((p) => [p.id, p]));
+---
+
+<Layout
+  title="The Worst of All of Them — Deep Dives"
+  description="Nine bad presidents. One who borrowed from every single one of them. A visual map connecting Trump to the worst behavior in American history."
+>
+  <section class="max-w-5xl mx-auto py-16 px-4">
+    <!-- Breadcrumb -->
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/deep-dives" class="text-dem hover:underline">Deep Dives</a>
+      <span class="mx-1">/</span>
+      <span>The Worst of All of Them</span>
+    </p>
+
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">The Worst of All of Them</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      America has had bad presidents before. But no single president has borrowed from <em>every single one of them</em> &mdash; until now.
+    </p>
+
+    <div class="border-l-4 border-gop pl-4 mb-10">
+      <p class="text-sm text-slate-600">
+        The comparisons people make to foreign dictators are easy. But the scarier comparison is <strong>to our own history</strong>. Every line on this map traces back to something an American president already did &mdash; and something we already tried to stop. It didn't work.
+      </p>
+    </div>
+
+    <!-- ============================== -->
+    <!-- THE MAP — Desktop: ring layout -->
+    <!-- ============================== -->
+
+    <!-- Trump center card (always visible) -->
+    <div class="flex justify-center mb-6 md:mb-0" id="trump-center">
+      <div class="bg-slate-900 text-white rounded-2xl p-6 w-full max-w-sm border-2 border-gop shadow-xl relative z-10">
+        <p class="text-xs font-mono tracking-widest text-gop uppercase mb-1">At the center</p>
+        <h2 class="text-2xl font-bold">Donald Trump</h2>
+        <p class="text-xs text-white/50 mb-3">2017–2021, 2025–present</p>
+        <p class="text-sm text-white/70 leading-relaxed">
+          Every connection below traces a specific Trump action back to a specific president's playbook. Some are direct copies. Some go further than the original. None are without precedent in American history &mdash; <strong class="text-white">which is exactly what makes them so dangerous.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Connection map -->
+    <div class="space-y-4 mt-6">
+      {trumpActions.map((action) => (
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {/* Action header */}
+          <div class="bg-slate-900 px-5 py-3">
+            <h3 class="text-white font-bold text-sm">{action.action}</h3>
+            <p class="text-white/60 text-xs mt-0.5">{action.detail}</p>
+          </div>
+
+          {/* Connection lines */}
+          <div class="divide-y divide-slate-100">
+            {action.parallels.map((par) => {
+              const pres = presMap[par.presidentId];
+              if (!pres) return null;
+              const accentColor =
+                pres.color === "dem" ? "bg-dem" :
+                pres.color === "gop" ? "bg-gop" :
+                "bg-navy";
+              const textColor =
+                pres.color === "dem" ? "text-dem" :
+                pres.color === "gop" ? "text-gop" :
+                "text-navy";
+              return (
+                <div class="flex items-start gap-3 px-5 py-3">
+                  {/* President badge */}
+                  <div class="shrink-0 flex flex-col items-center gap-1 w-20">
+                    <div class={`w-3 h-3 rounded-full ${accentColor}`}></div>
+                    <div class="w-0.5 h-4 bg-slate-200"></div>
+                    <a
+                      href={`/deep-dives/scorecard#${pres.id}`}
+                      class={`text-xs font-bold ${textColor} hover:underline text-center leading-tight`}
+                    >
+                      {pres.name}
+                    </a>
+                    <span class="text-[10px] text-slate-400">{pres.years}</span>
+                  </div>
+
+                  {/* Connection text */}
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-slate-700 leading-relaxed">{par.connection}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Summary callout -->
+    <div class="mt-10 bg-slate-900 text-white rounded-xl p-8">
+      <h2 class="text-xl font-bold mb-4">Why This Matters</h2>
+      <p class="text-white/80 text-sm leading-relaxed mb-4">
+        Other presidents did one or two of these things. Andrew Jackson defied the courts <em>or</em> created the spoils system. Nixon weaponized law enforcement <em>or</em> impounded funds. Harding's cronies profited from corruption. FDR tried to pack the courts. Wilson jailed dissenters.
+      </p>
+      <p class="text-white/80 text-sm leading-relaxed mb-4">
+        Trump is doing <strong class="text-white">all of it</strong>. At the same time. At a larger scale. And in several cases &mdash; mass IG firings, pardoning political violence, the $TRUMP meme coin, giving DOGE access to federal systems &mdash; he's done things <strong class="text-white">no American president has ever done before</strong>.
+      </p>
+      <p class="text-white/80 text-sm leading-relaxed">
+        He didn't need to copy a foreign dictator. American history gave him a complete playbook. The only difference is that he's running all of them at once.
+      </p>
+    </div>
+
+    <!-- The JD Vance quote -->
+    <div class="mt-8 bg-gop/5 border border-gop/20 rounded-xl p-6">
+      <h3 class="font-bold text-navy mb-2">The Quiet Part Out Loud</h3>
+      <blockquote class="text-slate-600 text-sm leading-relaxed italic border-l-4 border-gop pl-4 mb-3">
+        "When the courts &mdash; because you will get taken to court &mdash; and when the courts stop you, stand before the country like Andrew Jackson did and say: 'The chief justice has made his ruling. Now let him enforce it.'"
+      </blockquote>
+      <p class="text-xs text-slate-500 mb-3">&mdash; JD Vance, 2021 podcast</p>
+      <p class="text-sm text-slate-600 leading-relaxed mb-2">
+        Three things about this quote:
+      </p>
+      <ol class="text-sm text-slate-600 space-y-1.5 list-decimal list-inside">
+        <li><strong>The quote is fake.</strong> Jackson never actually said it. A journalist invented it in 1865, twenty years after Jackson died.</li>
+        <li><strong>The case was about ethnic cleansing.</strong> The Supreme Court ruling Jackson ignored was about protecting Cherokee land. The result of that defiance was the Trail of Tears and the deaths of 4,000 people.</li>
+        <li><strong>It wasn't a history lesson &mdash; it was a plan.</strong> The Trump administration has followed through, defying court orders on deportations, the Abrego Garcia case, and DOGE operations.</li>
+      </ol>
+    </div>
+
+    <!-- President quick-reference grid -->
+    <div class="mt-10">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">The Presidents on This Map</h2>
+      <div class="grid grid-cols-3 md:grid-cols-5 gap-3">
+        {presidents.map((p) => {
+          const borderColor =
+            p.color === "dem" ? "border-dem/40 hover:border-dem" :
+            p.color === "gop" ? "border-gop/40 hover:border-gop" :
+            "border-navy/40 hover:border-navy";
+          return (
+            <a
+              href={`/deep-dives/scorecard#${p.id}`}
+              class={`block text-center rounded-lg border-2 ${borderColor} p-3 transition-all hover:shadow-md`}
+            >
+              <p class="text-xs font-bold text-navy">{p.name}</p>
+              <p class="text-[10px] text-slate-400">{p.years}</p>
+              <p class="text-[10px] text-slate-500 mt-1 italic leading-tight">{p.tagline}</p>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a
+        href="/deep-dives/scorecard"
+        class="block bg-navy/5 border border-navy/20 rounded-lg p-5 hover:border-navy/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Go deeper</p>
+        <p class="font-bold text-navy">The Scorecard</p>
+        <p class="text-sm text-slate-500 mt-1">Full history cards for every president on this map. What they did, what we built, whether it held.</p>
+      </a>
+      <a
+        href="/deep-dives/rubble"
+        class="block bg-dem/5 border border-dem/20 rounded-lg p-5 hover:border-dem/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">What now?</p>
+        <p class="font-bold text-navy">Sweeping Up the Rubble</p>
+        <p class="text-sm text-slate-500 mt-1">The guardrails are broken. Here's what we need to build next.</p>
+      </a>
+    </div>
+
+    <!-- Sources -->
+    <div class="mt-10">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li><a href="https://www.npr.org/2025/01/25/g-s1-44771/trump-fires-inspectors-general" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NPR: Trump Fires Inspectors General</a></li>
+        <li><a href="https://www.cbsnews.com/news/trump-jan-6-pardons/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBS News: Trump January 6 Pardons</a></li>
+        <li><a href="https://www.cbpp.org/research/federal-budget/new-data-show-trump-administrations-illegal-targeted-withholding-of-funds" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBPP: $425 Billion in Withheld Funds</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Deportation_of_Kilmar_Abrego_Garcia" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Abrego Garcia Deportation Case</a></li>
+        <li><a href="https://law.temple.edu/aer/2025/03/06/j-d-vance-fails-constitutional-law/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Temple Law: JD Vance Fails Constitutional Law</a></li>
+        <li><a href="https://www.georgiaencyclopedia.org/articles/government-politics/worcester-v-georgia-1832/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Georgia Encyclopedia: Worcester v. Georgia</a></li>
+        <li><a href="https://education.nationalgeographic.org/resource/indian-removal-act-and-trail-tears/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Geographic: Trail of Tears</a></li>
+        <li><a href="https://www.ibanet.org/US-presidency-weaponised-Department-of-Justice-investigations-prompt-concerns-over-independence" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">IBA: Weaponized Department of Justice</a></li>
+        <li><a href="https://protectdemocracy.org/work/trumps-schedule-f-plan-explained/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Protect Democracy: Schedule F Explained</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Department_of_Government_Efficiency" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">DOGE Overview</a></li>
+        <li><a href="https://www.lawfaremedia.org/article/report-finds-trump-businesses-received-7.8-million-from-foreign-governments-during-trump-presidency" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Lawfare: $7.8M in Foreign Government Payments</a></li>
+      </ul>
+    </div>
+
+  </section>
+</Layout>

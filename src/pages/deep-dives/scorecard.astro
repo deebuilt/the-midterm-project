@@ -1,0 +1,362 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { presidents } from "../../data/deep-dives";
+
+const holdColors: Record<string, { bg: string; text: string; label: string }> = {
+  held: { bg: "bg-emerald-500", text: "text-emerald-700", label: "Held" },
+  eroded: { bg: "bg-amber-400", text: "text-amber-700", label: "Eroded" },
+  broken: { bg: "bg-red-500", text: "text-red-700", label: "Broken" },
+};
+---
+
+<Layout
+  title="The Scorecard — Deep Dives"
+  description="Nine bad presidents. What they did, what broke, what we built to stop it from happening again — and whether it held. Written at an 8th-grade reading level."
+>
+  <section class="max-w-4xl mx-auto py-16 px-4">
+    <!-- Breadcrumb -->
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/deep-dives" class="text-dem hover:underline">Deep Dives</a>
+      <span class="mx-1">/</span>
+      <span>The Scorecard</span>
+    </p>
+
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">The Scorecard</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      For every president who broke something, America tried to build a guardrail. Here's what they did, what we built, and whether it held.
+    </p>
+
+    <!-- How to read this -->
+    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-10">
+      <h2 class="font-bold text-navy mb-2">How to read this page</h2>
+      <p class="text-sm text-slate-600 mb-3">
+        Each card covers one president. Every card has four sections:
+      </p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <div class="flex items-start gap-2">
+          <span class="font-bold text-navy shrink-0">1.</span>
+          <span class="text-slate-600"><strong>What they did</strong> &mdash; their worst actions</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="font-bold text-navy shrink-0">2.</span>
+          <span class="text-slate-600"><strong>What broke</strong> &mdash; rules or norms they violated</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="font-bold text-navy shrink-0">3.</span>
+          <span class="text-slate-600"><strong>What we built</strong> &mdash; laws passed to stop it</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="font-bold text-navy shrink-0">4.</span>
+          <span class="text-slate-600"><strong>Did it hold?</strong> &mdash; traffic light</span>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-4 mt-4 text-xs">
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+          <span class="text-slate-600"><strong>Held</strong> &mdash; the guardrail worked</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+          <span class="text-slate-600"><strong>Eroded</strong> &mdash; partially weakened over time</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+          <span class="text-slate-600"><strong>Broken</strong> &mdash; actively being dismantled</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Vocab check -->
+    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-10">
+      <h2 class="font-bold text-navy mb-2">Words you'll see on this page</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-slate-600">
+        <p><strong>Emoluments:</strong> Getting paid on the side while you're president. The Constitution bans it.</p>
+        <p><strong>Impoundment:</strong> Holding back money Congress already said to spend.</p>
+        <p><strong>Habeas corpus:</strong> The right to go before a judge instead of being locked up without a trial.</p>
+        <p><strong>Censure:</strong> A formal public scolding by Congress. Embarrassing, but no legal penalty.</p>
+        <p><strong>Rescission:</strong> When the president asks Congress to cancel money it already approved.</p>
+        <p><strong>Inspector general:</strong> An independent investigator inside a government agency who looks for waste, fraud, and abuse.</p>
+        <p><strong>Merit-based civil service:</strong> Government workers hired for their skills, not their political connections.</p>
+        <p><strong>Executive order:</strong> A directive from the president. Has the force of law, but can be overturned by the next president or by a court. <a href="/learn/executive-orders" class="text-dem hover:underline">Learn more &rarr;</a></p>
+      </div>
+    </div>
+
+    <!-- President cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {presidents.map((p) => {
+        const hold = holdColors[p.holdStatus];
+        const borderColor =
+          p.color === "dem" ? "border-t-dem" :
+          p.color === "gop" ? "border-t-gop" :
+          "border-t-navy";
+        return (
+          <article
+            id={p.id}
+            class={`rounded-xl border border-slate-200 overflow-hidden scroll-mt-24 ${borderColor} border-t-4`}
+          >
+            {/* Header */}
+            <div class="px-5 pt-5 pb-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="text-lg font-bold text-navy">{p.name}</h3>
+                  <p class="text-xs text-slate-400">{p.years} &middot; {p.party}</p>
+                </div>
+                <span class={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${hold.text} bg-white border`}>
+                  <span class={`w-2.5 h-2.5 rounded-full ${hold.bg} inline-block shrink-0`}></span>
+                  {hold.label}
+                </span>
+              </div>
+              <p class="text-sm font-medium text-slate-500 mt-1 italic">&ldquo;{p.tagline}&rdquo;</p>
+            </div>
+
+            {/* Body */}
+            <div class="px-5 pb-5 space-y-4">
+              {/* What they did */}
+              <div>
+                <h4 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">What they did</h4>
+                <ul class="space-y-1.5">
+                  {p.actions.map((a) => (
+                    <li class="flex items-start gap-2 text-sm text-slate-700">
+                      <span class="text-slate-300 mt-0.5 shrink-0">&bull;</span>
+                      <span>{a}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* What broke */}
+              <div>
+                <h4 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">What broke</h4>
+                <ul class="space-y-1.5">
+                  {p.normsBroken.map((n) => (
+                    <li class="flex items-start gap-2 text-sm text-slate-600">
+                      <span class="text-red-300 mt-0.5 shrink-0">&times;</span>
+                      <span>{n}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* What we built */}
+              <div>
+                <h4 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-2">What we built after</h4>
+                <div class="space-y-2">
+                  {p.reforms.map((r) => (
+                    <div class="bg-slate-50 rounded-lg p-3">
+                      <p class="text-sm font-semibold text-navy">
+                        {r.name} <span class="text-slate-400 font-normal">({r.year})</span>
+                      </p>
+                      <p class="text-sm text-slate-600 mt-0.5">{r.plain}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Did it hold? */}
+              <div class={`border-l-4 pl-3 ${
+                p.holdStatus === "held" ? "border-emerald-400" :
+                p.holdStatus === "eroded" ? "border-amber-400" :
+                "border-red-400"
+              }`}>
+                <h4 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-1">Did it hold?</h4>
+                <p class="text-sm text-slate-600">{p.holdExplanation}</p>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+
+      {/* Trump card — special treatment */}
+      <article
+        id="trump"
+        class="rounded-xl border-2 border-gop overflow-hidden scroll-mt-24 md:col-span-2 bg-slate-900 text-white"
+      >
+        <div class="px-6 pt-6 pb-4">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Donald Trump</h3>
+              <p class="text-xs text-white/50">2017–2021, 2025–present &middot; Republican</p>
+            </div>
+            <span class="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full text-red-400 bg-white/10 border border-white/20">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
+              In progress
+            </span>
+          </div>
+          <p class="text-sm font-medium text-white/60 mt-1 italic">&ldquo;The worst of all of them&rdquo;</p>
+        </div>
+
+        <div class="px-6 pb-6 space-y-5">
+          {/* What he did */}
+          <div>
+            <h4 class="text-xs font-mono tracking-widest text-white/40 uppercase mb-2">What he did</h4>
+            <ul class="space-y-2">
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Fired 17 inspectors general in one night &mdash; the watchdogs created after Nixon.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Defied court orders on deportations. JD Vance cited Andrew Jackson as the model.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Withheld $425+ billion Congress approved &mdash; dwarfing the impoundments that created the 1974 law.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Weaponized the DOJ: ordered prosecutions of political opponents by name. 100+ prosecutors resigned.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Pardoned ~1,500 January 6 defendants, including 169 who pled guilty to assaulting police.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Launched the $TRUMP meme coin: $324M+ in fees to his companies. Businesses received $7.8M from foreign governments in term one.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Schedule F: reclassified tens of thousands of career government workers so they can be fired for political reasons.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>DOGE: gave Elon Musk's associates access to federal systems to fire workers and cancel contracts &mdash; without Senate confirmation.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Defunded universities and investigated critics. Ordered agencies to target opponents.</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/80">
+                <span class="text-gop mt-0.5 shrink-0">&bull;</span>
+                <span>Declared national emergencies to bypass Congress on the border wall and tariffs.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* What broke */}
+          <div>
+            <h4 class="text-xs font-mono tracking-widest text-white/40 uppercase mb-2">What broke</h4>
+            <ul class="space-y-1.5">
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Inspector general independence (from Nixon reforms)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Compliance with court orders (from the Jackson precedent)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>The Impoundment Control Act (from Nixon reforms)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>DOJ independence (from post-Watergate norms)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Pardon power norms (no precedent for pardoning attacks on the government)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Emoluments clause (from the founding, never enforced)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Merit-based civil service (from the Pendleton Act of 1883)</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Protection of free speech and academic freedom</span>
+              </li>
+              <li class="flex items-start gap-2 text-sm text-white/70">
+                <span class="text-red-400 mt-0.5 shrink-0">&times;</span>
+                <span>Emergency powers limits (from post-Nixon reforms)</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* What we built after */}
+          <div class="bg-white/10 rounded-lg p-5 border border-white/10">
+            <h4 class="text-xs font-mono tracking-widest text-white/40 uppercase mb-2">What we built after</h4>
+            <p class="text-white/80 text-sm leading-relaxed">
+              That's on us. The 2026 midterms are the first chance to elect a Congress that will rebuild the guardrails. Read
+              <a href="/deep-dives/rubble" class="text-tossup hover:underline font-semibold">Sweeping Up the Rubble</a>
+              for the full to-do list.
+            </p>
+          </div>
+
+          {/* Did it hold? */}
+          <div class="border-l-4 border-red-500 pl-3">
+            <h4 class="text-xs font-mono tracking-widest text-white/40 uppercase mb-1">Did it hold?</h4>
+            <p class="text-sm text-white/70">
+              Almost every guardrail built after previous presidencies is now being tested or actively dismantled. The fundamental problem: most guardrails depend on the president choosing to follow them, or on enforcement mechanisms that run through the executive branch itself. When a president is willing to ignore norms and the enforcement runs through their own people, the guardrails fail.
+            </p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- The cycle -->
+    <div class="mt-10 bg-slate-900 text-white rounded-xl p-8">
+      <h2 class="text-xl font-bold mb-4">The Cycle</h2>
+      <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0 text-sm font-medium">
+        <span class="bg-gop/20 text-gop-light px-4 py-2 rounded-lg">A president pushes the limits</span>
+        <span class="text-white/30 text-lg md:mx-2">&rarr;</span>
+        <span class="bg-red-900/40 text-red-300 px-4 py-2 rounded-lg">Something breaks</span>
+        <span class="text-white/30 text-lg md:mx-2">&rarr;</span>
+        <span class="bg-emerald-900/40 text-emerald-300 px-4 py-2 rounded-lg">We build a guardrail</span>
+        <span class="text-white/30 text-lg md:mx-2">&rarr;</span>
+        <span class="bg-amber-900/40 text-amber-300 px-4 py-2 rounded-lg">It erodes over time</span>
+        <span class="text-white/30 text-lg md:mx-2">&rarr;</span>
+        <span class="bg-gop/20 text-gop-light px-4 py-2 rounded-lg">The next one finds the cracks</span>
+      </div>
+      <p class="text-white/50 text-sm text-center mt-4">
+        This cycle has repeated for 230 years. The question is whether we can build guardrails with teeth this time.
+      </p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a
+        href="/deep-dives/worst-of-all"
+        class="block bg-gop/5 border border-gop/20 rounded-lg p-5 hover:border-gop/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Next up</p>
+        <p class="font-bold text-navy">The Worst of All of Them</p>
+        <p class="text-sm text-slate-500 mt-1">See the visual map connecting Trump to every president on this page.</p>
+      </a>
+      <a
+        href="/deep-dives/rubble"
+        class="block bg-dem/5 border border-dem/20 rounded-lg p-5 hover:border-dem/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Then read</p>
+        <p class="font-bold text-navy">Sweeping Up the Rubble</p>
+        <p class="text-sm text-slate-500 mt-1">The guardrails are broken. Here's what we need to build next.</p>
+      </a>
+    </div>
+
+    <!-- Sources -->
+    <div class="mt-10">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li><a href="https://www.archives.gov/milestone-documents/alien-and-sedition-acts" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives: Alien and Sedition Acts</a></li>
+        <li><a href="https://guides.loc.gov/indian-removal-act" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Library of Congress: Indian Removal Act</a></li>
+        <li><a href="https://www.archives.gov/milestone-documents/pendleton-act" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives: Pendleton Civil Service Reform Act</a></li>
+        <li><a href="https://constitution.congress.gov/constitution/amendment-14/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Constitution Annotated: 14th Amendment</a></li>
+        <li><a href="https://www.senate.gov/about/powers-procedures/impeachment/impeachment-johnson.htm" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">U.S. Senate: Impeachment of Andrew Johnson</a></li>
+        <li><a href="https://www.britannica.com/event/Teapot-Dome-Scandal" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Britannica: Teapot Dome Scandal</a></li>
+        <li><a href="https://constitutioncenter.org/the-constitution/amendments/amendment-xxii" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Constitution Center: 22nd Amendment</a></li>
+        <li><a href="https://www.archives.gov/milestone-documents/executive-order-9066" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Archives: Executive Order 9066 (Japanese Internment)</a></li>
+        <li><a href="https://constitutioncenter.org/the-constitution/amendments/amendment-xxv" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">National Constitution Center: 25th Amendment</a></li>
+        <li><a href="https://hls.harvard.edu/today/watergate-era-reforms-50-years-later/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Harvard Law School: Watergate-Era Reforms, 50 Years Later</a></li>
+        <li><a href="https://www.gao.gov/products/095406" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">GAO: Congressional Budget and Impoundment Control Act</a></li>
+        <li><a href="https://campaignlegal.org/update/significance-firing-inspectors-general-explained" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Campaign Legal Center: Significance of Firing Inspectors General</a></li>
+        <li><a href="https://www.npr.org/2025/01/25/g-s1-44771/trump-fires-inspectors-general" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">NPR: Trump Fires Inspectors General</a></li>
+        <li><a href="https://www.cbpp.org/research/federal-budget/new-data-show-trump-administrations-illegal-targeted-withholding-of-funds" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBPP: Trump Administration's Withholding of Funds</a></li>
+        <li><a href="https://protectdemocracy.org/work/protecting-our-democracy-act-2/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Protect Democracy: Protecting Our Democracy Act</a></li>
+      </ul>
+    </div>
+
+  </section>
+</Layout>

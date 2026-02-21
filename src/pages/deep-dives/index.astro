@@ -1,0 +1,90 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { deepDives } from "../../data/deep-dives";
+---
+
+<Layout
+  title="Deep Dives — The Midterm Project"
+  description="Long-form investigations into presidential power, broken guardrails, and what comes next. Written for everyone."
+>
+  <section class="max-w-4xl mx-auto py-16 px-4">
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/" class="text-dem hover:underline">Home</a>
+      <span class="mx-1">/</span>
+      <span>Deep Dives</span>
+    </p>
+
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Deep Dives</h1>
+    <p class="text-lg text-slate-500 mb-10">
+      Long-form investigations into presidential power, broken guardrails, and what we do next. No jargon. No prerequisites. Start anywhere.
+    </p>
+
+    <!-- Series intro -->
+    <div class="bg-slate-900 text-white rounded-xl p-8 mb-10">
+      <h2 class="text-xl font-bold mb-3">The Pattern</h2>
+      <p class="text-slate-300 leading-relaxed mb-4">
+        Throughout American history, presidents have pushed the limits of their power. Each time, something broke. Each time, we tried to build a guardrail to stop it from happening again. And each time, the next president found the cracks.
+      </p>
+      <p class="text-slate-300 leading-relaxed">
+        This series traces that pattern from 1798 to today — from John Adams jailing newspaper editors to Trump firing the watchdogs created after Nixon. Three pieces. Three angles. One question: <strong class="text-white">what do we build next?</strong>
+      </p>
+    </div>
+
+    <!-- Article cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {deepDives.map((dive, i) => (
+        <a
+          href={`/deep-dives/${dive.slug}`}
+          class:list={[
+            "group block rounded-xl border-2 p-6 transition-all hover:shadow-lg",
+            dive.color === "gop"
+              ? "border-gop/30 hover:border-gop/60"
+              : dive.color === "navy"
+                ? "border-navy/30 hover:border-navy/60"
+                : "border-dem/30 hover:border-dem/60",
+          ]}
+        >
+          <div class="text-4xl mb-3">{dive.icon}</div>
+          <p class:list={[
+            "text-xs font-mono uppercase tracking-widest mb-2",
+            dive.color === "gop"
+              ? "text-gop"
+              : dive.color === "navy"
+                ? "text-navy"
+                : "text-dem",
+          ]}>
+            Part {i + 1} of 3
+          </p>
+          <h3 class="text-xl font-bold mb-2 group-hover:underline">{dive.title}</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">{dive.subtitle}</p>
+        </a>
+      ))}
+    </div>
+
+    <!-- Reading order suggestion -->
+    <div class="mt-10 bg-tossup/10 border border-tossup/30 rounded-lg p-6 text-center">
+      <p class="text-sm text-slate-600">
+        <strong class="text-navy">Suggested reading order:</strong> Start with
+        <a href="/deep-dives/scorecard" class="text-dem hover:underline font-medium">The Scorecard</a>
+        to learn the history, then see the connections in
+        <a href="/deep-dives/worst-of-all" class="text-dem hover:underline font-medium">The Worst of All of Them</a>,
+        then find out what comes next in
+        <a href="/deep-dives/rubble" class="text-dem hover:underline font-medium">Sweeping Up the Rubble</a>.
+      </p>
+    </div>
+
+    <!-- Cross-links -->
+    <div class="mt-10 text-center text-sm text-slate-400">
+      <p>
+        Part of <a href="/" class="text-dem hover:underline">The Midterm Project</a> &mdash;
+        voter education for the 2026 midterms.
+      </p>
+      <p class="mt-1">
+        Also explore:
+        <a href="/learn" class="text-dem hover:underline">Learn</a> &middot;
+        <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a> &middot;
+        <a href="/learn/follow-the-money" class="text-dem hover:underline">Follow the Money</a>
+      </p>
+    </div>
+  </section>
+</Layout>

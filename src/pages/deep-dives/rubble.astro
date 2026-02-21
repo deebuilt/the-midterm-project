@@ -1,0 +1,278 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { guardrails } from "../../data/deep-dives";
+---
+
+<Layout
+  title="Sweeping Up the Rubble — Deep Dives"
+  description="The guardrails are broken. Here's what we need to build next — a plain-English to-do list for Congress."
+>
+  <section class="max-w-3xl mx-auto py-16 px-4">
+    <!-- Breadcrumb -->
+    <p class="text-sm text-slate-400 mb-2">
+      <a href="/deep-dives" class="text-dem hover:underline">Deep Dives</a>
+      <span class="mx-1">/</span>
+      <span>Sweeping Up the Rubble</span>
+    </p>
+
+    <h1 class="text-3xl md:text-4xl font-bold mb-2">Sweeping Up the Rubble</h1>
+    <p class="text-lg text-slate-500 mb-4">
+      The guardrails are broken. Here's what we need to build next.
+    </p>
+
+    <div class="prose prose-slate max-w-none space-y-8">
+
+      <!-- HOOK -->
+      <p class="text-lg text-slate-600">
+        Every time an American president broke something, we built a guardrail to stop it from happening again. After Andrew Jackson replaced government workers with political friends, we created the civil service. After Nixon used the FBI against his enemies, we created inspectors general. After FDR won four terms, we added a two-term limit to the Constitution.
+      </p>
+      <p class="text-lg text-slate-600">
+        Some of those guardrails worked. Some eroded. And now, many of them are actively being torn down. This page is a to-do list for what comes next &mdash; <strong>twelve things Congress can do to make sure this doesn't happen again.</strong>
+      </p>
+
+      <!-- THE PATTERN -->
+      <div class="not-prose bg-slate-900 text-white rounded-xl p-8">
+        <h2 class="text-xl font-bold mb-3">The Pattern (in 30 seconds)</h2>
+        <div class="space-y-3 text-sm text-white/80">
+          <div class="flex items-start gap-3">
+            <span class="text-gop font-bold shrink-0 w-5">1.</span>
+            <span>A president pushes the limits of their power.</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-red-400 font-bold shrink-0 w-5">2.</span>
+            <span>Something breaks. Sometimes people get hurt. Sometimes it takes years to see the damage.</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-emerald-400 font-bold shrink-0 w-5">3.</span>
+            <span>After the president leaves, Congress passes a law to stop it from happening again.</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-amber-400 font-bold shrink-0 w-5">4.</span>
+            <span>Over time, the law erodes. People forget why it was needed. Funding gets cut. Loopholes appear.</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-gop font-bold shrink-0 w-5">5.</span>
+            <span>The next president finds the cracks and pushes through them.</span>
+          </div>
+        </div>
+        <p class="text-white/50 text-sm mt-4">
+          This cycle has repeated for 230 years. Read the full history in <a href="/deep-dives/scorecard" class="text-tossup hover:underline">The Scorecard</a>.
+        </p>
+      </div>
+
+      <!-- THE FUNDAMENTAL PROBLEM -->
+      <h2 class="text-2xl font-bold">The Fundamental Problem</h2>
+      <p class="text-slate-600">
+        Here's why the guardrails keep failing: <strong>most of them depend on the president choosing to follow them</strong>. And when they don't, enforcement usually runs through the executive branch &mdash; which is controlled by the president.
+      </p>
+      <p class="text-slate-600">
+        It's like asking someone to ground themselves. If the president tells the Justice Department to ignore a law, who's going to make them follow it? The Justice Department &mdash; which reports to the president.
+      </p>
+      <p class="text-slate-600">
+        The central question for the next Congress: <strong>can we build guardrails with independent enforcement</strong> &mdash; enforcement that doesn't depend on the cooperation of the person being constrained?
+      </p>
+
+      <!-- THE TO-DO LIST -->
+      <h2 class="text-2xl font-bold">The To-Do List: 12 Guardrails We Need</h2>
+      <p class="text-slate-600">
+        These aren't hypothetical. Most of them have already been written into real bills. The <strong>Protecting Our Democracy Act</strong> (PODA) passed the House in 2021 and contains many of these reforms. It stalled in the Senate. The 2026 midterms are the next chance to elect a Congress that will pass it.
+      </p>
+    </div>
+
+    <!-- Guardrail cards -->
+    <div class="space-y-5 mt-8">
+      {guardrails.map((g, i) => (
+        <div id={g.id} class="rounded-xl border border-slate-200 overflow-hidden scroll-mt-24">
+          {/* Number + title */}
+          <div class="bg-navy px-5 py-3 flex items-center gap-3">
+            <span class="bg-white/20 text-white text-sm font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+              {i + 1}
+            </span>
+            <h3 class="text-white font-bold">{g.title}</h3>
+          </div>
+
+          <div class="px-5 py-4 space-y-4">
+            {/* The gap */}
+            <div>
+              <h4 class="text-xs font-mono tracking-widest text-red-400 uppercase mb-1">The gap</h4>
+              <p class="text-sm text-slate-700 leading-relaxed">{g.gap}</p>
+            </div>
+
+            {/* The fix */}
+            <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+              <h4 class="text-xs font-mono tracking-widest text-emerald-600 uppercase mb-1">The fix</h4>
+              <p class="text-sm text-slate-700 leading-relaxed">{g.fix}</p>
+            </div>
+
+            {/* Real bill + historical root */}
+            <div class="flex flex-col md:flex-row gap-3 text-xs text-slate-500">
+              {g.realBill && (
+                <div class="flex items-start gap-1.5">
+                  <span class="text-dem font-bold shrink-0">Bill:</span>
+                  <span>{g.realBill}</span>
+                </div>
+              )}
+              <div class="flex items-start gap-1.5">
+                <span class="text-navy font-bold shrink-0">Traces back to:</span>
+                <span>{g.historicalRoot}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8 mt-10">
+
+      <!-- THE PROTECTING OUR DEMOCRACY ACT -->
+      <div class="not-prose bg-dem/5 border border-dem/20 rounded-xl p-6">
+        <h3 class="font-bold text-navy mb-2">The Bill That Already Exists</h3>
+        <p class="text-sm text-slate-600 mb-3">
+          The <strong>Protecting Our Democracy Act</strong> (PODA) was introduced in 2021 and passed the House 220&ndash;208. It includes reforms to inspector general protections, subpoena enforcement, acting official limits, impoundment control, emoluments enforcement, and more. It stalled in the Senate.
+        </p>
+        <p class="text-sm text-slate-600 mb-3">
+          It was reintroduced in 2023. It covers about half of the twelve guardrails on this page. The other half would require new legislation or constitutional amendments.
+        </p>
+        <p class="text-sm text-slate-600">
+          <strong>The point:</strong> we don't have to start from scratch. The drafting has been done. The question is whether the Congress elected in 2026 will have the votes to pass it.
+        </p>
+      </div>
+
+      <!-- WHAT YOU CAN DO -->
+      <h2 class="text-2xl font-bold">What You Can Do</h2>
+    </div>
+
+    <div class="space-y-3 mt-4">
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+        <div>
+          <p class="font-semibold text-navy">Know what your representatives have done</p>
+          <p class="text-sm text-slate-600">
+            Head to <a href="/reelect-or-reject" class="text-dem hover:underline">Re-elect or Reject</a> and tap any senator's photo to see how they voted on the bills that matter. Did they vote to protect watchdogs or fire them? Did they vote to enforce spending rules or let them slide?
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+        <div>
+          <p class="font-semibold text-navy">Ask candidates where they stand</p>
+          <p class="text-sm text-slate-600">
+            When candidates come to your town or show up in your feed, ask them: "Will you vote for the Protecting Our Democracy Act?" If they don't know what it is, send them this page.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+        <div>
+          <p class="font-semibold text-navy">Show up in 2026</p>
+          <p class="text-sm text-slate-600">
+            Midterm elections have the lowest voter turnout of any election. The people who show up decide what happens next. Find your ballot and make a plan at <a href="/find-your-ballot" class="text-dem hover:underline">Find Your Ballot</a>.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-dem text-white flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">&#10003;</div>
+        <div>
+          <p class="font-semibold text-navy">Share this page</p>
+          <p class="text-sm text-slate-600">
+            Most people don't know these guardrails exist, let alone that they're broken. Share the <a href="/deep-dives" class="text-dem hover:underline">Deep Dives series</a> with someone who's paying attention but doesn't know what to do about it.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="prose prose-slate max-w-none space-y-8 mt-10">
+
+      <!-- CLOSING -->
+      <div class="not-prose bg-slate-900 text-white rounded-xl p-8">
+        <h2 class="text-xl font-bold mb-3">The Bottom Line</h2>
+        <p class="text-white/80 text-sm leading-relaxed mb-4">
+          Every guardrail on this page exists because someone before us went through something terrible and said "never again." The civil service exists because of Jackson. Inspectors general exist because of Nixon. The two-term limit exists because of FDR.
+        </p>
+        <p class="text-white/80 text-sm leading-relaxed mb-4">
+          None of those reforms happened while the bad president was still in power. They happened after &mdash; when the next Congress had the will to act. That's where we are now.
+        </p>
+        <p class="text-white text-sm leading-relaxed font-semibold">
+          The rubble is real. The blueprints exist. The question is whether we'll build.
+        </p>
+      </div>
+
+      <!-- RESOURCES -->
+      <h2 class="text-2xl font-bold">Resources</h2>
+      <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a
+          href="https://protectdemocracy.org/work/protecting-our-democracy-act-2/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block bg-white rounded-lg border border-slate-200 p-4 hover:border-dem/40 hover:shadow-md transition-all"
+        >
+          <p class="font-bold text-navy text-sm">Protect Democracy</p>
+          <p class="text-xs text-slate-500 mt-1">Nonpartisan organization tracking the Protecting Our Democracy Act and other reform efforts.</p>
+        </a>
+        <a
+          href="https://www.brennancenter.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block bg-white rounded-lg border border-slate-200 p-4 hover:border-dem/40 hover:shadow-md transition-all"
+        >
+          <p class="font-bold text-navy text-sm">Brennan Center for Justice</p>
+          <p class="text-xs text-slate-500 mt-1">Research and advocacy for democracy reform, voting rights, and government accountability.</p>
+        </a>
+        <a
+          href="https://campaignlegal.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block bg-white rounded-lg border border-slate-200 p-4 hover:border-dem/40 hover:shadow-md transition-all"
+        >
+          <p class="font-bold text-navy text-sm">Campaign Legal Center</p>
+          <p class="text-xs text-slate-500 mt-1">Nonpartisan legal work on campaign finance, ethics, and election integrity.</p>
+        </a>
+        <a
+          href="https://www.citizensforethics.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block bg-white rounded-lg border border-slate-200 p-4 hover:border-dem/40 hover:shadow-md transition-all"
+        >
+          <p class="font-bold text-navy text-sm">Citizens for Responsibility and Ethics (CREW)</p>
+          <p class="text-xs text-slate-500 mt-1">Tracks emoluments violations, ethics breaches, and government corruption.</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a
+        href="/deep-dives/scorecard"
+        class="block bg-navy/5 border border-navy/20 rounded-lg p-5 hover:border-navy/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">The history</p>
+        <p class="font-bold text-navy">The Scorecard</p>
+        <p class="text-sm text-slate-500 mt-1">Full history cards for every president who broke something — and what we built after.</p>
+      </a>
+      <a
+        href="/deep-dives/worst-of-all"
+        class="block bg-gop/5 border border-gop/20 rounded-lg p-5 hover:border-gop/40 transition-all"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">The connections</p>
+        <p class="font-bold text-navy">The Worst of All of Them</p>
+        <p class="text-sm text-slate-500 mt-1">The visual map connecting Trump to every president's worst behavior.</p>
+      </a>
+    </div>
+
+    <!-- Sources -->
+    <div class="mt-10">
+      <h2 class="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4">Sources</h2>
+      <ul class="text-sm text-slate-500 space-y-1">
+        <li><a href="https://protectdemocracy.org/work/protecting-our-democracy-act-2/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Protect Democracy: Protecting Our Democracy Act</a></li>
+        <li><a href="https://campaignlegal.org/update/significance-firing-inspectors-general-explained" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Campaign Legal Center: Firing Inspectors General</a></li>
+        <li><a href="https://hls.harvard.edu/today/watergate-era-reforms-50-years-later/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Harvard Law: Watergate-Era Reforms, 50 Years Later</a></li>
+        <li><a href="https://www.citizensforethics.org/reports-investigations/crew-reports/understanding-the-impoundment-control-act/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CREW: Understanding the Impoundment Control Act</a></li>
+        <li><a href="https://www.cbpp.org/research/federal-budget/new-data-show-trump-administrations-illegal-targeted-withholding-of-funds" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">CBPP: Withholding of Funds</a></li>
+        <li><a href="https://protectdemocracy.org/work/trumps-schedule-f-plan-explained/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Protect Democracy: Schedule F Explained</a></li>
+        <li><a href="https://protectdemocracy.org/work/understanding-the-electoral-count-reform-act-of-2022/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Protect Democracy: Electoral Count Reform Act</a></li>
+        <li><a href="https://www.americanprogress.org/article/lessons-from-watergate/" target="_blank" rel="noopener noreferrer" class="text-dem hover:underline">Center for American Progress: Lessons from Watergate</a></li>
+      </ul>
+    </div>
+
+  </section>
+</Layout>
