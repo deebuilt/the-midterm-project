@@ -343,7 +343,7 @@ function buildVoteHtmlUrl(congress: number, session: number, voteNumber: string)
 /** Fetch a Senate.gov XML URL via our Edge Function proxy (bypasses CORS) */
 async function fetchSenateXml(url: string, authToken: string): Promise<string> {
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const resp = await fetch(`${supabaseUrl}/functions/v1/vote-proxy`, {
+  const resp = await fetch(`${supabaseUrl}/functions/v1/senate-proxy`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

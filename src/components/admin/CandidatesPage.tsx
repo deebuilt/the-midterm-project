@@ -37,7 +37,7 @@ import {
 import { supabase } from "../../lib/supabase";
 import { useIsMobile } from "./useIsMobile";
 import { ResizableDrawer } from "./ResizableDrawer";
-import type { Party, Stance, CandidateStatus } from "../../lib/database.types";
+import type { Party, Stance, CandidateStatus, VoteEnum } from "../../lib/database.types";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -93,6 +93,18 @@ interface CandidateRaceInfo {
   is_incumbent: boolean;
 }
 
+interface CandidateVoteRecord {
+  id: number;
+  vote_id: number;
+  bill_name: string;
+  bill_number: string | null;
+  vote_date: string | null;
+  vote: VoteEnum;
+  result: string | null;
+  topic_name: string | null;
+  source_url: string | null;
+}
+
 interface TopicOption {
   id: number;
   name: string;
@@ -128,6 +140,20 @@ const stanceColors: Record<string, string> = {
   unknown: "default",
 };
 
+const voteColors: Record<string, string> = {
+  yea: "green",
+  nay: "red",
+  abstain: "default",
+  not_voting: "default",
+};
+
+const voteOptions = [
+  { value: "yea", label: "Yea" },
+  { value: "nay", label: "Nay" },
+  { value: "abstain", label: "Abstain" },
+  { value: "not_voting", label: "Not Voting" },
+];
+
 const partyOptions: { value: Party; label: string }[] = [
   { value: "Democrat", label: "Democrat" },
   { value: "Republican", label: "Republican" },
@@ -161,6 +187,9 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [detailCandidateId, setDetailCandidateId] = useState<number | null>(null);
   const [positions, setPositions] = useState<CandidatePosition[]>([]);
   const [races, setRaces] = useState<CandidateRaceInfo[]>([]);
+  const [candidateVotes, setCandidateVotes] = useState<CandidateVoteRecord[]>([]);
+  const [allBills, setAllBills] = useState<{ id: number; bill_name: string; bill_number: string | null }[]>([]);
+  const [addVoteModalOpen, setAddVoteModalOpen] = useState(false);
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [photoError, setPhotoError] = useState(false);
@@ -188,6 +217,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   const [editPositionForm] = Form.useForm();
   const [form] = Form.useForm();
   const [positionForm] = Form.useForm();
+  const [addVoteForm] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
   // Derived drawer state
@@ -300,13 +330,22 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     );
   }, []);
 
+  const loadAllBills = useCallback(async () => {
+    const { data } = await supabase
+      .from("votes")
+      .select("id, bill_name, bill_number")
+      .order("vote_date", { ascending: false });
+    setAllBills(data ?? []);
+  }, []);
+
   useEffect(() => {
     loadCandidates();
     loadTopics();
     loadRaces();
     loadBodies();
     loadStates();
-  }, [loadCandidates, loadTopics, loadRaces, loadBodies, loadStates]);
+    loadAllBills();
+  }, [loadCandidates, loadTopics, loadRaces, loadBodies, loadStates, loadAllBills]);
 
   useEffect(() => {
     setHeaderActions(
@@ -339,7 +378,7 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
   async function loadCandidateDetails(candidateId: number) {
     setDrawerLoading(true);
 
-    const [posResult, raceResult] = await Promise.all([
+    const [posResult, raceResult, votesResult] = await Promise.all([
       supabase
         .from("candidate_positions")
         .select("id, topic_id, stance, summary, source_url, topic:topics!inner(name)")
@@ -355,6 +394,16 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
               state:states!inner(name, abbr),
               body:government_bodies!inner(name)
             )
+          )
+        `)
+        .eq("candidate_id", candidateId),
+      supabase
+        .from("candidate_votes")
+        .select(`
+          id, vote,
+          bill:votes!inner(
+            id, bill_name, bill_number, vote_date, source_url, result,
+            topic:topics(name)
           )
         `)
         .eq("candidate_id", candidateId),
@@ -381,6 +430,20 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
         rating: r.race?.rating ?? null,
         status: r.status,
         is_incumbent: r.is_incumbent,
+      }))
+    );
+
+    setCandidateVotes(
+      (votesResult.data ?? []).map((cv: any) => ({
+        id: cv.id,
+        vote_id: cv.bill?.id,
+        bill_name: cv.bill?.bill_name ?? "Unknown",
+        bill_number: cv.bill?.bill_number ?? null,
+        vote_date: cv.bill?.vote_date ?? null,
+        vote: cv.vote,
+        result: cv.bill?.result ?? null,
+        topic_name: cv.bill?.topic?.name ?? null,
+        source_url: cv.bill?.source_url ?? null,
       }))
     );
 
@@ -465,12 +528,14 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
           setDetailCandidateId(null);
           setEditingPositionId(null);
           setDrawerFormDirty(false);
+          setAddVoteModalOpen(false);
         },
       });
     } else {
       setSelectedIndex(null);
       setDetailCandidateId(null);
       setEditingPositionId(null);
+      setAddVoteModalOpen(false);
     }
   }
 
@@ -820,6 +885,47 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
     }
   }
 
+  // ─── Candidate Vote Handlers ───
+
+  async function handleChangeVote(candidateVoteId: number, newVote: VoteEnum) {
+    const { error } = await supabase
+      .from("candidate_votes")
+      .update({ vote: newVote })
+      .eq("id", candidateVoteId);
+    if (error) {
+      messageApi.error(error.message);
+    } else if (detailCandidate) {
+      loadCandidateDetails(detailCandidate.id);
+    }
+  }
+
+  async function handleRemoveVote(candidateVoteId: number) {
+    const { error } = await supabase
+      .from("candidate_votes")
+      .delete()
+      .eq("id", candidateVoteId);
+    if (error) {
+      messageApi.error(error.message);
+    } else if (detailCandidate) {
+      loadCandidateDetails(detailCandidate.id);
+    }
+  }
+
+  async function handleAddVote(values: { vote_id: number; vote: VoteEnum }) {
+    if (!detailCandidate) return;
+    const { error } = await supabase.from("candidate_votes").insert({
+      candidate_id: detailCandidate.id,
+      vote_id: values.vote_id,
+      vote: values.vote,
+    });
+    if (error) {
+      messageApi.error(error.message);
+    } else {
+      addVoteForm.resetFields();
+      setAddVoteModalOpen(false);
+      loadCandidateDetails(detailCandidate.id);
+    }
+  }
 
   const raceSelectOptions = allRaces.map((r) => ({
     value: r.id,
@@ -2142,10 +2248,160 @@ export default function CandidatesPage({ setHeaderActions }: CandidatesPageProps
                     </div>
                   ),
                 },
+                {
+                  key: "votes",
+                  label: `Votes (${candidateVotes.length})`,
+                  children: drawerLoading ? (
+                    <Spin />
+                  ) : (
+                    <div>
+                      <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
+                        Voting records for this candidate. Edit bills in the Votes admin page.
+                      </Text>
+
+                      <div
+                        style={{
+                          marginBottom: 16,
+                          padding: 12,
+                          background: "#f8f9fa",
+                          borderRadius: 8,
+                          border: "1px solid #f0f0f0",
+                        }}
+                      >
+                        <Button
+                          size="small"
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => setAddVoteModalOpen(true)}
+                        >
+                          Assign Vote
+                        </Button>
+                      </div>
+
+                      {candidateVotes.length === 0 ? (
+                        <Text type="secondary">No voting records yet.</Text>
+                      ) : (
+                        <div style={{ overflowX: "auto" }}>
+                          <Table
+                            dataSource={candidateVotes}
+                            rowKey="id"
+                            size="small"
+                            pagination={false}
+                            columns={[
+                              {
+                                title: "Bill",
+                                key: "bill",
+                                width: 180,
+                                render: (_: unknown, r: CandidateVoteRecord) => (
+                                  <div>
+                                    <div style={{ fontWeight: 500, fontSize: 12 }}>{r.bill_name}</div>
+                                    {r.bill_number && (
+                                      <Text type="secondary" style={{ fontSize: 11 }}>
+                                        {r.bill_number}
+                                      </Text>
+                                    )}
+                                  </div>
+                                ),
+                              },
+                              {
+                                title: "Date",
+                                dataIndex: "vote_date",
+                                key: "vote_date",
+                                width: 90,
+                                render: (d: string | null) =>
+                                  d ? new Date(d).toLocaleDateString() : "—",
+                              },
+                              {
+                                title: "Vote",
+                                dataIndex: "vote",
+                                key: "vote",
+                                width: 120,
+                                render: (vote: string, record: CandidateVoteRecord) => (
+                                  <Select
+                                    size="small"
+                                    value={vote}
+                                    onChange={(val) => handleChangeVote(record.id, val as VoteEnum)}
+                                    style={{ width: 110 }}
+                                    options={voteOptions}
+                                  />
+                                ),
+                              },
+                              {
+                                title: "Result",
+                                dataIndex: "result",
+                                key: "result",
+                                width: 80,
+                                render: (r: string | null) =>
+                                  r ? <Tag>{r}</Tag> : <Text type="secondary">—</Text>,
+                              },
+                              {
+                                title: "Topic",
+                                dataIndex: "topic_name",
+                                key: "topic_name",
+                                width: 100,
+                                render: (t: string | null) =>
+                                  t ?? <Text type="secondary">—</Text>,
+                              },
+                              {
+                                title: "",
+                                key: "remove",
+                                width: 48,
+                                render: (_: unknown, record: CandidateVoteRecord) => (
+                                  <Popconfirm
+                                    title="Remove this vote record?"
+                                    onConfirm={() => handleRemoveVote(record.id)}
+                                    okText="Remove"
+                                    okType="danger"
+                                  >
+                                    <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+                                  </Popconfirm>
+                                ),
+                              },
+                            ]}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ),
+                },
               ]}
             />
           </>
         )}
+
+        {/* Assign Vote modal */}
+        <Modal
+          title="Assign Vote to Bill"
+          open={addVoteModalOpen}
+          onCancel={() => {
+            setAddVoteModalOpen(false);
+            addVoteForm.resetFields();
+          }}
+          onOk={() => addVoteForm.submit()}
+          okText="Assign"
+          destroyOnClose
+        >
+          <Form form={addVoteForm} layout="vertical" onFinish={handleAddVote} style={{ marginTop: 16 }}>
+            <Form.Item name="vote_id" label="Bill" rules={[{ required: true, message: "Select a bill" }]}>
+              <Select
+                showSearch
+                placeholder="Search bills..."
+                filterOption={(input, option) =>
+                  ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
+                }
+                options={allBills
+                  .filter((b) => !candidateVotes.some((cv) => cv.vote_id === b.id))
+                  .map((b) => ({
+                    value: b.id,
+                    label: `${b.bill_name}${b.bill_number ? ` (${b.bill_number})` : ""}`,
+                  }))}
+              />
+            </Form.Item>
+            <Form.Item name="vote" label="Vote" rules={[{ required: true, message: "Select a vote" }]}>
+              <Select options={voteOptions} />
+            </Form.Item>
+          </Form>
+        </Modal>
       </ResizableDrawer>
     </div>
   );
